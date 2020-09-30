@@ -1,0 +1,1 @@
+pyside2-uic GUI/mainwindow.ui > E:/ETSI/Proyecto/bin/GUI/ui_mainwindow.py
