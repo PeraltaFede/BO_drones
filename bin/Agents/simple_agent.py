@@ -69,7 +69,7 @@ class SimpleAgent(object):
                     0 <= self.next_pose[1] <= self.agent_env.grid.shape[0] and (
                     self.agent_env.grid[self.next_pose[1], self.next_pose[0]] == 0 or self.ignore_obstacles):
                 self.pose = deepcopy(self.next_pose)
-                print("{} did move to {}".format(self, self.pose))
+                print("{} did move to and will read {}".format(self, self.read()))
             else:
                 print(0 <= self.next_pose[0] <= self.agent_env.grid.shape[1])
                 print(0 <= self.next_pose[1] <= self.agent_env.grid.shape[0])

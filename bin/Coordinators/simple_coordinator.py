@@ -12,7 +12,6 @@ class Coordinator(object):
         self.agents = agents
         self.map_data = map_data
         self.acquisition = 'gaussian_lcb'
-        # todo: cambiar kernel segun lo que se requiera
         self.gp = gpr.GaussianProcessRegressor(normalize_y=True, kernel=1000 * kernels.RBF(2))
 
         self.data = [np.array([[], []]), np.array([])]

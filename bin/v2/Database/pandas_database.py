@@ -34,6 +34,9 @@ class MQTTHandler(object):
         msg_thread.start()
         msg_thread.join()
 
+    def send_request(self):
+        self.client.publish("step", True)
+
     def on_disconnect(self, _client, _, rc=0):
         print("Disconnected result code " + str(rc))
         self.client.loop_stop()
@@ -88,7 +91,6 @@ class Database(object):
         if target == "properties":
             self.properties_df = self.properties_df.append(new_data, ignore_index=True)
 
-# todo: mongodb
 # def _connect_mongo(host, port, username, password, db):
 #     """ A util for making a connection to mongo """
 #     if username and password:

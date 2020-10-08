@@ -56,7 +56,7 @@ class Simulator(object):
         self.coordinator = Coordinator(self.agents, self.environment.grid, self.main_sensor)
         reads = [agent.read() for agent in self.agents]
 
-        for i in range(2):
+        for i in range(1):
             self.agents[0].randomize_pos()
             reads.append(self.agents[0].read())
 
@@ -67,8 +67,9 @@ class Simulator(object):
         self.coordinator.initialize_data_gpr(reads)
 
         plt.imshow(self.environment.render_maps()["t"], origin='lower')
-        # plt.title("Real Temperature Map")
         plt.colorbar(orientation='vertical')
+        plt.contour(self.environment.render_maps()["t"], colors='k', alpha=0.3, linewidths=1.0)
+        # plt.title("Real Temperature Map")
         plt.draw()
         plt.pause(0.0001)
         # plt.show(block=True)
@@ -115,10 +116,14 @@ class Simulator(object):
 
     def run_simulation(self):
         imax = 20
+        i = 0
 
         data = self.environment.render_maps()
 
-        for i in range(imax):
+        while i < imax:
+            if not self.sender.should_update():
+                plt.pause(0.5)
+                continue
             if isinstance(self.agents, sa.SimpleAgent):
                 self.agents.next_pose = self.coordinator.generate_new_goal()
                 self.agents.step()
@@ -138,7 +143,6 @@ class Simulator(object):
                             str(read[0][0]) + "," + str(read[0][1]) + "," + str(read[1]))
 
                         self.coordinator.fit_data()
-                        # todo: cuando se muevan descomentar el break
             plt.title("MSE is {}".format(self.coordinator.get_mse(self.environment.maps['t'].T.flatten())))
             plt.draw()
             plt.pause(0.001)
@@ -154,5 +158,6 @@ class Simulator(object):
                 print(mse)
                 if mse < 0.1:
                     break
+            i += 1
         print("done")
         plt.show(block=True)

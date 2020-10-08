@@ -8,13 +8,13 @@ import matplotlib.image as img
 import numpy as np
 import yaml
 from PySide2.QtCore import QTimer, Slot, Signal, QObject
-from PySide2.QtWidgets import QApplication, QMainWindow
+from PySide2.QtWidgets import QApplication, QMainWindow, QHBoxLayout, QWidget
 from matplotlib.backends.backend_qt5agg import FigureCanvasQTAgg as FigureCanvas
 from matplotlib.figure import Figure
 
-from bin.Coordinators.informed_coordinator import Coordinator
-from bin.GUI.ui_mainwindow import Ui_MainWindow
-from bin.v2.Database.pandas_database import Database
+from ...Coordinators.informed_coordinator import Coordinator
+from ...GUI.ui_mainwindow import Ui_MainWindow
+from ...v2.Database.pandas_database import Database
 
 
 class SignalManager(QObject):
@@ -52,9 +52,9 @@ class GUI(QMainWindow):
         self.ui.actionReiniciar.triggered.connect(self.restart_figure)
 
         # self.ui.actionMapa
-        # self.ui.actionPredicci_n_GP
-        # self.ui.actionIncertidumbre_GP
-        # self.ui.actionFuncion_de_Adquisici_n
+        self.ui.actionPredicci_n_GP.triggered.connect(self.update_images)
+        self.ui.actionIncertidumbre_GP.triggered.connect(self.update_images)
+        self.ui.actionFuncion_de_Adquisici_n.triggered.connect(self.update_images)
         self.ui.action3D.triggered.connect(self.send_request)
 
         self.db = database
@@ -65,9 +65,28 @@ class GUI(QMainWindow):
             if data[1] not in sensors.keys():
                 sensors[data[1]] = initial_map
 
-        self.fig = Figure(figsize=(640, 480), dpi=72, facecolor=(1, 1, 1), edgecolor=(0, 0, 0))
-        self.canvas = FigureCanvas(self.fig)
-        self.setCentralWidget(self.canvas)
+        wid = QWidget()
+        wid.resize(250, 150)
+        hbox = QHBoxLayout(wid)
+
+        self.map_fig = Figure(figsize=(7, 5), dpi=72, facecolor=(1, 1, 1), edgecolor=(0, 0, 0))
+        self.map_canvas = FigureCanvas(self.map_fig)
+        self.gp_fig = Figure(figsize=(7, 5), dpi=72, facecolor=(1, 1, 1), edgecolor=(0, 0, 0))
+        self.gp_canvas = FigureCanvas(self.gp_fig)
+        self.std_fig = Figure(figsize=(7, 5), dpi=72, facecolor=(1, 1, 1), edgecolor=(0, 0, 0))
+        self.std_canvas = FigureCanvas(self.std_fig)
+        self.acq_fig = Figure(figsize=(7, 5), dpi=72, facecolor=(1, 1, 1), edgecolor=(0, 0, 0))
+        self.acq_canvas = FigureCanvas(self.acq_fig)
+
+        hbox.addWidget(self.map_canvas)
+        hbox.addWidget(self.gp_canvas)
+        hbox.addWidget(self.std_canvas)
+        hbox.addWidget(self.acq_canvas)
+
+        self.acq_canvas.setVisible(False)
+
+        self.setCentralWidget(wid)
+        wid.show()
 
         row = np.ceil(np.sqrt(len(sensors)))
         col = np.round(np.sqrt(len(sensors))) * 3
@@ -79,7 +98,7 @@ class GUI(QMainWindow):
         self.shape = None
         i = 1
         for key in sensors:
-            ax = self.fig.add_subplot(int(row * 100 + col * 10 + i))
+            ax = self.map_fig.add_subplot(111)
             # plt.subplot(row, col, i)
             self.image.append(ax.imshow(sensors[key], origin='lower'))
             self.titles.append("{} real".format(key))
@@ -91,27 +110,34 @@ class GUI(QMainWindow):
                     if self.data[0][k, j] == 1.0:
                         self.nans.append([k, j])
 
-            ax = self.fig.add_subplot(int(row * 100 + col * 10 + i + 1))
-            # plt.subplot(row, col, i + 1)
+            ax = self.gp_fig.add_subplot(111)
             self.image.append(ax.imshow(sensors[key], origin='lower'))
             self.titles.append("{} gp".format(key))
             ax.set_title("Sensor {} Gaussian Process Regression".format(key))
             self.data.append(sensors[key])
-            self.fig.colorbar(self.image[i], ax=ax, orientation='horizontal')
+            self.gp_fig.colorbar(self.image[i], ax=ax, orientation='horizontal')
             current_cmap = cm.get_cmap()
             current_cmap.set_bad(color='white')
 
-            ax = self.fig.add_subplot(int(row * 100 + col * 10 + i + 2))
-            # plt.subplot(row, col, i + 2)
+            ax = self.std_fig.add_subplot(111)
             self.image.append(ax.imshow(sensors[key], origin='lower'))
             self.titles.append("{} gp un".format(key))
             ax.set_title("Sensor {} GP Uncertainty".format(key))
             self.data.append(sensors[key])
-            self.fig.colorbar(self.image[i + 1], ax=ax, orientation='horizontal')
+            self.gp_fig.colorbar(self.image[i + 1], ax=ax, orientation='horizontal')
             current_cmap = cm.get_cmap()
             current_cmap.set_bad(color='white')
 
-            i += 3
+            ax = self.acq_fig.add_subplot(111)
+            self.image.append(ax.imshow(sensors[key], origin='lower'))
+            self.titles.append("{} acq".format(key))
+            ax.set_title("Sensor {} Acquisition Function".format(key))
+            self.data.append(sensors[key])
+            self.gp_fig.colorbar(self.image[i + 2], ax=ax, orientation='horizontal')
+            current_cmap = cm.get_cmap()
+            current_cmap.set_bad(color='white')
+
+            i += 4
             if self.shape is None:
                 self.shape = np.shape(sensors[key])
 
@@ -124,7 +150,7 @@ class GUI(QMainWindow):
         self.coordinator = Coordinator(None, self.data[0], 't')
 
         self.update_thread = QTimer()
-        self.update_thread.setInterval(500)
+        self.update_thread.setInterval(250)
         self.update_thread.timeout.connect(self.update_request)
         self.update_thread.start()
 
@@ -177,15 +203,20 @@ class GUI(QMainWindow):
             self.coordinator.add_data(new_data[0])
         self.coordinator.fit_data()
         self.db.sensors_c_index = last_index
-        mu, std, sensor_name = self.coordinator.surrogate(return_std=True,
-                                                          return_sensor=True)
+
         observe_maps = dict()
-        if self.ui.actionPredicci_n_GP.isChecked():
-            observe_maps["{} gp".format(sensor_name)] = mu
-        if self.ui.actionIncertidumbre_GP.isChecked():
-            observe_maps["{} gp un".format(sensor_name)] = std
+
+        if self.ui.actionPredicci_n_GP.isChecked() or self.ui.actionIncertidumbre_GP.isChecked():
+            mu, std, sensor_name = self.coordinator.surrogate(return_std=self.ui.actionIncertidumbre_GP.isChecked(),
+                                                              return_sensor=True)
+            if self.ui.actionPredicci_n_GP.isChecked():
+                observe_maps["{} gp".format(sensor_name)] = mu
+            if self.ui.actionIncertidumbre_GP.isChecked():
+                observe_maps["{} gp un".format(sensor_name)] = std
+
         if self.ui.actionFuncion_de_Adquisici_n.isChecked():
-            observe_maps["{} acq f".format(sensor_name)] = std
+            acq, sensor_name = self.coordinator.get_acq()
+            observe_maps["{} acq".format(sensor_name)] = acq
 
         self.observe_maps(observe_maps)
         self.db.updating_sensors = False
@@ -223,7 +254,27 @@ class GUI(QMainWindow):
 
     @Slot()
     def update_images(self):
-        self.canvas.draw()
+        self.map_canvas.draw()
+        if self.ui.actionPredicci_n_GP.isChecked():
+            self.gp_canvas.draw()
+            if not self.gp_canvas.isVisible():
+                self.gp_canvas.setVisible(True)
+        else:
+            self.gp_canvas.setVisible(False)
+
+        if self.ui.actionIncertidumbre_GP.isChecked():
+            self.std_canvas.draw()
+            if not self.std_canvas.isVisible():
+                self.std_canvas.setVisible(True)
+        else:
+            self.std_canvas.setVisible(False)
+
+        if self.ui.actionFuncion_de_Adquisici_n.isChecked():
+            self.acq_canvas.draw()
+            if not self.acq_canvas.isVisible():
+                self.acq_canvas.setVisible(True)
+        else:
+            self.acq_canvas.setVisible(False)
 
     def export_maps(self, extension='png'):
         for my_image, my_title in zip(self.data, self.titles):
