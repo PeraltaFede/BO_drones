@@ -4,12 +4,13 @@ from warnings import simplefilter
 import numpy as np
 from sklearn.metrics import mean_squared_error as mse
 from skopt.learning.gaussian_process import gpr, kernels
-from skopt.acquisition import gaussian_lcb as ge
+
+# from skopt.acquisition import gaussian_pi
 
 try:
-    from Utils.acquisition_functions import gaussian_ei
+    from Utils.acquisition_functions import gaussian_sei, maxvalue_entropy_search
 except ModuleNotFoundError:
-    from bin.Utils.acquisition_functions import gaussian_ei
+    from bin.Utils.acquisition_functions import gaussian_sei, maxvalue_entropy_search
 from scipy.optimize import minimize
 
 
@@ -18,8 +19,10 @@ class Coordinator(object):
         self.agents = agents
         self.map_data = map_data
         self.acquisition = 'gaussian_ei'
-        self.gp = gpr.GaussianProcessRegressor(normalize_y=True, kernel=20 * kernels.RBF(150), alpha=1e-7)
-
+        self.gp = gpr.GaussianProcessRegressor(kernel=kernels.RBF(150), alpha=1e-7)
+        # self.gp = gpr.GaussianProcessRegressor(kernel=kernels.Matern(150, nu=3.5), alpha=1e-7)
+        # self.gp = gpr.GaussianProcessRegressor(kernel=kernels.RationalQuadratic(150, 0.1), alpha=1e-7)
+        #         self.gp = gpr.GaussianProcessRegressor(normalize_y=True, kernel=20 * kernels.RBF(150), alpha=1e-7)
         self.data = [np.array([[], []]), np.array([])]
 
         self.all_vector_pos = np.mgrid[0:self.map_data.shape[1]:1, 0:self.map_data.shape[0]:1].reshape(2, -1).T
@@ -65,7 +68,7 @@ class Coordinator(object):
 
         def min_obj(X):
             # Minimization objective is the negative acquisition function
-            return -gaussian_ei(X.reshape(-1, dim), self.gp, np.max(self.data[1]), xi=0.01)
+            return -gaussian_sei(X.reshape(-1, dim), self.gp, np.max(self.data[1]), xi=0.01)
 
         # Find the best optimum by starting from n_restart different random points.
         for x0 in np.random.uniform([0, 0], [999, 1499], size=(n_restarts, dim)):
@@ -77,10 +80,15 @@ class Coordinator(object):
                 print(min_val)
         return np.round(min_x.reshape(-1, 1).T).astype(np.int)[0]
 
-    def generate_new_goal(self, method=None):
-        all_acq = gaussian_ei(self.vector_pos, self.gp, np.max(self.data[1]))
+    def generate_new_goal(self, method=None, pose=np.zeros((1, 3))):
+        print('pose', pose)
+        # all_acq = gaussian_sei(self.vector_pos, self.gp, np.max(self.data[1]), c_point=pose[:2])
+        all_acq = maxvalue_entropy_search(self.vector_pos, self.gp, np.max(self.data[1]), c_point=pose[:2])
+        # all_acq = gaussian_pi(self.vector_pos, self.gp, np.max(self.data[1]))
+
         new_pos = self.vector_pos[np.where(all_acq == np.nanmax(all_acq))][0]
         new_pos = np.append(new_pos, 0)
+        print('future pos is: ', new_pos)
 
         return new_pos
 
@@ -88,6 +96,9 @@ class Coordinator(object):
         nan = np.isnan(y_true)
         return mse(y_true[~nan], self.surrogate()[~nan])
 
-    def get_acq(self):
-        return gaussian_ei(self.all_vector_pos, self.gp, np.max(self.data[1])), self.main_sensor
+    def get_acq(self, pose=np.zeros((1, 2))):
+        # return gaussian_sei(self.all_vector_pos, self.gp, np.max(self.data[1]), c_point=pose[0][:2]), self.main_sensor
+        return maxvalue_entropy_search(self.all_vector_pos, self.gp, np.max(self.data[1]),
+                                       c_point=pose[0][:2]), self.main_sensor
+        # return gaussian_pi(self.all_vector_pos, self.gp, np.max(self.data[1])), self.main_sensor
         # return ge(self.all_vector_pos, self.gp, 3), self.main_sensor

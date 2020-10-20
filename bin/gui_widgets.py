@@ -1,8 +1,8 @@
 import os
 import sys
 import threading
-from datetime import datetime
 from copy import copy
+from datetime import datetime
 
 import matplotlib.cm as cm
 import matplotlib.image as img
@@ -138,28 +138,40 @@ class GUI(QMainWindow):
             self.image.append(ax.imshow(sensors[key], origin='lower'))
             self.titles.append("{} gp".format(key))
             ax.set_title("Sensor {} Gaussian Process Regression".format(key))
+            ax.set_ylabel('y')
+            ax.set_xlabel('x')
             self.data.append(sensors[key])
-            self.gp_fig.colorbar(self.image[i], ax=ax, orientation='horizontal')
+            cb = self.gp_fig.colorbar(self.image[i], ax=ax, orientation='horizontal')
             current_cmap = copy(cm.get_cmap())
             current_cmap.set_bad(color='white')
+            cb.ax.set_xlabel(r'$\mu (x)$')
 
             ax = self.std_fig.add_subplot(111)
             self.image.append(ax.imshow(sensors[key], origin='lower'))
             self.titles.append("{} gp un".format(key))
             ax.set_title("Sensor {} GP Uncertainty".format(key))
+            ax.set_ylabel('y')
+            ax.set_xlabel('x')
             self.data.append(sensors[key])
-            self.gp_fig.colorbar(self.image[i + 1], ax=ax, orientation='horizontal')
+            cb = self.gp_fig.colorbar(self.image[i + 1], ax=ax, orientation='horizontal')
             current_cmap = copy(cm.get_cmap())
             current_cmap.set_bad(color='white')
+            cb.ax.set_xlabel(r'$\sigma (x)$')
 
             ax = self.acq_fig.add_subplot(111)
             self.image.append(ax.imshow(sensors[key], origin='lower'))
             self.titles.append("{} acq".format(key))
             ax.set_title("Sensor {} Acquisition Function".format(key))
+            ax.set_ylabel('y')
+            ax.set_xlabel('x')
+
+            self.axes = ax
+
             self.data.append(sensors[key])
-            self.gp_fig.colorbar(self.image[i + 2], ax=ax, orientation='horizontal')
+            cb = self.gp_fig.colorbar(self.image[i + 2], ax=ax, orientation='horizontal')
             current_cmap = copy(cm.get_cmap())
             current_cmap.set_bad(color='white')
+            cb.ax.set_xlabel(r'$\mathrm{\mathsf{SEI}} (x)$')
 
             i += 4
             if self.shape is None:
@@ -183,6 +195,7 @@ class GUI(QMainWindow):
         self.signalManager.drones_sig.connect(self.request_drones_update)
         # self.signalManager.proper_sig.connect(self.request_proper_update)
         self.signalManager.images_ready.connect(self.update_images)
+        self.current_drone_pos = np.zeros((1, 2))
 
     @Slot()
     def update_request(self):
@@ -228,6 +241,8 @@ class GUI(QMainWindow):
         self.coordinator.fit_data()
         self.db.sensors_c_index = last_index
 
+        self.current_drone_pos = new_data[-1]
+
         observe_maps = dict()
 
         if self.ui.actionPredicci_n_GP.isChecked() or self.ui.actionIncertidumbre_GP.isChecked():
@@ -243,7 +258,7 @@ class GUI(QMainWindow):
                 observe_maps["{} gp un".format(sensor_name)] = std
 
         if self.ui.actionFuncion_de_Adquisici_n.isChecked():
-            acq, sensor_name = self.coordinator.get_acq()
+            acq, sensor_name = self.coordinator.get_acq(self.current_drone_pos)
             observe_maps["{} acq".format(sensor_name)] = acq
 
         self.observe_maps(observe_maps)
@@ -263,6 +278,10 @@ class GUI(QMainWindow):
 
                         self.image[i].set_data(self.data[i])
                         self.image[i].set_clim(vmin=np.min(self.data[i]), vmax=np.max(self.data[i]))
+                        if "acq" in key:
+                            ipos, kpos = np.where(self.data[i] == np.nanmax(self.data[i]))
+                            print(ipos, kpos)
+                            self.axes.plot(kpos[0], ipos[0], 'Xr', markersize=10)
                         # a.update_ticks()
                         break
 
@@ -276,6 +295,9 @@ class GUI(QMainWindow):
         for i in range(len(self.titles)):
             self.image[i].set_data(self.data[0])
             self.image[i].set_clim(vmin=np.min(self.data[0]), vmax=np.max(self.data[0]))
+
+        [line.remove() for line in self.axes.lines]
+
         self.signalManager.images_ready.emit('')
         # threading.Thread(target=self.observe_maps, args=(,),).start()
 

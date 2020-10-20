@@ -2,15 +2,16 @@ import datetime
 import time
 
 import matplotlib.image as img
+import matplotlib.pyplot as plt
+import numpy as np
+from scipy.spatial.distance import cdist
 
+from bin.Agents import pathplanning_agent as ppa
 from bin.Agents import simple_agent as sa
 from bin.Coordinators.informed_coordinator import Coordinator
 from bin.Environment.simple_env import Env
 from bin.GUI.simple_mpl_gui import GUI
 from bin.v2.Communications.simple_sender import Sender
-
-import matplotlib.pyplot as plt
-import os
 
 
 class Simulator(object):
@@ -83,13 +84,15 @@ class Simulator(object):
     def init_maps(self):
         if isinstance(self.agents, sa.SimpleAgent):
             [self.sensors.add(sensor) for sensor in self.agents.sensors]
-        elif isinstance(self.agents, list) and isinstance(self.agents[0], sa.SimpleAgent):
+        elif isinstance(self.agents, list) and isinstance(self.agents[0], sa.SimpleAgent) or \
+                isinstance(self.agents, list) and isinstance(self.agents[0], ppa.SimpleAgent):
             for agent in self.agents:
                 [self.sensors.add(sensor) for sensor in agent.sensors]
         self.environment.add_new_map(self.sensors)
 
     def load_envs_into_agents(self):
-        sa.SimpleAgent.set_agent_env(self.environment)
+        for agent in self.agents:
+            agent.set_agent_env(self.environment)
 
     def export_maps(self, sensors=None, extension='png', render=False):
         data = self.environment.render_maps(sensors)
@@ -129,20 +132,27 @@ class Simulator(object):
                 self.agents.step()
                 self.coordinator.add_data(self.agents.read())
                 self.coordinator.fit_data()
-            elif isinstance(self.agents, list) and isinstance(self.agents[0], sa.SimpleAgent):
+            elif isinstance(self.agents, list) and isinstance(self.agents[0], sa.SimpleAgent) or \
+                    isinstance(self.agents, list) and isinstance(self.agents[0], ppa.SimpleAgent):
                 for agent in self.agents:
                     if agent.reached_pose():
                         self.sender.send_new_drone_msg(agent.pose)
-                        agent.next_pose = self.coordinator.generate_new_goal()
-                        agent.step()
-                        time.sleep(1)
-                        read = agent.read()
-                        self.coordinator.add_data(read)
+                        agent.next_pose = self.coordinator.generate_new_goal(pose=agent.pose)
+                        if agent.step():
+                            time.sleep(1)
+                            read = agent.read()
+                            self.coordinator.add_data(read)
 
-                        self.sender.send_new_sensor_msg(
-                            str(read[0][0]) + "," + str(read[0][1]) + "," + str(read[1]))
+                            self.sender.send_new_sensor_msg(
+                                str(read[0][0]) + "," + str(read[0][1]) + "," + str(read[1]))
 
-                        self.coordinator.fit_data()
+                            self.coordinator.fit_data()
+
+                            # plt.imshow(np.exp(-cdist([agent.pose[:2]],
+                            #                          self.coordinator.all_vector_pos) / 150).reshape(1000, 1500).T,
+                            #            origin='lower')
+                        else:
+                            i -= 1
             plt.title("MSE is {}".format(self.coordinator.get_mse(self.environment.maps['t'].T.flatten())))
             plt.draw()
             plt.pause(0.001)

@@ -29,7 +29,7 @@ def shekel_arg0(sol):
 
 def create_map(grid, resolution, obstacles_on=False, randomize_shekel=False, no_maxima=3, load_from_db=True):
     if load_from_db:
-        with open('E:/ETSI/Proyecto/data/Databases/numpy_files/ground_truth1.npy', 'rb') as g:
+        with open('E:/ETSI/Proyecto/data/Databases/numpy_files/ground_truth_norm.npy', 'rb') as g:
             return np.load(g)
     else:
         global w_obstacles, a, c
@@ -70,8 +70,14 @@ def create_map(grid, resolution, obstacles_on=False, randomize_shekel=False, no_
         #
         # if no_minimum > 1:
         # #     _z = _z ** (1/no_minimum)
-        # with open('E:/ETSI/Proyecto/data/Databases/numpy_files/ground_truth1.npy', 'wb') as g:
-        #     np.save(g, _z)
+
+        _z = _z/(np.nanmean(_z)) - 1
+        # _z = (_z - np.nanmean(_z)) / np.nanstd(_z)
+
+        # _z = _z / np.linalg.norm(_z, ord=2, axis=1, keepdims=True)
+
+        with open('E:/ETSI/Proyecto/data/Databases/numpy_files/ground_truth_norm.npy', 'wb') as g:
+            np.save(g, _z)
 
         #     b = np.load(f)
         return _z

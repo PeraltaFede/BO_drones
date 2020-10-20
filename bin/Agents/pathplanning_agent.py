@@ -2,6 +2,8 @@ from copy import deepcopy
 
 import numpy as np
 
+from bin.Utils.path_planners import rrt_star
+
 
 class SimpleAgent(object):
     regions = [[[479.8, 967.26], [0., 1183.96], [0, 1500.], [1000., 1500.], [1000., 1141.71043299]],
@@ -38,6 +40,7 @@ class SimpleAgent(object):
         self.position_error = np.round(5 * (np.random.rand(3) - 0.5)).astype(np.int)
         self.voronoi_reg = voronoi_reg
         self.agent_env = None
+        self.path = None
 
     def set_agent_env(self, env):
         if self.voronoi_reg == -1:
@@ -76,6 +79,48 @@ class SimpleAgent(object):
         # np.random.seed(None)
         # np.random.seed(seed=None)
 
+    def simulate_step(self, start, finish, m, b):
+        # s = start + vo
+        deltax = 0.51 * np.sign(finish[0] - start[0])
+        delta = [start[0] + deltax, m * (start[0] + deltax) + b, 0]
+        # print('---', delta, deltax)
+        return np.round(delta).astype(np.int)
+
+    def line_crosses_obstacle(self, start, finish):
+        den = (finish[0] - start[0])
+        m = (finish[1] - start[1]) / den if den != 0 else 0
+        b = start[1] - m * start[0]
+        # y = mx + b
+        pos = start.copy()
+
+        while pos[0] != finish[0] and pos[1] != finish[1]:
+            pos = self.simulate_step(pos, finish, m, b)
+            if self.agent_env.grid[pos[1], pos[0]] == 1:
+                return True
+        return False
+
+    def path_plan(self):
+        if self.line_crosses_obstacle(self.pose, self.next_pose):
+            print('collision inbound, calculating route via rrt')
+            # self.path = None
+            path = rrt_star(self.agent_env.grid, self.pose, self.next_pose)
+            c_end = self.pose
+            p2f = []
+            while True:
+                for i in range(len(path)):
+                    if not self.line_crosses_obstacle(c_end[:2], path[-i - 1]):
+                        p2f.append(path[-i - 1])
+                        c_end = path[-i - 1]
+                        break
+                if c_end[0] == path[-1][0] and c_end[1] == path[-1][1]:
+                    # print('final path is', p2f)
+                    self.path = p2f
+                    break
+
+        else:
+            print('no collision found')
+            self.path = [self.next_pose]
+
     def step(self):
         if self.agent_env is not None:
             if self.position_flag:
@@ -87,6 +132,9 @@ class SimpleAgent(object):
                     self.position_error = np.round(6 * (np.random.rand(3) - 0.5)).astype(np.int)
 
                 self.next_pose = next_pose
+
+            self.path_plan()
+            print(self.path)
 
             if 0 <= self.next_pose[0] <= self.agent_env.grid.shape[1] and \
                     0 <= self.next_pose[1] <= self.agent_env.grid.shape[0] and (

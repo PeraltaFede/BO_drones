@@ -11,7 +11,7 @@ class Sender(object):
         self._mqtt_thread = threading.Thread(target=self.mqtt_thread)
         self._mqtt_thread.start()
 
-        self.step = True
+        self.step = False
 
         self.ids = ["type", "longitude", "latitude", "value", "altitude", "drone", "timestamp"]
 
