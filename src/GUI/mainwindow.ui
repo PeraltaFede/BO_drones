@@ -46,9 +46,9 @@
     <addaction name="actionIncertidumbre_GP"/>
     <addaction name="actionFuncion_de_Adquisici_n"/>
     <addaction name="separator"/>
+    <addaction name="actionAutomatic"/>
     <addaction name="action3D"/>
     <addaction name="separator"/>
-    <addaction name="actionMostrar_Puntos_de_Medici_n"/>
    </widget>
    <addaction name="menuArchivo"/>
    <addaction name="menuEditar"/>
@@ -124,16 +124,25 @@
    <property name="checkable">
     <bool>false</bool>
    </property>
+   <property name="enabled">
+    <bool>false</bool>
+   </property>
    <property name="text">
-    <string>send next</string>
+    <string>Send next</string>
    </property>
    <property name="shortcut">
     <string>Ctrl+N</string>
    </property>
   </action>
-  <action name="actionMostrar_Puntos_de_Medici_n">
+  <action name="actionAutomatic">
+   <property name="checkable">
+    <bool>true</bool>
+   </property>
+   <property name="checked">
+    <bool>true</bool>
+   </property>
    <property name="text">
-    <string>Mostrar Puntos de Medición</string>
+    <string>Automatic process</string>
    </property>
    <property name="shortcut">
     <string>Ctrl+S</string>

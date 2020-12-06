@@ -34,7 +34,6 @@ class SimpleAgent(object):
         """
         self.sensors = sensors
         self.pose = pose
-        self.next_pose = np.zeros((3, 1))
         self.ignore_obstacles = ignore_obstacles
         self.position_flag = True
         self.position_error = np.round(5 * (np.random.rand(3) - 0.5)).astype(np.int)
@@ -43,6 +42,27 @@ class SimpleAgent(object):
         self.path = None
         self.drone_id = _id
         self.distance_travelled = 0
+        self.next_pose = np.zeros(3, )
+
+    @property
+    def next_pose(self):
+        return self._next_pose
+
+    @next_pose.setter
+    def next_pose(self, value):
+        if self.agent_env is None:
+            self._next_pose = value
+            return
+        if self.position_flag:
+            val = value + self.position_error
+            while self.agent_env.grid[np.round(val[1]).astype(np.int), np.round(val[0]).astype(np.int)] != 0:
+                # print('retrying')
+                self.position_error = np.round(5 * (np.random.rand(3) - 0.5)).astype(np.int)
+                val = value + self.position_error
+            self._next_pose = val
+            self.path_plan()
+        else:
+            self._next_pose = value
 
     def set_agent_env(self, env):
         if self.voronoi_reg == -1:
@@ -77,13 +97,17 @@ class SimpleAgent(object):
         while self.agent_env.grid[self.pose[1], self.pose[0]] == 1 and not self.ignore_obstacles:
             self.pose = np.round(np.multiply(np.random.rand(3), np.array([max_x, max_y, 2 * np.pi]))).astype(np.int)
 
+        prevflag = self.position_flag
+        self.position_flag = False
         self.next_pose = deepcopy(self.pose)
+        self.position_flag = prevflag
         # np.random.seed(None)
         # np.random.seed(seed=None)
 
-    def simulate_step(self, start, finish, m, b):
+    @staticmethod
+    def simulate_step(start, finish, m, b, delta=0.51):
         # s = start + vo
-        deltax = 0.51 * np.sign(finish[0] - start[0])
+        deltax = delta * np.sign(finish[0] - start[0])
         delta = [start[0] + deltax, m * (start[0] + deltax) + b, 0]
         # print('---', delta, deltax)
         return np.round(delta).astype(np.int)
@@ -144,32 +168,34 @@ class SimpleAgent(object):
             # print('no collision found')
             self.path = [self.next_pose]
 
-    def step(self):
+    def step(self, dist_left=None):
         if self.agent_env is not None:
-            if self.position_flag:
-                next_pose = self.next_pose + self.position_error
-                self.position_error = np.round(4 * (np.random.rand(3) - 0.5)).astype(np.int)
-                while self.agent_env.grid[next_pose[1], next_pose[0]] != 0:
-                    # print('retrying')
-                    next_pose = self.next_pose + self.position_error
-                    self.position_error = np.round(4 * (np.random.rand(3) - 0.5)).astype(np.int)
-
-                self.next_pose = next_pose
-
-            self.path_plan()
-
             if 0 <= self.next_pose[0] <= self.agent_env.grid.shape[1] and \
                     0 <= self.next_pose[1] <= self.agent_env.grid.shape[0] and (
                     self.agent_env.grid[self.next_pose[1], self.next_pose[0]] == 0 or self.ignore_obstacles):
 
                 for goal in self.path:
-                    # print(np.linalg.norm(self.pose[:2] - goal[:2]))
-                    # print(goal)
-                    # print(self.pose)
-                    self.distance_travelled += np.linalg.norm(self.pose[:2] - goal[:2])
-                    self.pose = deepcopy(goal)
-                # print(self.pose, " vs ", self.next_pose)
-                self.pose = deepcopy(self.next_pose)
+                    d = np.linalg.norm(self.pose[:2] - goal[:2])
+                    if dist_left is None or (d <= dist_left):
+                        print('reached')
+                        self.distance_travelled += d
+                        self.pose = deepcopy(goal)
+                        dist_left -= d
+                        self.path.remove(goal)
+                    else:
+                        print('not reached')
+                        den = (goal[0] - self.pose[0])
+                        m = (goal[1] - self.pose[1]) / den if den != 0 else 0
+                        b = self.pose[1] - m * self.pose[0]
+                        self.distance_travelled += dist_left
+
+                        while dist_left > 2:
+                            new_pose = self.simulate_step(self.pose, goal, m, b)
+                            dist_left -= np.linalg.norm(np.subtract(new_pose[:2], self.pose[:2]))
+                            self.pose = new_pose
+                        break
+                if dist_left is None:
+                    self.pose = deepcopy(self.next_pose)
                 print("{}, TD={}, will read {}".format(self.drone_id, self.distance_travelled, self.read()))
                 return True
             else:

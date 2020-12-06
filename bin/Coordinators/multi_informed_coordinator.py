@@ -11,6 +11,8 @@ try:
 except ModuleNotFoundError:
     from bin.Utils.acquisition_functions import gaussian_sei, maxvalue_entropy_search, gaussian_pi, gaussian_ei
 
+from bin.Utils.voronoi_regions import calc_voronoi, find_vect_pos4region, find_cvt_pos4region
+
 
 # from skopt.acquisition import gaussian_ei
 
@@ -19,7 +21,6 @@ except ModuleNotFoundError:
 
 
 class Coordinator(object):
-
     def __init__(self, map_data, main_sensor='None', k_name="RBF", acq="gaussian_sei", acq_mod="masked"):
         # self.agents = agents
         self.map_data = map_data
@@ -84,7 +85,7 @@ class Coordinator(object):
         self.data[0] = np.append(self.data[0], new_data[0]).reshape(-1, 2)
         self.data[1] = np.append(self.data[1], new_data[1])
 
-    def generate_new_goal(self, pose=np.zeros((1, 3)), idx=-1):
+    def generate_new_goal(self, pose=np.zeros((1, 3)), idx=-1, other_poses=np.zeros((1, 3))):
         if self.acq_mod == "split_path":
             if len(self.splitted_goals) > 0:
                 new_pos = self.splitted_goals[0, :]
@@ -93,6 +94,9 @@ class Coordinator(object):
 
                 return np.append(new_pos, 0)
         xi = 1.0
+
+        _, reg = calc_voronoi(pose, other_poses, self.map_data)
+
         if self.acquisition == "gaussian_sei":
             all_acq = gaussian_sei(self.vector_pos, self.gp, np.min(self.data[1]), c_point=pose[:2], xi=xi,
                                    masked=self.acq_mod == "masked")
@@ -106,7 +110,34 @@ class Coordinator(object):
             all_acq = gaussian_ei(self.vector_pos, self.gp, np.min(self.data[1]), c_point=pose[:2], xi=xi,
                                   masked=self.acq_mod == "masked")
             # all_acq = gaussian_ei(self.vector_pos, self.gp, np.min(self.data[1]), xi=xi, return_grad=False)
-        new_pos = self.vector_pos[np.where(all_acq == np.nanmax(all_acq))][0]
+
+        # print('no, cvp isnt ', self.vector_pos)
+        # curr_vect_pos = find_vect_pos4region(self.point_v_pos, reg)
+        # print('yes, cvp is ', curr_vect_pos)
+        # print('no, cvp isnt ', self.vector_pos)
+
+        optimize_method = 'maximum'
+
+        if optimize_method == "maximum":
+            arr1inds = all_acq.argsort()
+            sorted_arr1 = self.vector_pos[arr1inds[::-1]]
+            new_pos = find_vect_pos4region(sorted_arr1, reg)
+        elif optimize_method == "cvt":
+            from time import time
+            t0 = time()
+            new_pos = find_cvt_pos4region(all_acq, self.vector_pos, reg)
+            print("ne: ", new_pos)
+            print("t0: ", time() - t0)
+            # t0 = time()
+            # arr1inds = all_acq.argsort()
+            # sorted_arr1 = self.vector_pos[arr1inds[::-1]]
+            # new_pos = find_vect_pos4region(sorted_arr1, reg)
+            # print("ne: ", new_pos)
+            # print("t1: ", time() - t0)
+        # print('---')
+        # print(self.vector_pos[np.where(all_acq == np.nanmax(all_acq))][0])
+        # print(new_pos)
+        # print('---')
 
         if self.acq_mod == "split_path" or self.acq_mod == "truncated":
             beacons_splitted = []
@@ -189,10 +220,10 @@ class Coordinator(object):
     def get_acq(self, pose=np.zeros((1, 2)), acq_func="gaussian_sei"):
         if acq_func == "gaussian_sei":
             return gaussian_sei(self.all_vector_pos, self.gp, np.min(self.data[1]),
-                                c_point=pose[:2], masked=self.acq_mod == "masked", xi=1.0), self.main_sensor
+                                c_point=pose[0][:2], masked=self.acq_mod == "masked"), self.main_sensor
         elif acq_func == "maxvalue_entropy_search":
             return maxvalue_entropy_search(self.all_vector_pos, self.gp, np.min(self.data[1]),
-                                           c_point=pose[:2], masked=self.acq_mod == "masked"), self.main_sensor
+                                           c_point=pose[0][:2], masked=self.acq_mod == "masked"), self.main_sensor
         elif acq_func == "gaussian_pi":
             return gaussian_pi(self.all_vector_pos, self.gp, np.min(self.data[1]),
                                masked=self.acq_mod == "masked"), self.main_sensor

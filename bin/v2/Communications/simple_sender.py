@@ -1,4 +1,3 @@
-import time
 import threading
 
 import paho.mqtt.client as mqtt
@@ -37,8 +36,8 @@ class Sender(object):
         if msg.topic == "step":
             self.step = message
 
-    def send_new_sensor_msg(self, raw_x_y_val):
-        msg = "t," + raw_x_y_val + ",1, 2, 3"
+    def send_new_sensor_msg(self, raw_x_y_val, _id=0):
+        msg = "t," + raw_x_y_val + ",1," + str(_id) + ", 3"
         payload = dict(zip(self.ids, msg.split(",")))
         for key in payload:
             try:
@@ -48,12 +47,26 @@ class Sender(object):
         self.client.publish("sensors", str(payload))
         # print("Message {} sent".format(payload))
 
-    def send_new_drone_msg(self, raw_x_y):
-        msg = "{},{},{},{},{},{}".format("d_0", raw_x_y[0], raw_x_y[1], 0, time.time(), "online")
-        payload = dict(zip(self.ids, msg.split(",")))
+    def send_new_drone_msg(self, raw_x_y, idx=-0):
+        msg = "{},{},{}".format(idx, raw_x_y[0], raw_x_y[1])
+        payload = dict(zip(["id", "x", "y"], msg.split(",")))
         for key in payload:
             try:
                 payload[key] = float(payload[key])
             except Exception as e:
                 pass
         self.client.publish("drones", str(payload))
+
+    def send_new_goal_msg(self, raw_x_y, idx=-0):
+        msg = "{},{},{}".format(idx, raw_x_y[0], raw_x_y[1])
+        payload = dict(zip(["id", "x", "y"], msg.split(",")))
+        for key in payload:
+            try:
+                payload[key] = float(payload[key])
+            except Exception as e:
+                pass
+        self.client.publish("goals", str(payload))
+
+    def send_new_acq_msg(self, acq_f):
+        print(acq_f)
+        self.client.publish("params", acq_f)

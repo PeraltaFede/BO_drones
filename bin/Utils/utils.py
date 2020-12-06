@@ -1,10 +1,17 @@
+from time import time
+
 import numpy as np
 from deap import benchmarks
+from skopt.benchmarks import branin as brn
 
 w_obstacles = False
 
 a = []
 c = []
+
+
+# maxz = 0
+# meanz = 0
 
 
 def bohachevsky_arg0(sol):
@@ -23,30 +30,54 @@ def himmelblau_arg0(sol):
     return np.nan if w_obstacles and sol[2] == 1 else benchmarks.himmelblau(sol[:2])[0]
 
 
+def branin(sol):
+    return np.nan if w_obstacles and sol[2] == 1 else brn(sol[:2])
+
+
 def shekel_arg0(sol):
     return np.nan if w_obstacles and sol[2] == 1 else benchmarks.shekel(sol[:2], a, c)[0]
 
 
-def create_map(grid, resolution, obstacles_on=False, randomize_shekel=False, no_maxima=3, load_from_db=True):
+def schwefel_arg0(sol):
+    return np.nan if w_obstacles and sol[2] == 1 else benchmarks.h1(sol[:2])[0]
+
+
+def create_map(grid, resolution, obstacles_on=False, randomize_shekel=False, no_maxima=10, load_from_db=True, file=0):
     if load_from_db:
         with open('E:/ETSI/Proyecto/data/Databases/numpy_files/ground_truth_norm.npy', 'rb') as g:
+            # _z = np.load(g)
+            # print(np.nanmax(_z))
+            # print(np.nanmin(_z))
+            # print(np.nanmean(_z), np.nanstd(_z))
+            # _z = _z[~np.isnan(_z)]
+            # import matplotlib.pyplot as plt
+            #
+            # plt.figure()
+            # plt.hist(_z)
+            # plt.show(block=True)
             return np.load(g)
     else:
         global w_obstacles, a, c
         w_obstacles = obstacles_on
-        xmin = 0
-        xmax = 1
+        xmin = -5
+        xmax = 10
         ymin = 0
-        ymax = 1
+        ymax = 15
         # _z = []
         if randomize_shekel:
+            no_maxima = np.random.randint(2, 6)
+            xmin = 0
+            xmax = 10
+            ymin = 0
+            ymax = 10
             a = []
             c = []
             for i in range(no_maxima):
-                a.append([np.random.rand(), np.random.rand()])
-                c.append(0.15)
-            print(a)
-            print(c)
+                # a.append([2 + np.random.rand() * 6, 2 + np.random.rand() * 6])
+                a.append([1.2 + np.random.rand() * 8.8, 1.2 + np.random.rand() * 8.8])
+                c.append(5)
+            # print(a)
+            # print(c)
             a = np.array(a)
             c = np.array(c).T
         else:
@@ -61,8 +92,9 @@ def create_map(grid, resolution, obstacles_on=False, randomize_shekel=False, no_
         _y = np.arange(xmin, xmax, resolution * (ymax - ymin) / (grid.shape[0])) + yadd
         _x, _y = np.meshgrid(_x, _y)
         # if i == 0:
-        _z = np.fromiter(map(shekel_arg0, zip(_x.flat, _y.flat, grid.flat)), dtype=np.float,
+        _z = np.fromiter(map(branin, zip(_x.flat, _y.flat, grid.flat)), dtype=np.float,
                          count=_x.shape[0] * _x.shape[1]).reshape(_x.shape)
+
         # else:
         #     _z1 = np.fromiter(map(shekel_arg0, zip(_x.flat, _y.flat, grid.flat)), dtype=np.float,
         #                       count=_x.shape[0] * _x.shape[1]).reshape(_x.shape)
@@ -70,14 +102,21 @@ def create_map(grid, resolution, obstacles_on=False, randomize_shekel=False, no_
         #
         # if no_minimum > 1:
         # #     _z = _z ** (1/no_minimum)
-
-        _z = _z/(np.nanmean(_z)) - 1
-        # _z = (_z - np.nanmean(_z)) / np.nanstd(_z)
+        # global maxz, meanz
+        # maxz = np.nanmax(_z)
+        # minz = np.nanmin(_z)
+        # _z = _z - (minz + maxz) / 2
+        # plt.hist(_z.flatten(), alpha=0.5)
+        # meanz = np.nanmean(_z)
+        # stdz = np.nanstd(_z)
+        # _z = (_z - meanz) / stdz
+        # print()
+        # print(np.nanmax(_z))
 
         # _z = _z / np.linalg.norm(_z, ord=2, axis=1, keepdims=True)
 
-        with open('E:/ETSI/Proyecto/data/Databases/numpy_files/ground_truth_norm.npy', 'wb') as g:
+        with open('E:/ETSI/Proyecto/data/Databases/numpy_files/shww.npy', 'wb') as g:
             np.save(g, _z)
-
+        # todo hubber loss
         #     b = np.load(f)
         return _z

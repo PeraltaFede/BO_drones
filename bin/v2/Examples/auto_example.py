@@ -6,6 +6,22 @@ from skopt.acquisition import gaussian_ei
 from bin.Utils.utils import create_map
 
 _z = create_map(None, None)
+[[ 578  958] [ 578  958]
+ [ 592  953] [ 592  953]
+ [ 599  951] [ 599  951]
+ [ 614  950] [ 614  950]
+ [ 651  950]] [ 651  950]]
+
+
+
+
+
+
+
+
+
+
+
 
 
 def f(_x):
