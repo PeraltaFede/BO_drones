@@ -14,7 +14,7 @@ pip install matplotlib skopt sklearn numpy json paho-mqtt pyyaml deap
 
 ## Use
 
-The code includes an [example folder](bin/Examples) where numerous example of use are found.
+The code includes an [example folder](bin/v2/Examples) where numerous example of use are found.
 
 ## Citing
 
