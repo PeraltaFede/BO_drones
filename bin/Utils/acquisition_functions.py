@@ -92,6 +92,16 @@ def gaussian_pi(x, model, y_opt=0.0, xi=0.01, c_point=np.zeros((1, 2)), masked=T
     return values
 
 
+def max_std(x, model, c_point=np.zeros((1, 2)), masked=True):
+    with warnings.catch_warnings():
+        warnings.simplefilter("ignore")
+        mu, std = model.predict(x, return_std=True)
+    mask = std > 0
+    if masked:
+        std *= np.exp(-cdist([c_point], x) / 250).reshape(mu[mask].shape)
+    return std
+
+
 def gaussian_ei(x, model, y_opt=0.0, xi=0.01, c_point=np.zeros((1, 2)), masked=True):
     with warnings.catch_warnings():
         warnings.simplefilter("ignore")

@@ -74,11 +74,11 @@ class SimpleAgent(object):
     def reached_pose(self):
         return self.pose[0] == self.next_pose[0] and self.pose[1] == self.next_pose[1]
 
-    def randomize_pos(self, near=False):
+    def randomize_pos(self, near=False, maxv=10):
         # np.random.seed(0)
         if near:
-            max_x = 10
-            max_y = 10
+            max_x = maxv
+            max_y = maxv
             original_pose = deepcopy(self.pose)
             self.pose = original_pose + np.round(
                 np.multiply(np.random.rand(3), np.array([max_x, max_y, 2 * np.pi]))).astype(np.int)
@@ -105,28 +105,40 @@ class SimpleAgent(object):
         # np.random.seed(seed=None)
 
     @staticmethod
-    def simulate_step(start, finish, m, b, delta=0.51):
-        # s = start + vo
-        deltax = delta * np.sign(finish[0] - start[0])
-        delta = [start[0] + deltax, m * (start[0] + deltax) + b, 0]
-        # print('---', delta, deltax)
-        return np.round(delta).astype(np.int)
+    def simulated_step(start, angle, delta=0.51):
+        return start + np.array([delta * np.cos(angle), delta * np.sin(angle)])
+
+    # @staticmethod
+    # def simulate_step(start, finish, m, b, delt=0.51, round_=True):
+    #     deltax = delt * np.sign(finish[0] - start[0])
+    #     if deltax == 0:
+    #         delta = [start[0], np.sign(finish[1] - start[1]) + start[1], 0]
+    #     else:
+    #         delta = [start[0] + deltax, m * (start[0] + deltax) + b, 0]
+    #     # print('---', delta, deltax)
+    #     if round_:
+    #         return np.round(delta).astype(np.int)
+    #     else:
+    #         return delta
 
     def line_crosses_obstacle(self, start, finish):
-        den = (finish[0] - start[0])
-        m = (finish[1] - start[1]) / den if den != 0 else 0
-        b = start[1] - m * start[0]
-        # y = mx + b
-        pos = start.copy()
-
-        while pos[0] != finish[0] and pos[1] != finish[1]:
-            pos = self.simulate_step(pos, finish, m, b)
-            if self.agent_env.grid[pos[1], pos[0]] == 1:
+        pos = start.copy()[:2]
+        rnd_pos = np.round(pos).astype(np.int)
+        diff = np.subtract(finish[:2], start[:2])
+        angle = np.arctan2(diff[1], diff[0])
+        # print(pos)
+        # print(finish)
+        # print(diff)
+        # print(angle)
+        while rnd_pos[0] != finish[0] and rnd_pos[1] != finish[1]:
+            pos = self.simulated_step(pos, angle)
+            rnd_pos = np.round(pos).astype(np.int)
+            # print(rnd_pos)
+            if self.agent_env.grid[rnd_pos[1], rnd_pos[0]] == 1:
                 return True
         return False
 
     def path_plan(self):
-
         if self.line_crosses_obstacle(self.pose, self.next_pose):
             print('collision inbound, calculating route via rrt')
             # self.path = None
@@ -160,7 +172,6 @@ class SimpleAgent(object):
                     self.path = p2f
                     break
                 if c_end[0] == path[-1][0] and c_end[1] == path[-1][1]:
-                    # print('final path is', p2f)
                     self.path = p2f
                     break
 
@@ -173,27 +184,42 @@ class SimpleAgent(object):
             if 0 <= self.next_pose[0] <= self.agent_env.grid.shape[1] and \
                     0 <= self.next_pose[1] <= self.agent_env.grid.shape[0] and (
                     self.agent_env.grid[self.next_pose[1], self.next_pose[0]] == 0 or self.ignore_obstacles):
-
+                if self.distance_travelled > 1500:
+                    return True
+                i2remove = 0
                 for goal in self.path:
                     d = np.linalg.norm(self.pose[:2] - goal[:2])
                     if dist_left is None or (d <= dist_left):
-                        print('reached')
+                        # print('reached')
+                        # print(self.pose, goal, dist_left, d)
                         self.distance_travelled += d
                         self.pose = deepcopy(goal)
                         dist_left -= d
-                        self.path.remove(goal)
                     else:
-                        print('not reached')
-                        den = (goal[0] - self.pose[0])
-                        m = (goal[1] - self.pose[1]) / den if den != 0 else 0
-                        b = self.pose[1] - m * self.pose[0]
-                        self.distance_travelled += dist_left
-
-                        while dist_left > 2:
-                            new_pose = self.simulate_step(self.pose, goal, m, b)
+                        # print('not reached')
+                        # print(self.pose, goal, dist_left, d)
+                        diff = np.subtract(goal[:2], self.pose[:2])
+                        angle = np.arctan2(diff[1], diff[0])
+                        while dist_left > 0.51:
+                            new_pose = self.simulated_step(self.pose[:2], angle)
+                            # print('i pose', )
                             dist_left -= np.linalg.norm(np.subtract(new_pose[:2], self.pose[:2]))
+                            self.distance_travelled += np.linalg.norm(np.subtract(new_pose[:2], self.pose[:2]))
+                            # print(new_pose, self.distance_travelled, dist_left, d)
+                            # if np.subtract(new_pose[:2], self.pose[:2])):
+                            #     self.pose = new_pose
+                            #     break
                             self.pose = new_pose
+
+                        new_pose = self.simulated_step(self.pose[:2], angle, delta=dist_left)
+                        self.distance_travelled += np.linalg.norm(np.subtract(new_pose[:2], self.pose[:2]))
+                        self.pose = np.round(np.append(new_pose, 0)).astype(np.int)
+                        # print('new pose is', self.pose)
+                        # print('goalpose is', goal)
+                        # print('norm', np.linalg.norm(np.subtract(self.pose[:2], goal[:2])))
                         break
+                    i2remove += 1
+                del self.path[:i2remove]
                 if dist_left is None:
                     self.pose = deepcopy(self.next_pose)
                 print("{}, TD={}, will read {}".format(self.drone_id, self.distance_travelled, self.read()))

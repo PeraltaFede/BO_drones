@@ -5,28 +5,14 @@ import matplotlib.pyplot as plt
 import numpy as np
 
 # plt.style.use("seaborn")
-with open('E:/ETSI/Proyecto/data/Databases/numpy_files/ground_truth_norm.npy', 'rb') as g:
-    _z = np.load(g)
+# with open('E:/ETSI/Proyecto/data/Databases/numpy_files/ground_truth_norm.npy', 'rb') as g:
+#     _z = np.load(g)
 
+cmap = plt.cm.coolwarm_r
 fig, ax = plt.subplots()
-current_cmap = copy(cm.get_cmap("inferno"))
-current_cmap.set_bad(color="#00000000")
-
-img = plt.imshow(_z, origin='lower', cmap=current_cmap, zorder=5, vmin=np.nanmin(_z), vmax=np.nanmax(_z))
-cbar = plt.colorbar(orientation='vertical')
-cbar.ax.tick_params(labelsize=20)
-CS = plt.contour(_z, colors=('gray', 'gray', 'gray', 'k', 'k', 'k', 'k'),
-                 alpha=0.6, linewidths=1.0, zorder=10)
-
-plt.grid(True, zorder=0, color="white")
-ax.set_facecolor('#eaeaf2')
-
-plt.clabel(CS, inline=1, fontsize=10)
-plt.xlabel("x", fontsize=20)
-plt.ylabel("y", fontsize=20)
-plt.xticks(fontsize=20)
-plt.yticks(fontsize=20)  # .0052 .0017
-plt.show(block=True)
+# cmap.set_bad(color="#00000000")
+# , vmin=np.nanmin(_z),                 vmax=np.nanmin(_z)
+import matplotlib.image as image
 
 with open('E:/ETSI/Proyecto/data/Databases/numpy_files/nans.npy', 'rb') as g:
     nans = np.load(g)
@@ -37,6 +23,29 @@ def get_clean(_file):
         _file[nnan[0], nnan[1]] = -1
     return np.ma.array(_file, mask=(_file == -1))
 
+
+_z = get_clean(np.flipud(image.imread("E:/ETSI/Proyecto/data/Map/Ypacarai/map.png")))
+
+img = plt.imshow(_z[:, :, 0], cmap=cm.coolwarm, zorder=5, origin='lower')
+# cbar = plt.colorbar(orientation='vertical')
+# cbar.ax.tick_params(labelsize=20)
+# CS = plt.contour(_z, colors=('gray', 'gray', 'gray', 'k', 'k', 'k', 'k'),
+#                  alpha=0.6, linewidths=1.0, zorder=10)
+
+plt.grid(True, zorder=0, color="white")
+ax.set_facecolor('#eaeaf2')
+# cbar.ax.set_xlabel(r'$\mu (x)$', fontsize=30)
+# plt.clabel(CS, inline=1, fontsize=10)
+plt.xlabel("x [m]", fontsize=20)
+plt.ylabel("y [m]", fontsize=20)
+xticks = np.arange(0, 1000, 200)
+yticks = np.arange(0, 1500, 200)
+xnticks = [str(num * 10) for num in xticks]
+ynticks = [str(num * 10) for num in yticks]
+plt.xticks(xticks, xnticks, fontsize=20)
+plt.yticks(yticks, ynticks, fontsize=20)  # .0052 .0017
+
+plt.show(block=True)
 
 with open('E:/ETSI/Proyecto/data/Databases/numpy_files/best_bo.npy', 'rb') as g:
     _bo = get_clean(np.load(g))
@@ -88,13 +97,13 @@ for fig, xs in zip([_bo, _ga, _lm], [_bo_xs, _ga_xs, _lm_xs]):
                      alpha=0.6, linewidths=1.0, zorder=10)
     plt.clabel(CS, inline=1, fontsize=10)
     if i == 0:
-        plt.ylabel("y", fontsize=20)
+        plt.ylabel("y [m]", fontsize=20)
     plt.grid(True, zorder=0, color="white")
     ax.set_facecolor('#eaeaf2')
-    plt.xlabel("x", fontsize=20)
+    plt.xlabel("x [m]", fontsize=20)
     plt.legend(loc="lower left", prop={"size": 20})
-    plt.xticks(fontsize=20)
-    plt.yticks(fontsize=20)  # .0052 .0017
+    plt.xticks(xticks, xnticks, fontsize=20)
+    plt.yticks(yticks, ynticks, fontsize=20)
     i += 1
 
 current_cmap = copy(cm.get_cmap("jet"))
@@ -110,13 +119,13 @@ for fig, xs in zip([_bo, _ga, _lm], [_bo_xs, _ga_xs, _lm_xs]):
                      alpha=0.6, linewidths=1.0, zorder=10)
     plt.clabel(CS, inline=1, fontsize=10)
     if i == 0:
-        plt.ylabel("y", fontsize=20)
+        plt.ylabel("y [m]", fontsize=20)
     plt.grid(True, zorder=0, color="white")
     ax.set_facecolor('#eaeaf2')
-    plt.xlabel("x", fontsize=20)
+    plt.xlabel("x [m]", fontsize=20)
     plt.legend(loc="lower left", prop={"size": 20})
-    plt.xticks(fontsize=20)
-    plt.yticks(fontsize=20)  # .0052 .0017
+    plt.xticks(xticks, xnticks, fontsize=20)
+    plt.yticks(yticks, ynticks, fontsize=20)
     i += 1
 
 # img = plt.imshow(_z, origin='lower', cmap='inferno')  # , vmin=0, vmax=6.357)

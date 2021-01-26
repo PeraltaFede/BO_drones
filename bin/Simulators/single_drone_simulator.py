@@ -85,24 +85,24 @@ class Simulator(object):
             self.sender.send_new_sensor_msg(str(reads[2][0][0]) + "," + str(reads[2][0][1]) + "," + str(reads[2][1]))
 
         self.coordinator.initialize_data_gpr(reads)
-        from copy import copy
-        import matplotlib.cm as cm
-        current_cmap = copy(cm.get_cmap("inferno"))
-        current_cmap.set_bad(color="#eaeaf2")
+        # from copy import copy
+        # import matplotlib.cm as cm
+        # current_cmap = copy(cm.get_cmap("inferno"))
+        # current_cmap.set_bad(color="#eaeaf2")
 
-        plt.imshow(self.environment.render_maps()["t"], origin='lower', cmap=current_cmap)  # YlGn_r
-        cbar = plt.colorbar(orientation='vertical')
-        cbar.ax.tick_params(labelsize=20)
-        CS = plt.contour(self.environment.render_maps()["t"], colors=('gray', 'gray', 'gray', 'k', 'k', 'k', 'k'),
-                         alpha=0.6, linewidths=1.0)
-        plt.clabel(CS, inline=1, fontsize=10)
-        # plt.title("Mask", fontsize=30)
-        plt.xlabel("x", fontsize=20)
-        plt.ylabel("y", fontsize=20)
-        plt.xticks(fontsize=20)
-        plt.yticks(fontsize=20)
-        plt.draw()
-        plt.pause(0.0001)
+        # plt.imshow(self.environment.render_maps()["t"], origin='lower', cmap=current_cmap)  # YlGn_r
+        # cbar = plt.colorbar(orientation='vertical')
+        # cbar.ax.tick_params(labelsize=20)
+        # CS = plt.contour(self.environment.render_maps()["t"], colors=('gray', 'gray', 'gray', 'k', 'k', 'k', 'k'),
+        #                  alpha=0.6, linewidths=1.0)
+        # plt.clabel(CS, inline=1, fontsize=10)
+        # # plt.title("Mask", fontsize=30)
+        # plt.xlabel("x", fontsize=20)
+        # plt.ylabel("y", fontsize=20)
+        # plt.xticks(fontsize=20)
+        # plt.yticks(fontsize=20)
+        # plt.draw()
+        # plt.pause(0.0001)
         # plt.show(block=True)
 
         if saving:
@@ -110,9 +110,9 @@ class Simulator(object):
             self.f.write("kernel,acq,masked\n")
             self.f.write(str(
                 "{},{},{}\n".format(self.coordinator.k_name, self.coordinator.acquisition, self.coordinator.acq_mod)))
-            self.f.write("step,mse,t_dist\n")
+            self.f.write("step,mse,t_dist,time\n")
             mse = self.coordinator.get_mse(self.environment.maps['t'].T.flatten())
-            self.f.write("{},{},{}\n".format(0, mse, self.agents[0].distance_travelled))
+            self.f.write("{},{},{},0\n".format(0, mse, self.agents[0].distance_travelled))
 
     def init_maps(self):
         if isinstance(self.agents, sa.SimpleAgent):
@@ -128,13 +128,14 @@ class Simulator(object):
             agent.set_agent_env(self.environment)
 
     def run_simulation(self):
-        imax = 20
+        imax = 15
         i = 0
 
         while i < imax:
-            if not self.sender.should_update():
-                plt.pause(0.5)
-                continue
+            # if not self.sender.should_update():
+            #     plt.pause(0.5)
+            #     continue
+            t0 = time.time()
             if isinstance(self.agents, sa.SimpleAgent):
                 self.agents.next_pose = self.coordinator.generate_new_goal()
                 self.agents.step()
@@ -164,21 +165,22 @@ class Simulator(object):
                         else:
                             i -= 1
             mse = self.coordinator.get_mse(self.environment.maps['t'].T.flatten())
-            plt.title("MSE is {}".format(mse))
-            plt.draw()
+            # plt.title("MSE is {}".format(mse))
+            # plt.draw()
             # plt.pause(2)
             i += 1
             # if i == 7:
-            #     # if self.agents[0].distance_travelled > 1500:
             #     print(mse)
             #     with open('E:/ETSI/Proyecto/data/Databases/numpy_files/best_bo.npy', 'wb') as g:
             #         np.save(g, self.coordinator.surrogate().reshape((1000, 1500)).T)
             #     plt.show(block=True)
 
             if self.saving:
-                self.f.write("{},{},{}\n".format(i, mse, self.agents[0].distance_travelled))
+                self.f.write("{},{},{},{}\n".format(i, mse, self.agents[0].distance_travelled, time.time() - t0))
+            # if self.agents[0].distance_travelled > 1500:
+            #     break
         print("done")
-        plt.show(block=True)
+        # plt.show(block=True)
         self.sender.client.disconnect()
         if self.saving:
             self.f.close()

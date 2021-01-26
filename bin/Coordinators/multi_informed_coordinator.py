@@ -7,9 +7,9 @@ from sklearn.metrics import mean_squared_error as mse
 from skopt.learning.gaussian_process import gpr, kernels
 
 try:
-    from Utils.acquisition_functions import gaussian_sei, maxvalue_entropy_search, gaussian_pi, gaussian_ei
+    from Utils.acquisition_functions import gaussian_sei, maxvalue_entropy_search, gaussian_pi, gaussian_ei, max_std
 except ModuleNotFoundError:
-    from bin.Utils.acquisition_functions import gaussian_sei, maxvalue_entropy_search, gaussian_pi, gaussian_ei
+    from bin.Utils.acquisition_functions import gaussian_sei, maxvalue_entropy_search, gaussian_pi, gaussian_ei, max_std
 
 from bin.Utils.voronoi_regions import calc_voronoi, find_vect_pos4region, find_cvt_pos4region
 
@@ -90,7 +90,7 @@ class Coordinator(object):
             if len(self.splitted_goals) > 0:
                 new_pos = self.splitted_goals[0, :]
                 self.splitted_goals = self.splitted_goals[1:, :]
-                print('new pos is', new_pos)
+                # print('new pos is', new_pos)
 
                 return np.append(new_pos, 0)
         xi = 1.0
@@ -109,6 +109,9 @@ class Coordinator(object):
         elif self.acquisition == "gaussian_ei":
             all_acq = gaussian_ei(self.vector_pos, self.gp, np.min(self.data[1]), c_point=pose[:2], xi=xi,
                                   masked=self.acq_mod == "masked")
+        elif self.acquisition == "max_std":
+            all_acq = max_std(self.vector_pos, self.gp, np.min(self.data[1]),
+                              masked=self.acq_mod == "masked")
             # all_acq = gaussian_ei(self.vector_pos, self.gp, np.min(self.data[1]), xi=xi, return_grad=False)
 
         # print('no, cvp isnt ', self.vector_pos)
@@ -126,8 +129,8 @@ class Coordinator(object):
             from time import time
             t0 = time()
             new_pos = find_cvt_pos4region(all_acq, self.vector_pos, reg)
-            print("ne: ", new_pos)
-            print("t0: ", time() - t0)
+            # print("ne: ", new_pos)
+            # print("t0: ", time() - t0)
             # t0 = time()
             # arr1inds = all_acq.argsort()
             # sorted_arr1 = self.vector_pos[arr1inds[::-1]]
@@ -141,13 +144,37 @@ class Coordinator(object):
 
         if self.acq_mod == "split_path" or self.acq_mod == "truncated":
             beacons_splitted = []
+            # print('new pos', new_pos)
+            # print('old pos', pose)
             vect_dist = np.subtract(new_pos, pose[:2])
+            # print('vd', vect_dist)
             ang = np.arctan2(vect_dist[1], vect_dist[0])
-            lx = np.round(np.arange(pose[0], new_pos[0], 220 * np.cos(ang))[1:]).astype(np.int)
-            ly = np.round(np.arange(pose[1], new_pos[1], 220 * np.sin(ang))[1:]).astype(np.int)
-            for dx, dy in zip(lx, ly):
-                if self.map_data[dy, dx] == 0:
-                    beacons_splitted.append(np.array([dx, dy]))
+            # print('ang', ang)
+            d = 220
+            # print('x', d * np.cos(ang), vect_dist[0])
+            # print('y', d * np.sin(ang), vect_dist[1])
+            # if d * np.cos(ang) < vect_dist[0]:
+            #     lx = np.round(np.arange(pose[0], new_pos[0], d * np.cos(ang))[1:]).astype(np.int)
+            # else:
+            #     lx = []
+            # if d * np.sin(ang) < vect_dist[1]:
+            #     ly = np.round(np.arange(pose[1], new_pos[1], d * np.sin(ang))[1:]).astype(np.int)
+            # else:
+            #     ly = []
+            # for dx, dy in zip(lx, ly):
+            #     if self.map_data[dy, dx] == 0:
+            #         beacons_splitted.append(np.array([dx, dy]))
+            # print(beacons_splitted)
+            # beacons_splitted = []
+            # print(np.linalg.norm(vect_dist))
+            # print('di', np.arange(0, np.linalg.norm(vect_dist), d)[1:])
+            for di in np.arange(0, np.linalg.norm(vect_dist), d)[1:]:
+                mini_goal = np.array([di * np.cos(ang) + pose[0], di * np.sin(ang) + pose[1]]).astype(np.int)
+                if self.map_data[mini_goal[1], mini_goal[0]] == 0:
+                    beacons_splitted.append(mini_goal)
+
+            # print(beacons_splitted)
+
             beacons_splitted.append(np.array(new_pos))
             self.splitted_goals = np.array(beacons_splitted)
             new_pos = self.splitted_goals[0, :]
@@ -217,18 +244,21 @@ class Coordinator(object):
         nan = np.isnan(y_true)
         return mse(y_true[~nan], self.surrogate()[~nan])
 
-    def get_acq(self, pose=np.zeros((1, 2)), acq_func="gaussian_sei"):
+    def get_acq(self, pose=np.zeros((1, 2)), acq_func="gaussian_sei", acq_mod="normal"):
         if acq_func == "gaussian_sei":
             return gaussian_sei(self.all_vector_pos, self.gp, np.min(self.data[1]),
-                                c_point=pose[0][:2], masked=self.acq_mod == "masked"), self.main_sensor
+                                c_point=pose[0][:2], masked=acq_mod == "masked"), self.main_sensor
         elif acq_func == "maxvalue_entropy_search":
             return maxvalue_entropy_search(self.all_vector_pos, self.gp, np.min(self.data[1]),
-                                           c_point=pose[0][:2], masked=self.acq_mod == "masked"), self.main_sensor
+                                           c_point=pose[0][:2], masked=acq_mod == "masked"), self.main_sensor
         elif acq_func == "gaussian_pi":
             return gaussian_pi(self.all_vector_pos, self.gp, np.min(self.data[1]),
-                               masked=self.acq_mod == "masked"), self.main_sensor
+                               masked=acq_mod == "masked"), self.main_sensor
         elif acq_func == "gaussian_ei":
             return gaussian_ei(self.all_vector_pos, self.gp, np.min(self.data[1]),
                                c_point=pose[:2],
                                masked=False, xi=1.0), self.main_sensor
+        elif acq_func == "max_std":
+            return max_std(self.all_vector_pos, self.gp, np.min(self.data[1]),
+                           masked=acq_mod == "masked"), self.main_sensor
         # return ge(self.all_vector_pos, self.gp, 3), self.main_sensor

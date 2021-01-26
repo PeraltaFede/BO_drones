@@ -1,5 +1,3 @@
-from time import time
-
 import numpy as np
 from deap import benchmarks
 from skopt.benchmarks import branin as brn
@@ -44,7 +42,8 @@ def schwefel_arg0(sol):
 
 def create_map(grid, resolution, obstacles_on=False, randomize_shekel=False, no_maxima=10, load_from_db=True, file=0):
     if load_from_db:
-        with open('E:/ETSI/Proyecto/data/Databases/numpy_files/ground_truth_norm.npy', 'rb') as g:
+        with open('E:/ETSI/Proyecto/data/Databases/numpy_files/random_{}.npy'.format(file), 'rb') as g:
+        # with open('E:/ETSI/Proyecto/data/Databases/numpy_files/ground_truth_norm.npy', 'rb') as g:
             # _z = np.load(g)
             # print(np.nanmax(_z))
             # print(np.nanmin(_z))
@@ -59,10 +58,10 @@ def create_map(grid, resolution, obstacles_on=False, randomize_shekel=False, no_
     else:
         global w_obstacles, a, c
         w_obstacles = obstacles_on
-        xmin = -5
-        xmax = 10
+        xmin = 0
+        xmax = 1
         ymin = 0
-        ymax = 15
+        ymax = 1
         # _z = []
         if randomize_shekel:
             no_maxima = np.random.randint(2, 6)
@@ -92,7 +91,7 @@ def create_map(grid, resolution, obstacles_on=False, randomize_shekel=False, no_
         _y = np.arange(xmin, xmax, resolution * (ymax - ymin) / (grid.shape[0])) + yadd
         _x, _y = np.meshgrid(_x, _y)
         # if i == 0:
-        _z = np.fromiter(map(branin, zip(_x.flat, _y.flat, grid.flat)), dtype=np.float,
+        _z = np.fromiter(map(shekel_arg0, zip(_x.flat, _y.flat, grid.flat)), dtype=np.float,
                          count=_x.shape[0] * _x.shape[1]).reshape(_x.shape)
 
         # else:
@@ -107,16 +106,47 @@ def create_map(grid, resolution, obstacles_on=False, randomize_shekel=False, no_
         # minz = np.nanmin(_z)
         # _z = _z - (minz + maxz) / 2
         # plt.hist(_z.flatten(), alpha=0.5)
-        # meanz = np.nanmean(_z)
-        # stdz = np.nanstd(_z)
-        # _z = (_z - meanz) / stdz
         # print()
         # print(np.nanmax(_z))
+        # print(np.nanmin(_z))
 
+        meanz = np.nanmean(_z)
+        stdz = np.nanstd(_z)
+        _z = (_z - meanz) / stdz
+
+        # print(np.nanmax(_z))
+        # print(np.nanmin(_z))
         # _z = _z / np.linalg.norm(_z, ord=2, axis=1, keepdims=True)
 
-        with open('E:/ETSI/Proyecto/data/Databases/numpy_files/shww.npy', 'wb') as g:
-            np.save(g, _z)
-        # todo hubber loss
-        #     b = np.load(f)
+        # with open('E:/ETSI/Proyecto/data/Databases/numpy_files/shww.npy', 'wb') as g:
+        #     np.save(g, _z)
         return _z
+
+
+def get_init_pos4(n=1, rotate_rnd=True, expand=False, map_data=None):
+    step = np.pi * 2 / n
+    if rotate_rnd:
+        extra_angle = np.random.rand() * np.pi * 2
+    else:
+        extra_angle = 0
+    angles = [step * i + extra_angle for i in range(n)]
+    initial_positions = np.full((n, 3), [500.0, 750.0, 0.0])
+
+    cosine = np.cos(angles)
+    sine = np.sin(angles)
+    if expand:
+        initial_positions[:, 0] += 220 * cosine
+        initial_positions[:, 1] += 220 * sine
+        for i in range(len(initial_positions[:, 0])):
+            while True:
+                initial_positions[i, 0] += cosine[i]
+                initial_positions[i, 1] += sine[i]
+                if map_data[np.round(initial_positions[i, 1]).astype(np.int), np.round(initial_positions[i, 0]).astype(
+                        np.int)] == 1:
+                    initial_positions[i, 0] -= cosine[i]
+                    initial_positions[i, 1] -= sine[i]
+                    break
+    else:
+        initial_positions[:, 0] += 10 * cosine
+        initial_positions[:, 1] += 10 * sine
+    return np.round(initial_positions).astype(np.int)

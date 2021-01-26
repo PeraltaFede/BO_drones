@@ -43,29 +43,6 @@ def calc_voronoi(region_center, close_agents, map_data):
     return vor, vor.vertices[vor.regions[vor.point_region[region]]]
 
 
-def create_voronoi_region():
-    vor, region = calc_voronoi()
-    max_dist = 0
-    for num in region:
-        if np.linalg.norm(np.subtract(np.array([num[0], num[1]]), formal_gps2pix(
-                region_center))) > max_dist and 1.0 < num[0] < 900 and 1.0 < num[1] < 1350:
-            max_dist = np.linalg.norm(
-                np.subtract(np.array([num[0], num[1]]), formal_gps2pix(region_center)))
-    return should_grow
-
-
-def obtain_shapely_polygon():
-    if len(region) == 0:
-        reg = Polygon(
-            [(0, 0), (0, np.size(map_data, 0)), (np.size(map_data, 1), np.size(map_data, 0)),
-             (np.size(map_data, 1), 0)])
-    else:
-        reg = Polygon(region)
-    print('reg is', reg)
-    # logging.log(logging.INFO, "DRONE:reg is {}".format(reg))
-    return reg
-
-
 def pointify(v_pos):
     return [Point(point) for point in v_pos]
 
@@ -79,7 +56,7 @@ def find_cvt_pos4region(all_acq, vect_pos, reg):
             mass += m
             x_mass += pos * m
 
-    return np.round(x_mass/mass).astype(np.int)
+    return np.round(x_mass / mass).astype(np.int)
 
 
 def find_vect_pos4region(sorted_vect_pos, reg):

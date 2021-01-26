@@ -2,20 +2,21 @@ import os
 import sys
 import threading
 from copy import copy
+from time import time
 
 import matplotlib.cm as cm
 import matplotlib.image as img
 import numpy as np
 import yaml
-from Coordinators.informed_coordinator import Coordinator
+from Coordinators.multi_informed_coordinator import Coordinator
 from GUI.ui_mainwindow import Ui_MainWindow
 from PySide2.QtCore import QTimer, Slot, Signal, QObject
 from PySide2.QtWidgets import QApplication, QMainWindow, QHBoxLayout, QWidget, QVBoxLayout
+from Utils.voronoi_regions import calc_voronoi
 from matplotlib.backends.backend_qt5agg import FigureCanvasQTAgg as FigureCanvas
 from matplotlib.backends.backend_qt5agg import NavigationToolbar2QT as NavigationToolbar
 from matplotlib.figure import Figure
 
-from bin.Utils.voronoi_regions import calc_voronoi
 from bin.v2.Database.pandas_database import Database
 
 
@@ -129,54 +130,87 @@ class GUI(QMainWindow):
         self.shape = None
         self.axes = []
         self.drone_pos_ax = []
-        self.drone_goals_ax = []
-        self.voronoi_ax = []
+        self.drone_goals_ax = dict()
+        self.voronoi_ax = dict()
+        self.signal_from_gp_std = False
+
+        xticks = np.arange(0, 1000, 200)
+        yticks = np.arange(0, 1500, 200)
+        xnticks = [str(num * 10) for num in xticks]
+        ynticks = [str(num * 10) for num in yticks]
+        self.colors = ["#3B4D77", "#C09235", "#B72F56", "#91B333", "#FFD100"]
 
         i = 1
         for key in sensors:
+            import matplotlib.pyplot as plt
+            from matplotlib.colors import ListedColormap
+            cmap = plt.cm.coolwarm
+            my_cmap = cmap(np.arange(cmap.N))
+            my_cmap[:, -1] = np.linspace(1, 0, cmap.N)
+            my_cmap = ListedColormap(my_cmap)
             ax = self.map_fig.add_subplot(111)
             # plt.subplot(row, col, i)
-            self.image.append(ax.imshow(sensors[key], origin='lower'))
+            self.image.append(ax.imshow(sensors[key], origin='lower', cmap=my_cmap, zorder=5))
+            ax.grid(True, zorder=0, color="white")
+            ax.set_facecolor('#eaeaf2')
+            ax.tick_params(axis="both", labelsize=30)
+            ax.set_ylabel('y [m]', fontsize=30)
+            ax.set_xlabel('x [m]', fontsize=30)
+            ax.set_xticks(xticks)  # values
+            ax.set_xticklabels(xnticks)  # labels
+            ax.set_yticks(yticks)  # values
+            ax.set_yticklabels(ynticks)  # labels
             self.titles.append("{} real".format(key))
-            ax.set_title("Map for sensor {}".format(key))
+            # ax.set_title("Map for sensor {}".format(key))
             self.data.append(sensors[key])
+            self.axes.append(ax)
+
+            # return base.from_list(cmap_name, color_list, N)
 
             ax = self.gp_fig.add_subplot(111)
-            current_cmap = copy(cm.get_cmap("inferno"))
+            # cm.get_cmap(base_cmap, N)
+            current_cmap = copy(cm.get_cmap("spectral"))
             current_cmap.set_bad(color="#00000000")
-            self.image.append(ax.imshow(sensors[key], origin='lower', cmap=current_cmap, zorder=5))
+            self.image.append(
+                ax.imshow(sensors[key], origin='lower', cmap=current_cmap, zorder=5, vmin=0, vmax=2))
             ax.grid(True, zorder=0, color="white")
             ax.set_facecolor('#eaeaf2')
             self.titles.append("{} gp".format(key))
             # ax.set_title("Sensor {} Gaussian Process Regression".format(key))
-            ax.tick_params(axis="x", labelsize=30)
-            ax.tick_params(axis="y", labelsize=30)
-            # ax.set_ylabel('y', fontsize=30)
-            ax.set_xlabel('x', fontsize=30)
+            ax.tick_params(axis="both", labelsize=30)
+            # ax.set_ylabel('y [m]', fontsize=30)
+            ax.set_xlabel('x [m]', fontsize=30)
+            ax.set_xticks(xticks)  # values
+            ax.set_xticklabels(xnticks)  # labels
+            ax.set_yticks(yticks)  # values
+            ax.set_yticklabels(ynticks)  # labels
             self.data.append(sensors[key])
-            self.image[-1].set_clim(vmin=-2.586, vmax=1.7898)
-            # cb = self.gp_fig.colorbar(self.image[i], ax=ax)
-            # cb.ax.tick_params(labelsize=20)
-            # cb.ax.set_xlabel(r'$\mu (x)$', fontsize=30)
+            # self.image[-1].set_clim(vmin=-2.586, vmax=1.7898)
+            cb = self.gp_fig.colorbar(self.image[i], ax=ax)
+            cb.ax.tick_params(labelsize=20)
+            cb.ax.set_xlabel(r'$SE(\mu (x))$', fontsize=30)
             self.axes.append(ax)
 
             ax = self.std_fig.add_subplot(111)
-            current_cmap = copy(cm.get_cmap("viridis"))
+            current_cmap = copy(cm.get_cmap("summer"))
             current_cmap.set_bad(color="#00000000")
-            self.image.append(ax.imshow(sensors[key], origin='lower', cmap=current_cmap, zorder=5))
+            self.image.append(ax.imshow(sensors[key], origin='lower', cmap=current_cmap, zorder=5, vmin=0.0, vmax=1.0))
             ax.grid(True, zorder=0, color="white")
             ax.set_facecolor('#eaeaf2')
             self.titles.append("{} gp un".format(key))
             # ax.set_title("Sensor {} GP Uncertainty".format(key))
-            ax.tick_params(axis="x", labelsize=30)
-            ax.tick_params(axis="y", labelsize=30)
-            # ax.set_ylabel('y', fontsize=30)
-            ax.set_xlabel('x', fontsize=30)
+            ax.tick_params(axis="both", labelsize=30)
+            # ax.set_ylabel('y [m]', fontsize=30)
+            ax.set_xlabel('x [m]', fontsize=30)
+            ax.set_xticks(xticks)  # values
+            ax.set_xticklabels(xnticks)  # labels
+            ax.set_yticks(yticks)  # values
+            ax.set_yticklabels(ynticks)  # labels
             self.data.append(sensors[key])
-            self.image[-1].set_clim(vmin=0.0, vmax=1.0)
-            # cb = self.gp_fig.colorbar(self.image[i + 1], ax=ax)
-            # cb.ax.tick_params(labelsize=20)
-            # cb.ax.set_xlabel(r'$\sigma (x)$', fontsize=30)
+            # self.image[-1].set_clim(vmin=0.0, vmax=1.0)
+            cb = self.gp_fig.colorbar(self.image[i + 1], ax=ax)
+            cb.ax.tick_params(labelsize=20)
+            cb.ax.set_xlabel(r'$\sigma (x)$', fontsize=30)
             self.axes.append(ax)
 
             ax = self.acq_fig.add_subplot(111)
@@ -187,10 +221,13 @@ class GUI(QMainWindow):
             ax.set_facecolor('#eaeaf2')
             self.titles.append("{} acq".format(key))
             # ax.set_title("Sensor {} Acquisition Function".format(key))
-            ax.tick_params(axis="x", labelsize=30)
-            ax.tick_params(axis="y", labelsize=30)
+            ax.tick_params(axis="both", labelsize=30)
             # ax.set_ylabel('y', fontsize=30)
-            ax.set_xlabel('x', fontsize=30)
+            ax.set_xlabel('x [m]', fontsize=30)
+            ax.set_xticks(xticks)  # values
+            ax.set_xticklabels(xnticks)  # labels
+            ax.set_yticks(yticks)  # values
+            ax.set_yticklabels(ynticks)  # labels
 
             self.data.append(sensors[key])
             # cb = self.gp_fig.colorbar(self.image[i + 2], ax=ax, orientation='horizontal')
@@ -208,6 +245,7 @@ class GUI(QMainWindow):
         self.sm = None
 
         self.coordinator = Coordinator(self.data[0], 't')
+        self.real_map = np.load("E:/ETSI/Proyecto/data/Databases/numpy_files/random_12.npy")
 
         self.update_thread = QTimer()
         self.update_thread.setInterval(250)
@@ -251,6 +289,7 @@ class GUI(QMainWindow):
 
     @Slot()
     def request_goals_update(self):
+        # print("new goal received, pls uncomment")
         threading.Thread(target=self.update_goals_position).start()
 
     @Slot()
@@ -264,33 +303,36 @@ class GUI(QMainWindow):
         poses = self.db.goals_df.to_numpy()
         for read in poses:
             current_drone_goals = np.array(read[:2])
-            clr = 'g' if int(read[2]) == 0 else 'k' if int(read[2]) == 1 else 'm' if int(read[2]) == 2 else 'y'
-            if len(self.drone_goals_ax) <= 4 * 3:
+
+            # clr = 'g' if int(read[2]) == 0 else 'k' if int(read[2]) == 1 else 'm' if int(read[2]) == 2 else 'y'
+            if read[2] not in self.drone_goals_ax.keys():
+                self.drone_goals_ax[read[2]] = []
                 if self.ui.actionPredicci_n_GP.isChecked():
-                    self.drone_goals_ax.append(
-                        self.axes[0].plot(current_drone_goals[0], current_drone_goals[1], 'X{}'.format(clr),
-                                          markersize=12,
-                                          label="Current Goal", zorder=6))
+                    self.drone_goals_ax[read[2]].append(
+                        self.axes[1].plot(current_drone_goals[0], current_drone_goals[1], 'X',
+                                          color=self.colors[int(read[2])],
+                                          markersize=12, zorder=6))  # , label="ID: {}".format(int(read[2]))
+                    # self.axes[1].legend(loc="lower left", prop={"size": 20})
                 if self.ui.actionIncertidumbre_GP.isChecked():
-                    self.drone_goals_ax.append(
-                        self.axes[1].plot(current_drone_goals[0], current_drone_goals[1], 'X{}'.format(clr),
-                                          markersize=12,
-                                          label="Current Goal", zorder=6))
-                if self.ui.actionFuncion_de_Adquisici_n.isChecked():
-                    self.drone_goals_ax.append(
-                        self.axes[2].plot(current_drone_goals[0], current_drone_goals[1], 'X{}'.format(clr),
-                                          markersize=12,
-                                          zorder=6))
+                    self.drone_goals_ax[read[2]].append(
+                        self.axes[2].plot(current_drone_goals[0], current_drone_goals[1], 'X',
+                                          color=self.colors[int(read[2])],
+                                          markersize=12, zorder=6))
+                # if self.ui.actionFuncion_de_Adquisici_n.isChecked():
+                #     self.drone_goals_ax[read[2]].append(
+                #         self.axes[3].plot(current_drone_goals[0], current_drone_goals[1], 'X',
+                #                           color=self.colors[int(read[2])],
+                #                           markersize=12, zorder=6))
             else:
                 if self.ui.actionPredicci_n_GP.isChecked():
-                    self.drone_goals_ax[int(read[2] * 3)][0].set_xdata(current_drone_goals[0])
-                    self.drone_goals_ax[int(read[2] * 3)][0].set_ydata(current_drone_goals[1])
+                    self.drone_goals_ax[read[2]][0][0].set_xdata(current_drone_goals[0])
+                    self.drone_goals_ax[read[2]][0][0].set_ydata(current_drone_goals[1])
                 if self.ui.actionIncertidumbre_GP.isChecked():
-                    self.drone_goals_ax[int(1 + read[2] * 3)][0].set_xdata(current_drone_goals[0])
-                    self.drone_goals_ax[int(1 + read[2] * 3)][0].set_ydata(current_drone_goals[1])
-                if self.ui.actionFuncion_de_Adquisici_n.isChecked():
-                    self.drone_goals_ax[int(2 + read[2] * 3)][0].set_xdata(current_drone_goals[0])
-                    self.drone_goals_ax[int(2 + read[2] * 3)][0].set_ydata(current_drone_goals[1])
+                    self.drone_goals_ax[read[2]][1][0].set_xdata(current_drone_goals[0])
+                    self.drone_goals_ax[read[2]][1][0].set_ydata(current_drone_goals[1])
+                # if self.ui.actionFuncion_de_Adquisici_n.isChecked():
+                #     self.drone_goals_ax[read[2]][2][0].set_xdata(current_drone_goals[0])
+                #     self.drone_goals_ax[read[2]][2][0].set_ydata(current_drone_goals[1])
         self.db.goals_c_index += 1
         self.signalManager.images_ready.emit('')
         self.db.updating_goals = False
@@ -299,42 +341,41 @@ class GUI(QMainWindow):
         self.db.updating_drones = True
         poses = self.db.drones_df.to_numpy()
         self.db.drones_c_index += 1
+        # print(poses)
+        # print(len(self.drone_pos_ax), len(self.db.drones_df.index))
         for read in poses:
             current_drone_pos = np.array(read[:2])
-            clr = 'g' if int(read[2]) == 0 else 'k' if int(read[2]) == 1 else 'm' if int(read[2]) == 2 else 'y'
-            if len(self.drone_pos_ax) < len(self.db.drones_df.index) * 3:
+            if len(self.drone_pos_ax) < len(self.db.drones_df.index) * 2:
                 if self.ui.actionPredicci_n_GP.isChecked():
                     self.drone_pos_ax.append(
-                        self.axes[0].plot(current_drone_pos[0], current_drone_pos[1], '.{}'.format(clr), markersize=12,
-                                          label="Current Position", zorder=7))
-                    # self.axes[0].legend(loc="lower left", prop={"size": 20})
+                        self.axes[1].plot(current_drone_pos[0], current_drone_pos[1], '.',
+                                          color=self.colors[int(read[2])], markersize=12,
+                                          zorder=7, label="ID: {}".format(int(read[2]))))
+                    self.axes[1].legend(loc="lower left", prop={"size": 20}).set_zorder(10)
                 if self.ui.actionIncertidumbre_GP.isChecked():
                     self.drone_pos_ax.append(
-                        self.axes[1].plot(current_drone_pos[0], current_drone_pos[1], '.{}'.format(clr), markersize=12,
-                                          label="Current Position", zorder=7))
-                    # self.axes[1].legend(loc="lower left", prop={"size": 20})
-                if self.ui.actionFuncion_de_Adquisici_n.isChecked():
-                    self.drone_pos_ax.append(
-                        self.axes[2].plot(current_drone_pos[0], current_drone_pos[1], '.{}'.format(clr), markersize=12,
+                        self.axes[2].plot(current_drone_pos[0], current_drone_pos[1], '.',
+                                          color=self.colors[int(read[2])], markersize=12,
                                           zorder=7))
+                    # self.axes[1].legend(loc="lower left", prop={"size": 20})
+                # if self.ui.actionFuncion_de_Adquisici_n.isChecked():
+                #     self.drone_pos_ax.append(
+                #         self.axes[3].plot(current_drone_pos[0], current_drone_pos[1], '.',
+                #                           color=self.colors[int(read[2])], markersize=12,
+                #                           zorder=7))
             else:
                 if self.ui.actionPredicci_n_GP.isChecked():
-                    self.drone_pos_ax[int(read[2] * 3)][0].set_xdata(current_drone_pos[0])
-                    self.drone_pos_ax[int(read[2] * 3)][0].set_ydata(current_drone_pos[1])
-                    # self.axes[0].plot(current_drone_pos[0], current_drone_pos[1], '^{}'.format(clr), markersize=12,
-                    #                   label="Current Position", zorder=6)
-                    # self.axes[0].legend(loc="lower left", prop={"size": 20})
+                    self.drone_pos_ax[int(read[2] * 2)][0].set_xdata(current_drone_pos[0])
+                    self.drone_pos_ax[int(read[2] * 2)][0].set_ydata(current_drone_pos[1])
                 if self.ui.actionIncertidumbre_GP.isChecked():
-                    self.drone_pos_ax[int(1 + read[2] * 3)][0].set_xdata(current_drone_pos[0])
-                    self.drone_pos_ax[int(1 + read[2] * 3)][0].set_ydata(current_drone_pos[1])
-                    # self.axes[1].plot(current_drone_pos[0], current_drone_pos[1], '^{}'.format(clr), markersize=12,
-                    #                   label="Current Position", zorder=6)
+                    self.drone_pos_ax[int(1 + read[2] * 2)][0].set_xdata(current_drone_pos[0])
+                    self.drone_pos_ax[int(1 + read[2] * 2)][0].set_ydata(current_drone_pos[1])
                     # self.axes[1].legend(loc="lower left", prop={"size": 20})
-                if self.ui.actionFuncion_de_Adquisici_n.isChecked():
-                    self.drone_pos_ax[int(2 + read[2] * 3)][0].set_xdata(current_drone_pos[0])
-                    self.drone_pos_ax[int(2 + read[2] * 3)][0].set_ydata(current_drone_pos[1])
-                    # self.axes[2].plot(current_drone_pos[0], current_drone_pos[1], '^{}'.format(clr), markersize=12,
-                    #                   zorder=6)
+                # if self.ui.actionFuncion_de_Adquisici_n.isChecked():
+                #     self.drone_pos_ax[int(2 + read[2] * 3)][0].set_xdata(current_drone_pos[0])
+                #     self.drone_pos_ax[int(2 + read[2] * 3)][0].set_ydata(current_drone_pos[1])
+                # self.axes[2].plot(current_drone_pos[0], current_drone_pos[1], '^{}'.format(clr), markersize=12,
+                #                   zorder=6)
         self.signalManager.images_ready.emit('')
         self.db.updating_drones = False
 
@@ -346,10 +387,10 @@ class GUI(QMainWindow):
         last_index = len(raw_data)
         raw_data = raw_data[self.db.sensors_c_index:, 1:6]
 
-        if self.db.sensors_c_index == 0:
-            new_data = [[row[:2], row[2]] for row in raw_data]
-            self.coordinator.initialize_data_gpr(new_data)
-        #
+        # if self.db.sensors_c_index == 0:
+        #     new_data = [[row[:2], row[2]] for row in raw_data]
+        #     self.coordinator.initialize_data_gpr(new_data)
+
         #     if self.ui.actionPredicci_n_GP.isChecked():
         #         self.axes[0].plot(new_data[0][0][0], new_data[0][0][1], 'Dy', markersize=12,
         #                           label="Initial Information", zorder=6)
@@ -367,40 +408,46 @@ class GUI(QMainWindow):
         #         self.axes[2].plot(new_data[1][0][0], new_data[1][0][1], 'Dy', markersize=12, zorder=6)
         #         self.axes[2].plot(new_data[2][0][0], new_data[2][0][1], '^y', markersize=12, zorder=6)
         # else:
+        for data in raw_data:
+            # drone_color = 'g' if int(data[4]) == 0 else 'k' if int(data[4]) == 1 else 'm' if int(data[4]) == 2 else 'y'
+            if self.db.sensors_c_index > 0:
+                poses = self.db.drones_df.to_numpy()
+                _, reg = calc_voronoi(data[:2], [np.array(read[:2]) for read in poses if read[2] != data[4]],
+                                      self.data[0])
+            else:
+                _, reg = calc_voronoi(data[:2], [np.array(read[:2]) for read in raw_data if read[4] != data[4]],
+                                      self.data[0])
+            reg = np.vstack([reg, reg[0, :]])
 
-        # for data in raw_data:
-        #     drone_color = 'g' if int(data[4]) == 0 else 'k' if int(data[4]) == 1 else 'm' if int(data[4]) == 2 else 'y'
-        #     for ob in self.voronoi_ax:
-        #         if ob[0] == drone_color:
-        #             ob[1][0].remove()
+            if self.colors[int(data[4])] in self.voronoi_ax.keys():
+                for line in self.voronoi_ax[self.colors[int(data[4])]]:
+                    line.pop(0).remove()
+            self.voronoi_ax[self.colors[int(data[4])]] = []
 
-            # if self.db.sensors_c_index > 0:
-            #     poses = self.db.drones_df.to_numpy()
-            #     _, reg = calc_voronoi(data[:2], [np.array(read[:2]) for read in poses if read[2] != data[4]],
-            #                           self.data[0])
-            # else:
-            #     _, reg = calc_voronoi(data[:2], [np.array(read[:2]) for read in raw_data if read[4] != data[4]],
-            #                           self.data[0])
-            #
-            # reg = np.vstack([reg, reg[0, :]])
-            # # print(reg)
-            # if self.ui.actionPredicci_n_GP.isChecked():
-            #     self.axes[0].plot(data[0], data[1], '^{}'.format(drone_color), markersize=12,
-            #                       zorder=6, alpha=0.7)
-            #     self.voronoi_ax.append(
-            #         [drone_color, self.axes[0].plot(reg[:, 0], reg[:, 1], '-{}'.format(drone_color), zorder=9)])
-            # if self.ui.actionIncertidumbre_GP.isChecked():
-            #     self.axes[1].plot(data[0], data[1], '^{}'.format(drone_color), markersize=12,
-            #                       zorder=6, alpha=0.7)
-            #     self.voronoi_ax.append(
-            #         [drone_color, self.axes[1].plot(reg[:, 0], reg[:, 1], '-{}'.format(drone_color), zorder=9)])
+            if self.ui.actionMapa.isChecked():
+                # self.axes[0].plot(data[0], data[1], '^{}'.format(drone_color), markersize=12,
+                #                   zorder=6, alpha=0.7, label="Drone: {}".format(int(data[4])))
+                self.axes[0].plot(data[0], data[1], '^', color=self.colors[int(data[4])], markersize=12,
+                                  zorder=6, alpha=0.7, label="Drone: {}".format(int(data[4])))
+                self.voronoi_ax[self.colors[int(data[4])]].append(
+                    self.axes[0].plot(reg[:, 0], reg[:, 1], '-', color=self.colors[int(data[4])], zorder=9, lw=3))
+                # self.axes[0].legend(loc="lower left", prop={"size": 20})
+            if self.ui.actionPredicci_n_GP.isChecked():
+                self.axes[1].plot(data[0], data[1], '^', color=self.colors[int(data[4])], markersize=12,
+                                  zorder=6, alpha=0.7)
+                self.voronoi_ax[self.colors[int(data[4])]].append(
+                    self.axes[1].plot(reg[:, 0], reg[:, 1], '-', color=self.colors[int(data[4])], zorder=9))
+            if self.ui.actionIncertidumbre_GP.isChecked():
+                self.axes[2].plot(data[0], data[1], '^', color=self.colors[int(data[4])], markersize=12,
+                                  zorder=6, alpha=0.7)
+                self.voronoi_ax[self.colors[int(data[4])]].append(
+                    self.axes[2].plot(reg[:, 0], reg[:, 1], '-', color=self.colors[int(data[4])], zorder=9))
             # if self.ui.actionFuncion_de_Adquisici_n.isChecked():
-            #     self.axes[2].plot(data[0], data[1], '^{}'.format(drone_color), markersize=12,
+            #     self.axes[3].plot(data[0], data[1], '^', color=self.colors[int(data[4])], markersize=12,
             #                       zorder=6, alpha=0.7)
-            #     self.voronoi_ax.append(
-            #         [drone_color, self.axes[2].plot(reg[:, 0], reg[:, 1], '-{}'.format(drone_color), zorder=9)])
-            # self.coordinator.add_data([data[:2], data[2]])
-
+            #     self.voronoi_ax[self.colors[int(data[4])]].append(
+            #         self.axes[3].plot(reg[:, 0], reg[:, 1], '-', color=self.colors[int(data[4])], zorder=9))
+            self.coordinator.add_data([data[:2], data[2]])
         self.coordinator.fit_data()
         self.db.sensors_c_index = last_index
 
@@ -417,6 +464,7 @@ class GUI(QMainWindow):
                                                              return_sensor=True)
             if self.ui.actionPredicci_n_GP.isChecked():
                 observe_maps["{} gp".format(sensor_name)] = mu
+                # observe_maps["{} gp".format(sensor_name)] = (mu - self.real_map) ** 2
             if self.ui.actionIncertidumbre_GP.isChecked():
                 observe_maps["{} gp un".format(sensor_name)] = std
 
@@ -436,6 +484,8 @@ class GUI(QMainWindow):
                 for key in images.keys():
                     if self.titles[i] == key:
                         data = images[key].reshape((self.shape[1], self.shape[0])).T
+                        if "t gp" == key:
+                            data = np.power(data - self.real_map, 2)
                         for nnan in self.nans:
                             data[nnan[0], nnan[1]] = -1
                         # todo: plt.contour(self.environment.render_maps()["t"], colors='k', alpha=0.3, linewidths=1.0)
@@ -443,7 +493,8 @@ class GUI(QMainWindow):
                         self.data[i] = np.ma.array(data, mask=(data == -1))
 
                         self.image[i].set_data(self.data[i])
-                        self.image[i].set_clim(vmin=np.min(self.data[i]), vmax=np.max(self.data[i]))
+                        if key == "t acq":
+                            self.image[i].set_clim(vmin=np.min(self.data[i]), vmax=np.max(self.data[i]))
                         # if "acq" in key:
                         #     ipos, kpos = np.where(self.data[i] == np.nanmax(self.data[i]))
                         #     print(ipos, kpos)
@@ -452,6 +503,7 @@ class GUI(QMainWindow):
                         break
 
         self.signalManager.images_ready.emit('')
+        self.signal_from_gp_std = True
 
     def restart_figure(self):
         self.coordinator.data = [np.array([[], []]), np.array([])]
@@ -513,6 +565,10 @@ class GUI(QMainWindow):
             if self.acq_canvas.isVisible():
                 self.acq_canvas.setVisible(False)
                 self.acq_toolbar.setVisible(False)
+        if self.signal_from_gp_std:
+            self.gp_fig.savefig("E:/ETSI/Papers/congreso 2021/multridrones/err_{}.png".format(time()))
+            self.std_fig.savefig("E:/ETSI/Papers/congreso 2021/multridrones/std_{}.png".format(time()))
+            self.signal_from_gp_std = False
 
     #
     # def export_maps(self, extension='png'):
