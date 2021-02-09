@@ -40,10 +40,19 @@ def schwefel_arg0(sol):
     return np.nan if w_obstacles and sol[2] == 1 else benchmarks.h1(sol[:2])[0]
 
 
-def create_map(grid, resolution, obstacles_on=False, randomize_shekel=False, no_maxima=10, load_from_db=True, file=0):
+def create_map(grid, resolution, obstacles_on=False, randomize_shekel=False, sensor="", no_maxima=10, load_from_db=True,
+               file=0):
     if load_from_db:
+        if sensor == "s1":
+            file = 3
+        elif sensor == "s2":
+            file = 1
+        elif sensor == "s3":
+            file = 2
+        elif sensor == "s4":
+            file = 2
         with open('E:/ETSI/Proyecto/data/Databases/numpy_files/random_{}.npy'.format(file), 'rb') as g:
-        # with open('E:/ETSI/Proyecto/data/Databases/numpy_files/ground_truth_norm.npy', 'rb') as g:
+            # with open('E:/ETSI/Proyecto/data/Databases/numpy_files/ground_truth_norm.npy', 'rb') as g:
             # _z = np.load(g)
             # print(np.nanmax(_z))
             # print(np.nanmin(_z))

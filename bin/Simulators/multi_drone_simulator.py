@@ -154,11 +154,11 @@ class Simulator(object):
         i = 0
 
         while i < imax:
-            if not self.sender.should_update():
-                plt.pause(0.5)
-                continue
+            # if not self.sender.should_update():
+            #     plt.pause(0.5)
+            #     continue
 
-            t0 = time.time()
+            # t0 = time.time()
             for agent in self.agents:
                 if agent.reached_pose():
                     print(agent.drone_id, "reached")
@@ -185,6 +185,15 @@ class Simulator(object):
                 #     i -= 1
                 self.sender.send_new_drone_msg(agent.pose, agent.drone_id)
             mse = self.coordinator.get_mse(self.environment.maps['t'].T.flatten())
+            score = self.coordinator.get_score(self.environment.maps['t'].T.flatten())
+
+            # Theta0 = np.logspace(np.log(self.coordinator.gp.kernel_.theta / 10),
+            #                      np.log(self.coordinator.gp.kernel_.theta + 10), 500)
+            # LML = np.array(
+            #     [-self.coordinator.gp.log_marginal_likelihood(np.log([Theta0[i]])) for i in range(Theta0.shape[0])])
+            # plt.plot(Theta0, LML)
+            # plt.plot(Theta0[np.where(LML == np.min(LML))], np.min(LML), '*')
+
             # plt.title("MSE is {}".format(mse))
             # plt.draw()
             # plt.pause(2)
@@ -198,7 +207,7 @@ class Simulator(object):
 
             if self.saving:
                 self.f.write(
-                    "{},{},{},{},{}\n".format(i, mse, len(self.coordinator.data[1]), time.time() - t0,
+                    "{},{},{},{},{}\n".format(i, mse, len(self.coordinator.data[1]), score,
                                               sum(c.distance_travelled for c in self.agents) / len(self.agents)))  #
         # print("done")
         plt.show(block=True)

@@ -1,9 +1,9 @@
+import matplotlib.pyplot as plt
 import numpy as np
 
 from bin.Agents.pathplanning_agent import SimpleAgent
 from bin.Coordinators.informed_coordinator import Coordinator
 from bin.Environment.simple_env import Env
-import matplotlib.pyplot as plt
 
 # EXPERIMENTS = 50
 # SIZE = 15
@@ -13,7 +13,7 @@ import matplotlib.pyplot as plt
 
 
 EXPERIMENTS = 1
-SIZE = 20
+SIZE = 9
 seeds = np.linspace(76842153, 1123581321, 100)
 
 sensors = ["t"]
@@ -21,7 +21,6 @@ sensors = ["t"]
 drones = [SimpleAgent(sensors)]
 env = Env(map_path2yaml="E:/ETSI/Proyecto/data/Map/Ypacarai/map.yaml")
 env.add_new_map(sensors)
-
 
 plt.style.use("seaborn")
 
@@ -44,13 +43,36 @@ with open('E:/ETSI/Proyecto/data/Databases/numpy_files/nans.npy', 'rb') as g:
 #             nans.append([k, j])
 # with open('E:/ETSI/Proyecto/data/Databases/numpy_files/nans.npy', 'wb') as g:
 #     np.save(g, nans)
+
+candidates = np.array([
+    [671, 906],
+    [625, 899],
+    [577, 900],
+    [538, 923],
+    [519, 950],
+    [504, 932],
+    [493, 892],
+    [487, 850],
+    [476, 809],
+    [501, 521],
+    [517, 481],
+    [551, 451],
+    [591, 429],
+    [630, 397],
+    [669, 365]
+
+])
+
 for k in range(EXPERIMENTS):
     print('current experiment is: ', k)
     np.random.seed(np.round(seeds[k]).astype(int))
     d = []
     x = []
     while len(d) < SIZE:
-        candidate = np.round(np.random.uniform([0, 0], [999, 1499]).astype(int))
+
+        # candidate = np.round(np.random.uniform([0, 0], [999, 1499]).astype(int))
+        candidate = candidates[0]
+        candidates = candidates[1:]
         if env.grid[candidate[1], candidate[0]] == 0:
             x.append(candidate)
             d.append([candidate, env.maps["t"][candidate[1], candidate[0]]])
@@ -74,7 +96,6 @@ for k in range(EXPERIMENTS):
         # for nnan in nans:
         #     sd[coord.k_name][nnan[0], nnan[1]] = -1
         # sd[coord.k_name] = np.ma.array(sd[coord.k_name], mask=(sd[coord.k_name] == -1))
-
 
 # plt.style.use("seaborn")
 # legends = []

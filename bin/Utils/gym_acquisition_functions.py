@@ -5,7 +5,7 @@ from scipy.spatial.distance import cdist
 from scipy.stats import norm
 
 
-def maxvalue_entropy_search(x, model, y_opt=0.0, c_point=np.zeros((1, 2)), xi=0.01, masked=True):
+def maxvalue_entropy_search(x, mu, std, y_opt=0.0, c_point=np.zeros((1, 2)), xi=0.01, masked=True):
     with warnings.catch_warnings():
         warnings.simplefilter("ignore")
         mu, sigma = model.predict(x, return_std=True)
@@ -21,15 +21,13 @@ def maxvalue_entropy_search(x, model, y_opt=0.0, c_point=np.zeros((1, 2)), xi=0.
     cdf = norm.cdf(normalized_max)
     cdf[np.where(cdf == 0.0)] = 1e-30
     values[mask] = (normalized_max * pdf) / (2 * cdf) - np.log(cdf)
-    # Predictive Entropy Search for Efficient Global
-    # todo: a = (0.5/M)*np.sum(np.log(v_n(x)+noise)-np.log(v_n(x|x*)+noise))
 
     if masked:
         values[mask] *= np.exp(-cdist([c_point], x) / 250).reshape(mu[mask].shape)
     return values
 
 
-def gaussian_sei(x, model, y_opt=0.0, xi=0.01, c_point=np.zeros((1, 2)), masked=True):
+def gaussian_sei(x, mu, std, y_opt=0.0, xi=0.01, c_point=np.zeros((1, 2)), masked=True):
     with warnings.catch_warnings():
         warnings.simplefilter("ignore")
         mu, sigma = model.predict(x, return_std=True)
@@ -48,7 +46,7 @@ def gaussian_sei(x, model, y_opt=0.0, xi=0.01, c_point=np.zeros((1, 2)), masked=
 
     values = np.zeros_like(mu)
     mask = sigma > 0
-    imp = y_opt - mu[mask] - xi  # todo ?????
+    imp = y_opt - mu[mask] - xi
     # imp += np.interp(np.exp(-cdist([c_point], x)).reshape(mu.shape), [-1, 0], [np.nanmin(imp), np.nanmax(imp)])
     # print(np.nanmax(imp))
     # print(np.nanmin(imp))
@@ -72,7 +70,7 @@ def gaussian_sei(x, model, y_opt=0.0, xi=0.01, c_point=np.zeros((1, 2)), masked=
     return np.divide(values, np.sqrt(v))
 
 
-def gaussian_pi(x, model, y_opt=0.0, xi=0.01, c_point=np.zeros((1, 2)), masked=True):
+def gaussian_pi(x, mu, std, y_opt=0.0, xi=0.01, c_point=np.zeros((1, 2)), masked=True):
     with warnings.catch_warnings():
         warnings.simplefilter("ignore")
         mu, std = model.predict(x, return_std=True)
@@ -94,7 +92,7 @@ def gaussian_pi(x, model, y_opt=0.0, xi=0.01, c_point=np.zeros((1, 2)), masked=T
     return values
 
 
-def max_std(x, model, c_point=np.zeros((1, 2)), masked=True):
+def max_std(x, mu, std, c_point=np.zeros((1, 2)), masked=True):
     with warnings.catch_warnings():
         warnings.simplefilter("ignore")
         mu, std = model.predict(x, return_std=True)
@@ -104,31 +102,15 @@ def max_std(x, model, c_point=np.zeros((1, 2)), masked=True):
     return std
 
 
-def gaussian_ei(x, model, y_opt=0.0, xi=0.01, c_point=np.zeros((1, 2)), masked=True):
-    if not isinstance(model, tuple):
-        with warnings.catch_warnings():
-            warnings.simplefilter("ignore")
-            mu, std = model.predict(x, return_std=True)
-        # check dimensionality of mu, std so we can divide them below
-        if (mu.ndim != 1) or (std.ndim != 1):
-            raise ValueError("mu and std are {}-dimensional and {}-dimensional, "
-                             "however both must be 1-dimensional. Did you train "
-                             "your model with an (N, 1) vector instead of an "
-                             "(N,) vector?"
-                             .format(mu.ndim, std.ndim))
-    else:
-        mu = model[0]
-        std = model[1]
-    # return std
-
+def gaussian_ei(x, mu, std, y_opt=0.0, xi=0.01, c_point=np.zeros((1, 2)), masked=True):
     values = np.zeros_like(mu)
-    mask = std > 0
+    mask = np.array(std) > 0
     improve = y_opt - xi - mu[mask]
     scaled = improve / std[mask]
     cdf = norm.cdf(scaled)
     pdf = norm.pdf(scaled)
     exploit = improve * cdf
-    explore = std[mask] * pdf
+    explore = mu[mask] * pdf
     values[mask] = exploit + explore
     if masked:
         values[mask] *= np.exp(-cdist([c_point], x) / 250).reshape(mu[mask].shape)

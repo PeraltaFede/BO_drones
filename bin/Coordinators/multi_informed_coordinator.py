@@ -5,6 +5,7 @@ import numpy as np
 from sklearn.metrics import mean_squared_error as mse
 # from skopt.acquisition import gaussian_ei
 from skopt.learning.gaussian_process import gpr, kernels
+from sklearn.metrics._regression import r2_score
 
 try:
     from Utils.acquisition_functions import gaussian_sei, maxvalue_entropy_search, gaussian_pi, gaussian_ei, max_std
@@ -33,6 +34,10 @@ class Coordinator(object):
             self.gp = gpr.GaussianProcessRegressor(kernel=kernels.Matern(100, nu=3.5), alpha=1e-7)
         elif k_name == "RQ":
             self.gp = gpr.GaussianProcessRegressor(kernel=kernels.RationalQuadratic(100, 0.1), alpha=1e-7)
+        elif k_name == "RQ2":
+            self.gp = gpr.GaussianProcessRegressor(kernel=kernels.RationalQuadratic(50, 0.1), alpha=1e-7)
+        elif k_name == "RBF2":
+            self.gp = gpr.GaussianProcessRegressor(kernel=kernels.RBF(50), alpha=1e-7, noise=0.2)
 
         self.data = [np.array([[], []]), np.array([])]
 
@@ -243,6 +248,10 @@ class Coordinator(object):
     def get_mse(self, y_true):
         nan = np.isnan(y_true)
         return mse(y_true[~nan], self.surrogate()[~nan])
+
+    def get_score(self, y_true):
+        nan = np.isnan(y_true)
+        return r2_score(y_true[~nan], self.surrogate()[~nan])
 
     def get_acq(self, pose=np.zeros((1, 2)), acq_func="gaussian_sei", acq_mod="normal"):
         if acq_func == "gaussian_sei":

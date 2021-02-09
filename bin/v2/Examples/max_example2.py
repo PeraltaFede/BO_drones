@@ -20,8 +20,8 @@ for file in [10, 11, 12, 13, 14]:  #35 ,53, 54, 55, 59, 60
         i += 1
         np.random.seed(np.round(seeds[3]).astype(int))
         drones = [SimpleAgent(["t"], _id=0), SimpleAgent(["t"], _id=1)]
-        sim = Simulator("E:/ETSI/Proyecto/data/Map/Ypacarai/map.yaml", drones, "t", test_name="testing_test2",
-                        saving=False, file=12,
+        sim = Simulator("E:/ETSI/Proyecto/data/Map/Ypacarai/map.yaml", drones, "t", test_name="SCORE",
+                        saving=True, file=12,
                         acq="gaussian_ei", acq_mod="truncated")
         sim.run_simulation()
         if i >= 50:

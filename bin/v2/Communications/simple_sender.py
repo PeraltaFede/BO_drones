@@ -36,14 +36,18 @@ class Sender(object):
         if msg.topic == "step":
             self.step = message
 
-    def send_new_sensor_msg(self, raw_x_y_val, _id=0):
-        msg = "t," + raw_x_y_val + ",1," + str(_id) + ", 3"
+    def send_new_sensor_msg(self, raw_x_y_val, _id=0, sensor="t"):
+        msg = sensor + "," + raw_x_y_val + ",1," + str(_id) + ", 3"
         payload = dict(zip(self.ids, msg.split(",")))
         for key in payload:
             try:
                 payload[key] = float(payload[key])
             except Exception as e:
                 pass
+        # print(str(payload))
+        while not self.client.is_connected():
+            # threading.Timer
+            continue
         self.client.publish("sensors", str(payload))
         # print("Message {} sent".format(payload))
 
@@ -55,6 +59,11 @@ class Sender(object):
                 payload[key] = float(payload[key])
             except Exception as e:
                 pass
+        # print(str(payload))
+
+        while not self.client.is_connected():
+            # threading.Timer
+            continue
         self.client.publish("drones", str(payload))
 
     def send_new_goal_msg(self, raw_x_y, idx=-0):
@@ -65,8 +74,15 @@ class Sender(object):
                 payload[key] = float(payload[key])
             except Exception as e:
                 pass
+        # print(str(payload))
+        while not self.client.is_connected():
+            # threading.Timer
+            continue
         self.client.publish("goals", str(payload))
 
     def send_new_acq_msg(self, acq_f):
-        print(acq_f)
+        # print(acq_f)
+        while not self.client.is_connected():
+            # threading.Timer
+            continue
         self.client.publish("params", acq_f)

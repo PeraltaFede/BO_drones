@@ -59,10 +59,15 @@ def find_cvt_pos4region(all_acq, vect_pos, reg):
     return np.round(x_mass / mass).astype(np.int)
 
 
-def find_vect_pos4region(sorted_vect_pos, reg):
+def find_vect_pos4region(sorted_vect_pos, reg, return_idx=False):
     reg_poly = Polygon(reg)
-    for pos in sorted_vect_pos:
-        if reg_poly.contains(Point(pos)):
-            return pos
+    if return_idx:
+        for i in range(len(sorted_vect_pos)):
+            if reg_poly.contains(Point(sorted_vect_pos[i])):
+                return sorted_vect_pos[i], i
+    else:
+        for pos in sorted_vect_pos:
+            if reg_poly.contains(Point(pos)):
+                return pos
     return None
     # print(slow_method_4_reg)

@@ -11,7 +11,7 @@ class Env(BaseEnv):
 
     def add_new_map(self, sensors, file=0):
         for sensor in sensors:
-            self.maps[sensor] = utils.create_map(self.grid, self.resolution, True, file=file)
+            self.maps[sensor] = utils.create_map(self.grid, self.resolution, True, sensor=sensor, file=file)
 
     def render_maps(self, sensors=None):
         data = {}

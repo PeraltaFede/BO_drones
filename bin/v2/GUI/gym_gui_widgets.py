@@ -8,15 +8,16 @@ import matplotlib.cm as cm
 import matplotlib.image as img
 import numpy as np
 import yaml
-from Coordinators.multi_informed_coordinator import Coordinator
-from GUI.ui_mainwindow import Ui_MainWindow
 from PySide2.QtCore import QTimer, Slot, Signal, QObject
 from PySide2.QtWidgets import QApplication, QMainWindow, QHBoxLayout, QWidget, QVBoxLayout
-from Utils.voronoi_regions import calc_voronoi
 from matplotlib.backends.backend_qt5agg import FigureCanvasQTAgg as FigureCanvas
 from matplotlib.backends.backend_qt5agg import NavigationToolbar2QT as NavigationToolbar
+from matplotlib.colors import ListedColormap
 from matplotlib.figure import Figure
 
+from bin.Coordinators.gym_coordinator import Coordinator
+from bin.GUI.ui_mainwindow import Ui_MainWindow
+from bin.Utils.voronoi_regions import calc_voronoi
 from bin.v2.Database.pandas_database import Database
 
 
@@ -57,6 +58,8 @@ class GUI(QMainWindow):
 
         self.ui.actionMapa.setChecked(False)
         self.ui.actionFuncion_de_Adquisici_n.setChecked(True)
+        self.ui.actionAutomatic.setChecked(False)
+        self.ui.action3D.setEnabled(True)
 
         self.ui.actionMapa.triggered.connect(self.update_images)
         self.ui.actionPredicci_n_GP.triggered.connect(self.update_images)
@@ -65,7 +68,7 @@ class GUI(QMainWindow):
         self.ui.action3D.triggered.connect(self.send_request)
         self.ui.actionAutomatic.triggered.connect(self.change_automatic)
 
-        self.auto_BO = True
+        self.auto_BO = self.ui.actionAutomatic.isChecked()
 
         self.db = database
         initial_map = obtain_map_data(
@@ -74,7 +77,7 @@ class GUI(QMainWindow):
         for data in self.db.properties_df.values:
             if data[1] not in sensors.keys():
                 sensors[data[1]] = initial_map
-
+        self.selected_sensor = list(sensors.keys())[0]
         self.acq_func = self.db.properties_df["acq"][0]
 
         wid = QWidget()
@@ -141,102 +144,94 @@ class GUI(QMainWindow):
         self.colors = ["#3B4D77", "#C09235", "#B72F56", "#91B333", "#FFD100"]
 
         i = 1
-        for key in sensors:
-            import matplotlib.pyplot as plt
-            from matplotlib.colors import ListedColormap
-            cmap = plt.cm.coolwarm
-            my_cmap = cmap(np.arange(cmap.N))
-            my_cmap[:, -1] = np.linspace(1, 0, cmap.N)
-            my_cmap = ListedColormap(my_cmap)
-            ax = self.map_fig.add_subplot(111)
-            # plt.subplot(row, col, i)
-            self.image.append(ax.imshow(sensors[key], origin='lower', cmap=my_cmap, zorder=5))
-            ax.grid(True, zorder=0, color="white")
-            ax.set_facecolor('#eaeaf2')
-            ax.tick_params(axis="both", labelsize=30)
-            ax.set_ylabel('y [m]', fontsize=30)
-            ax.set_xlabel('x [m]', fontsize=30)
-            ax.set_xticks(xticks)  # values
-            ax.set_xticklabels(xnticks)  # labels
-            ax.set_yticks(yticks)  # values
-            ax.set_yticklabels(ynticks)  # labels
-            self.titles.append("{} real".format(key))
-            # ax.set_title("Map for sensor {}".format(key))
-            self.data.append(sensors[key])
-            self.axes.append(ax)
-
-            # return base.from_list(cmap_name, color_list, N)
-
-            ax = self.gp_fig.add_subplot(111)
-            # cm.get_cmap(base_cmap, N)
-            current_cmap = copy(cm.get_cmap("plasma"))
-            current_cmap.set_bad(color="#00000000")
-            self.image.append(
-                ax.imshow(sensors[key], origin='lower', cmap=current_cmap, zorder=5))
-            ax.grid(True, zorder=0, color="white")
-            ax.set_facecolor('#eaeaf2')
-            self.titles.append("{} gp".format(key))
-            # ax.set_title("Sensor {} Gaussian Process Regression".format(key))
-            ax.tick_params(axis="both", labelsize=30)
-            # ax.set_ylabel('y [m]', fontsize=30)
-            ax.set_xlabel('x [m]', fontsize=30)
-            ax.set_xticks(xticks)  # values
-            ax.set_xticklabels(xnticks)  # labels
-            ax.set_yticks(yticks)  # values
-            ax.set_yticklabels(ynticks)  # labels
-            self.data.append(sensors[key])
-            self.image[-1].set_clim(vmin=-2.586, vmax=1.7898)
-            cb = self.gp_fig.colorbar(self.image[i], ax=ax)
-            cb.ax.tick_params(labelsize=20)
-            cb.ax.set_xlabel(r'$SE(\mu (x))$', fontsize=30)
-            self.axes.append(ax)
-
-            ax = self.std_fig.add_subplot(111)
-            current_cmap = copy(cm.get_cmap("summer"))
-            current_cmap.set_bad(color="#00000000")
-            self.image.append(ax.imshow(sensors[key], origin='lower', cmap=current_cmap, zorder=5, vmin=0.0, vmax=1.0))
-            ax.grid(True, zorder=0, color="white")
-            ax.set_facecolor('#eaeaf2')
-            self.titles.append("{} gp un".format(key))
-            # ax.set_title("Sensor {} GP Uncertainty".format(key))
-            ax.tick_params(axis="both", labelsize=30)
-            # ax.set_ylabel('y [m]', fontsize=30)
-            ax.set_xlabel('x [m]', fontsize=30)
-            ax.set_xticks(xticks)  # values
-            ax.set_xticklabels(xnticks)  # labels
-            ax.set_yticks(yticks)  # values
-            ax.set_yticklabels(ynticks)  # labels
-            self.data.append(sensors[key])
-            # self.image[-1].set_clim(vmin=0.0, vmax=1.0)
-            cb = self.gp_fig.colorbar(self.image[i + 1], ax=ax)
-            cb.ax.tick_params(labelsize=20)
-            cb.ax.set_xlabel(r'$\sigma (x)$', fontsize=30)
-            self.axes.append(ax)
-
-            ax = self.acq_fig.add_subplot(111)
-            current_cmap = copy(cm.get_cmap("YlGn_r"))
-            current_cmap.set_bad(color="#00000000")
-            self.image.append(ax.imshow(sensors[key], origin='lower', cmap=current_cmap, zorder=5))
-            ax.grid(True, zorder=0, color="white")
-            ax.set_facecolor('#eaeaf2')
-            self.titles.append("{} acq".format(key))
-            # ax.set_title("Sensor {} Acquisition Function".format(key))
-            ax.tick_params(axis="both", labelsize=30)
-            # ax.set_ylabel('y', fontsize=30)
-            ax.set_xlabel('x [m]', fontsize=30)
-            ax.set_xticks(xticks)  # values
-            ax.set_xticklabels(xnticks)  # labels
-            ax.set_yticks(yticks)  # values
-            ax.set_yticklabels(ynticks)  # labels
-
-            self.data.append(sensors[key])
-            # cb = self.gp_fig.colorbar(self.image[i + 2], ax=ax, orientation='horizontal')
-            # cb.ax.set_xlabel(r'$\mathrm{\mathsf{SEI}} (x)$')
-            self.axes.append(ax)
-
-            i += 4
-            if self.shape is None:
-                self.shape = np.shape(sensors[key])
+        cmap = cm.get_cmap("coolwarm")
+        my_cmap = cmap(np.arange(cmap.N))
+        my_cmap[:, -1] = np.linspace(1, 0, cmap.N)
+        my_cmap = ListedColormap(my_cmap)
+        ax = self.map_fig.add_subplot(111)
+        # plt.subplot(row, col, i)
+        self.image.append(ax.imshow(sensors[self.selected_sensor], origin='lower', cmap=my_cmap, zorder=5))
+        ax.grid(True, zorder=0, color="white")
+        ax.set_facecolor('#eaeaf2')
+        ax.tick_params(axis="both", labelsize=30)
+        ax.set_ylabel('y [m]', fontsize=30)
+        ax.set_xlabel('x [m]', fontsize=30)
+        ax.set_xticks(xticks)  # values
+        ax.set_xticklabels(xnticks)  # labels
+        ax.set_yticks(yticks)  # values
+        ax.set_yticklabels(ynticks)  # labels
+        self.titles.append("{} real".format(self.selected_sensor))
+        # ax.set_title("Map for sensor {}".format(key))
+        self.data.append(sensors[self.selected_sensor])
+        self.axes.append(ax)
+        # return base.from_list(cmap_name, color_list, N)
+        ax = self.gp_fig.add_subplot(111)
+        # cm.get_cmap(base_cmap, N)
+        current_cmap = copy(cm.get_cmap("plasma"))
+        current_cmap.set_bad(color="#00000000")
+        self.image.append(
+            ax.imshow(sensors[self.selected_sensor], origin='lower', cmap=current_cmap, zorder=5))
+        ax.grid(True, zorder=0, color="white")
+        ax.set_facecolor('#eaeaf2')
+        self.titles.append("{} gp".format(self.selected_sensor))
+        # ax.set_title("Sensor {} Gaussian Process Regression".format(key))
+        ax.tick_params(axis="both", labelsize=30)
+        # ax.set_ylabel('y [m]', fontsize=30)
+        ax.set_xlabel('x [m]', fontsize=30)
+        ax.set_xticks(xticks)  # values
+        ax.set_xticklabels(xnticks)  # labels
+        ax.set_yticks(yticks)  # values
+        ax.set_yticklabels(ynticks)  # labels
+        self.data.append(sensors[self.selected_sensor])
+        self.image[-1].set_clim(vmin=-2.586, vmax=1.7898)
+        cb = self.gp_fig.colorbar(self.image[i], ax=ax)
+        cb.ax.tick_params(labelsize=20)
+        cb.ax.set_xlabel(r'$SE(\mu (x))$', fontsize=30)
+        self.axes.append(ax)
+        ax = self.std_fig.add_subplot(111)
+        current_cmap = copy(cm.get_cmap("summer"))
+        current_cmap.set_bad(color="#00000000")
+        self.image.append(
+            ax.imshow(sensors[self.selected_sensor], origin='lower', cmap=current_cmap, zorder=5, vmin=0.0, vmax=1.0))
+        ax.grid(True, zorder=0, color="white")
+        ax.set_facecolor('#eaeaf2')
+        self.titles.append("{} gp un".format(self.selected_sensor))
+        # ax.set_title("Sensor {} GP Uncertainty".format(key))
+        ax.tick_params(axis="both", labelsize=30)
+        # ax.set_ylabel('y [m]', fontsize=30)
+        ax.set_xlabel('x [m]', fontsize=30)
+        ax.set_xticks(xticks)  # values
+        ax.set_xticklabels(xnticks)  # labels
+        ax.set_yticks(yticks)  # values
+        ax.set_yticklabels(ynticks)  # labels
+        self.data.append(sensors[self.selected_sensor])
+        # self.image[-1].set_clim(vmin=0.0, vmax=1.0)
+        cb = self.gp_fig.colorbar(self.image[i + 1], ax=ax)
+        cb.ax.tick_params(labelsize=20)
+        cb.ax.set_xlabel(r'$\sigma (x)$', fontsize=30)
+        self.axes.append(ax)
+        ax = self.acq_fig.add_subplot(111)
+        current_cmap = copy(cm.get_cmap("YlGn_r"))
+        current_cmap.set_bad(color="#00000000")
+        self.image.append(ax.imshow(sensors[self.selected_sensor], origin='lower', cmap=current_cmap, zorder=5))
+        ax.grid(True, zorder=0, color="white")
+        ax.set_facecolor('#eaeaf2')
+        self.titles.append("{} acq".format(self.selected_sensor))
+        # ax.set_title("Sensor {} Acquisition Function".format(key))
+        ax.tick_params(axis="both", labelsize=30)
+        # ax.set_ylabel('y', fontsize=30)
+        ax.set_xlabel('x [m]', fontsize=30)
+        ax.set_xticks(xticks)  # values
+        ax.set_xticklabels(xnticks)  # labels
+        ax.set_yticks(yticks)  # values
+        ax.set_yticklabels(ynticks)  # labels
+        self.data.append(sensors[self.selected_sensor])
+        # cb = self.gp_fig.colorbar(self.image[i + 2], ax=ax, orientation='horizontal')
+        # cb.ax.set_xlabel(r'$\mathrm{\mathsf{SEI}} (x)$')
+        self.axes.append(ax)
+        i += 4
+        if self.shape is None:
+            self.shape = np.shape(sensors[self.selected_sensor])
 
         self.row = None
         self.col = None
@@ -244,9 +239,8 @@ class GUI(QMainWindow):
         self.vmax = 0
         self.sm = None
 
-        self.coordinator = Coordinator(self.data[0], 't')
-        self.real_map = np.load("E:/ETSI/Proyecto/data/Databases/numpy_files/random_12.npy")
-
+        self.coordinator = Coordinator(self.data[0], {"s1"})
+        # self.real_map = np.load("E:/ETSI/Proyecto/data/Databases/numpy_files/random_12.npy")
         self.update_thread = QTimer()
         self.update_thread.setInterval(250)
         self.update_thread.timeout.connect(self.update_request)
@@ -446,30 +440,33 @@ class GUI(QMainWindow):
             #                       zorder=6, alpha=0.7)
             #     self.voronoi_ax[self.colors[int(data[4])]].append(
             #         self.axes[3].plot(reg[:, 0], reg[:, 1], '-', color=self.colors[int(data[4])], zorder=9))
-            self.coordinator.add_data([data[:2], data[2]])
+            # print(data)
+            self.coordinator.add_data({"pos": data[:2], "s1": data[2]})
+            print(raw_data, data[:2], data[2])
         self.coordinator.fit_data()
         self.db.sensors_c_index = last_index
 
+        # print(raw_data)
         self.current_drone_pos = raw_data[-1][0:3]
 
         observe_maps = dict()
 
+        sensor_name = "s1"
         if self.ui.actionPredicci_n_GP.isChecked() or self.ui.actionIncertidumbre_GP.isChecked():
             if self.ui.actionIncertidumbre_GP.isChecked():
-                mu, std, sensor_name = self.coordinator.surrogate(return_std=True,
-                                                                  return_sensor=True)
+                result = self.coordinator.surrogate(return_std=True, keys=["s1"])
+                mu, std = result[0][0], result[0][1]
             else:
-                mu, sensor_name = self.coordinator.surrogate(return_std=False,
-                                                             return_sensor=True)
+                mu = self.coordinator.surrogate(return_std=False)
             if self.ui.actionPredicci_n_GP.isChecked():
                 observe_maps["{} gp".format(sensor_name)] = mu
                 # observe_maps["{} gp".format(sensor_name)] = (mu - self.real_map) ** 2
             if self.ui.actionIncertidumbre_GP.isChecked():
                 observe_maps["{} gp un".format(sensor_name)] = std
 
-        if self.ui.actionFuncion_de_Adquisici_n.isChecked():
-            acq, sensor_name = self.coordinator.get_acq(self.current_drone_pos, self.acq_func)
-            observe_maps["{} acq".format(sensor_name)] = acq
+        # if self.ui.actionFuncion_de_Adquisici_n.isChecked():
+        #     acq, sensor_name = self.coordinator.get_acq(self.current_drone_pos, self.acq_func)
+        #     observe_maps["{} acq".format(sensor_name)] = acq
 
         self.observe_maps(observe_maps)
         self.db.updating_sensors = False
@@ -583,8 +580,8 @@ class GUI(QMainWindow):
     #         new_image = self.sm.to_rgba(my_image, bytes=True)
     #         new_image[self.row, self.col, :] = [0, 0, 0, 0]
     #         new_image = np.flipud(new_image)
-    #         img.imsave("E:/ETSI/Proyecto/results/Map/{}_{}.{}".format(datetime.now().timestamp(), my_title, extension),
-    #                    new_image)
+    #         img.imsave("E:/ETSI/Proyecto/results/Map/{}_{}.{}".format(datetime.now().timestamp(),
+    #         my_title, extension),new_image)
     #         # plt.show(block=True)
 
     def send_request(self):
