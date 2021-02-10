@@ -1,19 +1,21 @@
 import time
+from sys import path
 
 import numpy as np
 
+path.extend([path[0][:path[0].rindex("bin") - 1]])
 from bin.Agents.gym_agent import SimpleAgent
 from bin.Simulators.gym_environment import GymEnvironment
 
 seeds = np.linspace(163343, 3647565, 100)
-for sensores in [["s1", "s2"], ["s1", "s2", "s3"], ["s1", "s2", "s3, s4"]]:
-    for fusion in ["max_sum", "simple_max"]:
+for sensores in [["s1", "s2"]]:  # , ["s1", "s2", "s3"], ["s1", "s2", "s3, s4"]]:
+    for fusion in ["max_sum"]:  # , "simple_max"]:
         i = 0
         for seed in seeds:
             i += 1
             np.random.seed(np.round(seed).astype(int))
             drones = [SimpleAgent(sensores, _id=0)]
-            sim = GymEnvironment("E:/ETSI/Proyecto/data/Map/Ypacarai/map.yaml", agents=drones, id_file=0,
+            sim = GymEnvironment(path[-1] + "/data/Map/Ypacarai/map.yaml", agents=drones, id_file=0,
                                  acq_mod="truncated", render2gui=False, saving=True,
                                  name_file="{}_1A{}S".format(fusion, len(sensores)),
                                  acq_fusion=fusion)
@@ -27,14 +29,14 @@ for sensores in [["s1", "s2"], ["s1", "s2", "s3"], ["s1", "s2", "s3, s4"]]:
                 # Selection of best next measurement position occurs here
                 next_poses = []
                 for agent in sim.agents:
-                    print('current pose is', agent.pose)
+                    # print('current pose is', agent.pose)
                     if agent.reached_pose():
                         # TODO: creo que debe ser [] instead
                         next_poses.append(sim.coordinator.generate_new_goal(pose=agent.pose,
                                                                             other_poses=[agt.pose for agt in sim.agents
                                                                                          if
                                                                                          agt is not agent]))
-                        print('current goal is', next_poses[-1])
+                        # print('current goal is', next_poses[-1])
                         if sim.render2gui:
                             sim.sender.send_new_goal_msg(agent.next_pose, agent.drone_id)
                     else:
@@ -43,5 +45,5 @@ for sensores in [["s1", "s2"], ["s1", "s2", "s3"], ["s1", "s2", "s3, s4"]]:
                 print(sim.step(next_poses))
                 # mus, stds = sim.render()
             sim.f.close()
-            if i >= 50:
+            if i >= 3:
                 break

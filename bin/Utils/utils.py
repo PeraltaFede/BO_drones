@@ -1,3 +1,5 @@
+from sys import path
+
 import numpy as np
 from deap import benchmarks
 from skopt.benchmarks import branin as brn
@@ -51,7 +53,7 @@ def create_map(grid, resolution, obstacles_on=False, randomize_shekel=False, sen
             file = 2
         elif sensor == "s4":
             file = 2
-        with open('E:/ETSI/Proyecto/data/Databases/numpy_files/random_{}.npy'.format(file), 'rb') as g:
+        with open(path[-1] + '/data/Databases/numpy_files/random_{}.npy'.format(file), 'rb') as g:
             # with open('E:/ETSI/Proyecto/data/Databases/numpy_files/ground_truth_norm.npy', 'rb') as g:
             # _z = np.load(g)
             # print(np.nanmax(_z))

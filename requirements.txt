@@ -1,1 +1,0 @@
-numpy PyYAML pandas sklearn scikit-learn Shapely scipy deap cmocean

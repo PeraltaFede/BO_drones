@@ -1,11 +1,16 @@
+import argparse
 import glob
 import os
 import socket
 
 import tqdm
 
-host = "127.0.0.1"
-name_files = glob.glob("E:/ETSI/Proyecto/results/multiagent/*.csv")
+parser = argparse.ArgumentParser()
+parser.add_argument("-i", "--ip", type=str, help="IP of laptop computer which will receive the files")
+args = parser.parse_args()
+
+host = args.ip
+name_files = glob.glob(os.getcwd()[:os.getcwd().index("src") - 1] + "/results/multiagent/*.csv")
 
 SEPARATOR = "<SEPARATOR>"
 BUFFER_SIZE = 4096  # send 4096 bytes each time step
