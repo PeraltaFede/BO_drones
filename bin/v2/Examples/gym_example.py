@@ -45,5 +45,5 @@ for sensores in [["s1", "s2"], ["s1", "s2", "s3"], ["s1", "s2", "s3, s4"]]:
                 print(sim.step(next_poses))
                 # mus, stds = sim.render()
             sim.f.close()
-            if i >= 3:
+            if i >= 50:
                 break

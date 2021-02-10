@@ -110,7 +110,7 @@ class Coordinator(object):
             arr1inds = all_acq.argsort()
             sorted_arr1 = self.vector_pos[arr1inds[::-1]]
             new_pos, idx = find_vect_pos4region(sorted_arr1, reg, return_idx=True)
-            new_poses.append(np.array([new_pos, all_acq[arr1inds[::-1][idx]]]))
+            new_poses.append(np.array([new_pos, all_acq[arr1inds[::-1][idx]]], dtype=object))
 
             # mapz = gaussian_ei(self.all_vector_pos, self.gps[key], np.min(self.train_targets[key]), c_point=pose[:2],
             #                    xi=xi,
