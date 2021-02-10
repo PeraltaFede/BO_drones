@@ -12,7 +12,8 @@ show = "mse,score,time"
 datas = []
 dataype = []
 
-for_comparison = ["1,2,max_sum", "1,3,max_sum", "1,4,max_sum", "1,2,simple_max", "1,3,simple_max", "1,4,simple_max"]
+for_comparison = ["1,2,max_sum"]
+# , "1,3,max_sum", "1,4,max_sum", "1,2,simple_max", "1,3,simple_max", "1,4,simple_max"
 
 for name_file in name_files:
     with open(name_file, 'r') as f:
