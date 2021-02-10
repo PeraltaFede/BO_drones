@@ -10,6 +10,7 @@ from bin.Simulators.gym_environment import GymEnvironment
 seeds = np.linspace(163343, 3647565, 100)
 for sensores in [["s1", "s2"], ["s1", "s2", "s3"], ["s1", "s2", "s3, s4"]]:
     for fusion in ["max_sum", "simple_max"]:
+        print(fusion, sensores)
         i = 0
         for seed in seeds:
             i += 1
