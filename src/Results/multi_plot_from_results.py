@@ -12,9 +12,12 @@ show = "mse,score,time"
 datas = []
 dataype = []
 
-# for_comparison = ["1,2,max_sum", "1,2,simple_max", "1,3,max_sum", "1,3,simple_max", "1,4,max_sum", "1,4,simple_max"]
-for_comparison = ["max_sum,2,gaussian_ei", "max_sum,2,predictive_entropy_search",
-                  "simple_max,2,gaussian_ei", "simple_max,2,predictive_entropy_search"]
+for_comparison = ["decoupled,2,gaussian_ei", "coupled,2,gaussian_ei",
+                  # "decoupled,2,predictive_entropy_search", "coupled,2,predictive_entropy_search",
+                  "decoupled,3,gaussian_ei", "coupled,3,gaussian_ei",
+                  # "coupled,3,predictive_entropy_search", "coupled,3,predictive_entropy_search",
+                  "decoupled,4,gaussian_ei", "coupled,4,gaussian_ei",]
+                  # "decoupled,4,predictive_entropy_search", "coupled,4,predictive_entropy_search"]
 
 for name_file in name_files:
     with open(name_file, 'r') as f:
@@ -192,7 +195,7 @@ if "mse" in show:
         # print(mse_std[key])
         plt.bar(labels + (i - len(for_comparison) / 2 + 0.5) * width, mse_mean[key], width,
                 yerr=mse_std[key],
-                label="n_ASV: {0}, n_sensors: {1}, fusion: {2}".format(*key.split(',')), color=colors[i])
+                label="n_sensors: {1}, fusion: {0}, acq: {2}".format(*key.split(',')), color=colors[i])
         #     plt.plot(labels + (i - len(for_comparison) / 2 + 0.5), mse_mean[key])
         i += 1
     # print('yes')
@@ -204,7 +207,7 @@ if "mse" in show:
     plt.yticks(fontsize=30)
     plt.title("MSE", fontsize=30)
     # plt.legend(["realnew", "old", "new"], prop={'size': 23})
-    plt.legend(prop={'size': 23}, fancybox=True, shadow=True, frameon=True)
+    plt.legend(prop={'size': 13}, fancybox=True, shadow=True, frameon=True)
     # plt.tight_layout()
 i = 0
 if "score" in show:
@@ -213,14 +216,14 @@ if "score" in show:
         labels = np.arange(qty_clean[key][0][0], max4key[key] + qty_clean[key][0][0])
         plt.bar(labels + (i - len(for_comparison) / 2 + 0.5) * width, score_mean[key], width,
                 yerr=score_std[key],
-                label="n_ASV: {0}, n_sensors: {1}, fusion: {2}".format(*key.split(',')), color=colors[i])
+                label="n_sensors: {1}, fusion: {0}, acq: {2}".format(*key.split(',')), color=colors[i])
         i += 1
     plt.ylabel('R2Score', fontsize=30)
     plt.xticks(np.arange(0, max4key[key] + qty_clean[key][0][0]), fontsize=30)
     plt.xlabel("Measurements", fontsize=30)
     plt.yticks(fontsize=30)
     plt.title("R2Score", fontsize=30)
-    plt.legend(prop={'size': 23}, fancybox=True, shadow=True, frameon=True)
+    plt.legend(prop={'size': 13}, fancybox=True, shadow=True, frameon=True)
 
 i = 0
 if "time" in show:
@@ -232,7 +235,7 @@ if "time" in show:
         # print(mse_std[key])
         plt.bar(labels + (i - len(for_comparison) / 2 + 0.5) * width, time_mean[key], width,
                 yerr=time_std[key],
-                label="n_ASV: {0}, n_sensors: {1}, fusion: {2}".format(*key.split(',')), color=colors[i])
+                label="n_sensors: {1}, fusion: {0}, acq: {2}".format(*key.split(',')), color=colors[i])
         #     plt.plot(labels + (i - len(for_comparison) / 2 + 0.5), mse_mean[key])
         i += 1
     # print('yes')
@@ -244,6 +247,6 @@ if "time" in show:
     plt.yticks(fontsize=30)
     # plt.title("4 drones", fontsize=30)
     # plt.legend(["realnew", "old", "new"], prop={'size': 23})
-    plt.legend(prop={'size': 23}, fancybox=True, shadow=True, frameon=True)
+    plt.legend(prop={'size': 13}, fancybox=True, shadow=True, frameon=True)
 
 plt.show(block=True)

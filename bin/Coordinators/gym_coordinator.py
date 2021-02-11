@@ -97,8 +97,10 @@ class Coordinator(object):
             for _, sigma in gps:
                 sum_sigmas = sigma if sum_sigmas is None else sigma + sum_sigmas
             x_star = self.vector_pos[np.where(sum_sigmas == np.max(sum_sigmas))[0][0]]
-            for mu, sigma, key in zip(*gps, self.sensors):
-                all_acq = predictive_entropy_search(self.vector_pos, mu, sigma, model=self.gps[key], x_star=x_star)
+            for i in range(len(self.sensors)):
+                mu, sigma = gps[i]
+                all_acq = predictive_entropy_search(self.vector_pos, mu, sigma, model=self.gps[list(self.sensors)[i]],
+                                                    x_star=x_star)
                 if self.acq_fusion == "decoupled":
                     arr1inds = all_acq.argsort()
                     sorted_arr1 = self.vector_pos[arr1inds[::-1]]
