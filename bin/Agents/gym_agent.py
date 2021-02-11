@@ -147,6 +147,7 @@ class SimpleAgent(object):
                     self.agent_env.grid[self.next_pose[1], self.next_pose[0]] == 0 or self.ignore_obstacles):
                 if self.distance_travelled > 1500:
                     print('limited distance')
+                    self.battery_left = 0.0
                     return True
                 i2remove = 0
                 for goal in self.path:

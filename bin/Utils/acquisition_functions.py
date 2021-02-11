@@ -1,8 +1,35 @@
 import warnings
+from copy import deepcopy
 
 import numpy as np
 from scipy.spatial.distance import cdist
 from scipy.stats import norm
+
+
+def predictive_entropy_search(x, mu, sigma, model, x_star=None, noise=0):
+    # diferencias principales con respecto a paper: el pareto set en una sola aproximacion
+    # x_star se define como el maximo de la suma de los sigmas (para mejorar la explotacion)
+    # Predictive Entropy Search for Efficient Global
+
+    values = np.zeros_like(mu)
+    mask = sigma > 0
+    # todo: cambiar monte_carlo_samples
+    if x_star is None:
+        pos = np.where(sigma == np.max(sigma))[0][0]
+        x_star = x[pos]
+    else:
+        pos = np.where(x == x_star)[0][0]
+    val = mu[pos]
+    if not (x_star == model.X_train_).all():
+        model2 = deepcopy(model)
+        model2.fit(np.append(model.X_train_, x_star).reshape(-1, 2), np.append(model.y_train_, val))
+        _, sigma_cpd = model2.predict(x, return_std=True)
+        values[mask] = np.log(sigma[mask] + noise ** 2) - np.log(sigma_cpd[mask] + noise ** 2)
+    else:
+        print('this sentence will not be printed')
+        values[mask] = np.log(sigma[mask] + noise ** 2)
+
+    return values
 
 
 def maxvalue_entropy_search(x, model, y_opt=0.0, c_point=np.zeros((1, 2)), xi=0.01, masked=True):
@@ -21,8 +48,6 @@ def maxvalue_entropy_search(x, model, y_opt=0.0, c_point=np.zeros((1, 2)), xi=0.
     cdf = norm.cdf(normalized_max)
     cdf[np.where(cdf == 0.0)] = 1e-30
     values[mask] = (normalized_max * pdf) / (2 * cdf) - np.log(cdf)
-    # Predictive Entropy Search for Efficient Global
-    # todo: a = (0.5/M)*np.sum(np.log(v_n(x)+noise)-np.log(v_n(x|x*)+noise))
 
     if masked:
         values[mask] *= np.exp(-cdist([c_point], x) / 250).reshape(mu[mask].shape)

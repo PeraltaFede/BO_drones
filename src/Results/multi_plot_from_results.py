@@ -12,7 +12,9 @@ show = "mse,score,time"
 datas = []
 dataype = []
 
-for_comparison = ["1,2,max_sum", "1,3,max_sum", "1,4,max_sum", "1,2,simple_max", "1,3,simple_max", "1,4,simple_max"]
+# for_comparison = ["1,2,max_sum", "1,2,simple_max", "1,3,max_sum", "1,3,simple_max", "1,4,max_sum", "1,4,simple_max"]
+for_comparison = ["max_sum,2,gaussian_ei", "max_sum,2,predictive_entropy_search",
+                  "simple_max,2,gaussian_ei", "simple_max,2,predictive_entropy_search"]
 
 for name_file in name_files:
     with open(name_file, 'r') as f:
@@ -204,7 +206,7 @@ if "mse" in show:
     # plt.legend(["realnew", "old", "new"], prop={'size': 23})
     plt.legend(prop={'size': 23}, fancybox=True, shadow=True, frameon=True)
     # plt.tight_layout()
-
+i = 0
 if "score" in show:
     plt.figure()
     for key in for_comparison:
@@ -243,6 +245,5 @@ if "time" in show:
     # plt.title("4 drones", fontsize=30)
     # plt.legend(["realnew", "old", "new"], prop={'size': 23})
     plt.legend(prop={'size': 23}, fancybox=True, shadow=True, frameon=True)
-    plt.tight_layout()
 
 plt.show(block=True)

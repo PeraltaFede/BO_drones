@@ -117,6 +117,9 @@ class GymEnvironment(object):
             for k in range(len(self.agents[i].path) - 1):
                 future_dist += norm(self.agents[i].path[k][:2] - self.agents[i].path[k + 1][:2])
             future_dist += norm(self.agents[i].pose[:2] - self.agents[i].path[0][:2])
+            if future_dist == 0.0:
+                idx = -1
+                break
             if future_dist < dist2next:
                 idx = i
                 dist2next = future_dist
@@ -136,7 +139,7 @@ class GymEnvironment(object):
                     "{},{},{},{},{},{}\n".format(self.timestep, mse, score, len(self.coordinator.train_inputs), 0,
                                                  sum(c.distance_travelled for c in self.agents) / len(
                                                      self.agents)))
-                return -1, -1
+            return -1, -1
         for agent in self.agents:
             if agent.step(dist_left=dist2_simulate):
                 if agent.reached_pose():

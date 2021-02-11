@@ -8,12 +8,14 @@ from sklearn.metrics import mean_squared_error as mse
 from sklearn.metrics import r2_score
 from skopt.learning.gaussian_process import gpr, kernels
 
-from bin.Utils.acquisition_functions import gaussian_sei, maxvalue_entropy_search, gaussian_pi, gaussian_ei, max_std
+from bin.Utils.acquisition_functions import gaussian_sei, maxvalue_entropy_search, gaussian_pi, gaussian_ei, max_std, \
+    predictive_entropy_search
 from bin.Utils.voronoi_regions import calc_voronoi, find_vect_pos4region
 
 
 class Coordinator(object):
-    def __init__(self, map_data, sensors: set, k_names=None, acq="gaussian_ei", acq_mod="masked", acq_fusion="max_sum"):
+    def __init__(self, map_data, sensors: set, k_names=None, acq="gaussian_ei", acq_mod="masked",
+                 acq_fusion="decoupled"):
         if k_names is None:
             k_names = ["RBF"] * len(sensors)
         self.map_data = map_data
@@ -85,56 +87,83 @@ class Coordinator(object):
 
         _, reg = calc_voronoi(pose, other_poses, self.map_data)
         all_acq = []
-        new_poses = []
+        c_max = 0.0
+        new_pos = None
+        sum_all_acq = None
 
-        for key in self.sensors:
-            if self.acquisition == "gaussian_sei":
-                all_acq = gaussian_sei(self.vector_pos, self.gps[key], np.min(self.train_targets[key]),
-                                       c_point=pose[:2], xi=xi,
-                                       masked=self.acq_mod == "masked")
-            elif self.acquisition == "maxvalue_entropy_search":
-                all_acq = maxvalue_entropy_search(self.vector_pos, self.gps[key], np.min(self.train_targets[key]),
-                                                  c_point=pose[:2], xi=xi,
-                                                  masked=self.acq_mod == "masked")
-            elif self.acquisition == "gaussian_pi":
-                all_acq = gaussian_pi(self.vector_pos, self.gps[key], np.min(self.train_targets[key]), c_point=pose[:2],
-                                      xi=xi,
+        if self.acquisition == "predictive_entropy_search":
+            gps = self.surrogate(self.vector_pos, return_std=True)
+            sum_sigmas = None
+            for _, sigma in gps:
+                sum_sigmas = sigma if sum_sigmas is None else sigma + sum_sigmas
+            x_star = self.vector_pos[np.where(sum_sigmas == np.max(sum_sigmas))[0][0]]
+            for mu, sigma, key in zip(*gps, self.sensors):
+                all_acq = predictive_entropy_search(self.vector_pos, mu, sigma, model=self.gps[key], x_star=x_star)
+                if self.acq_fusion == "decoupled":
+                    arr1inds = all_acq.argsort()
+                    sorted_arr1 = self.vector_pos[arr1inds[::-1]]
+                    best_pos, idx = find_vect_pos4region(sorted_arr1, reg, return_idx=True)
+                    if all_acq[arr1inds[::-1][idx]] > c_max:
+                        new_pos = best_pos
+                        c_max = all_acq[arr1inds[::-1][idx]]
+                elif self.acq_fusion == "coupled":
+                    sum_all_acq = sum_all_acq + all_acq if sum_all_acq is not None else all_acq
+        else:
+            for key in self.sensors:
+                if self.acquisition == "gaussian_sei":
+                    all_acq = gaussian_sei(self.vector_pos, self.gps[key], np.min(self.train_targets[key]),
+                                           c_point=pose[:2], xi=xi,
+                                           masked=self.acq_mod == "masked")
+                elif self.acquisition == "maxvalue_entropy_search":
+                    all_acq = maxvalue_entropy_search(self.vector_pos, self.gps[key], np.min(self.train_targets[key]),
+                                                      c_point=pose[:2], xi=xi,
+                                                      masked=self.acq_mod == "masked")
+                elif self.acquisition == "gaussian_pi":
+                    all_acq = gaussian_pi(self.vector_pos, self.gps[key], np.min(self.train_targets[key]),
+                                          c_point=pose[:2],
+                                          xi=xi,
+                                          masked=self.acq_mod == "masked")
+                elif self.acquisition == "gaussian_ei":
+                    all_acq = gaussian_ei(self.vector_pos, self.gps[key], np.min(self.train_targets[key]),
+                                          c_point=pose[:2],
+                                          xi=xi,
+                                          masked=self.acq_mod == "masked")
+                elif self.acquisition == "max_std":
+                    all_acq = max_std(self.vector_pos, self.gps[key], np.min(self.train_targets[key]),
                                       masked=self.acq_mod == "masked")
-            elif self.acquisition == "gaussian_ei":
-                all_acq = gaussian_ei(self.vector_pos, self.gps[key], np.min(self.train_targets[key]), c_point=pose[:2],
-                                      xi=xi,
-                                      masked=self.acq_mod == "masked")
-            elif self.acquisition == "max_std":
-                all_acq = max_std(self.vector_pos, self.gps[key], np.min(self.train_targets[key]),
-                                  masked=self.acq_mod == "masked")
-            arr1inds = all_acq.argsort()
-            sorted_arr1 = self.vector_pos[arr1inds[::-1]]
-            new_pos, idx = find_vect_pos4region(sorted_arr1, reg, return_idx=True)
-            new_poses.append(np.array([new_pos, all_acq[arr1inds[::-1][idx]]], dtype=object))
-
-            # mapz = gaussian_ei(self.all_vector_pos, self.gps[key], np.min(self.train_targets[key]), c_point=pose[:2],
-            #                    xi=xi,
-            #                    masked=self.acq_mod == "masked").reshape((1000, 1500)).T
-            # smapz += mapz
-            # for nnan in nans:
-            #     mapz[nnan[0], nnan[1]] = -1
-            # mapz = np.ma.array(mapz, mask=(mapz == -1))
-            # if key == "s1":
-            #     plt.subplot(231)
-            # elif key == "s2":
-            #     plt.subplot(232)
-            # else:
-            #     plt.subplot(233)
-            # plt.imshow(mapz, origin='lower', cmap=cmo.cm.matter_r)
-            # plt.title("$AF_{}(x)$".format(str("{" + key + "}")))
-            # plt.plot(new_pos[0], new_pos[1], 'r.')
-            # for pm in self.train_inputs:
-            #     plt.plot(pm[0], pm[1], 'y^')
-            # plt.plot(pose[0], pose[1], 'b^')
-            # plt.colorbar()
-            # if max_mapz is None or all_acq[arr1inds[::-1][idx]] > c_max:
-            #     max_mapz = mapz
-            #     c_max = all_acq[arr1inds[::-1][idx]]
+                if self.acq_fusion == "decoupled":
+                    arr1inds = all_acq.argsort()
+                    sorted_arr1 = self.vector_pos[arr1inds[::-1]]
+                    best_pos, idx = find_vect_pos4region(sorted_arr1, reg, return_idx=True)
+                    if all_acq[arr1inds[::-1][idx]] > c_max:
+                        new_pos = best_pos
+                        c_max = all_acq[arr1inds[::-1][idx]]
+                elif self.acq_fusion == "coupled":
+                    sum_all_acq = sum_all_acq + all_acq if sum_all_acq is not None else all_acq
+                # mapz = gaussian_ei(self.all_vector_pos, self.gps[key], np.min(self.train_targets[key]),
+                # c_point=pose[:2],
+                #                    xi=xi,
+                #                    masked=self.acq_mod == "masked").reshape((1000, 1500)).T
+                # smapz += mapz
+                # for nnan in nans:
+                #     mapz[nnan[0], nnan[1]] = -1
+                # mapz = np.ma.array(mapz, mask=(mapz == -1))
+                # if key == "s1":
+                #     plt.subplot(231)
+                # elif key == "s2":
+                #     plt.subplot(232)
+                # else:
+                #     plt.subplot(233)
+                # plt.imshow(mapz, origin='lower', cmap=cmo.cm.matter_r)
+                # plt.title("$AF_{}(x)$".format(str("{" + key + "}")))
+                # plt.plot(new_pos[0], new_pos[1], 'r.')
+                # for pm in self.train_inputs:
+                #     plt.plot(pm[0], pm[1], 'y^')
+                # plt.plot(pose[0], pose[1], 'b^')
+                # plt.colorbar()
+                # if max_mapz is None or all_acq[arr1inds[::-1][idx]] > c_max:
+                #     max_mapz = mapz
+                #     c_max = all_acq[arr1inds[::-1][idx]]
         # plt.subplot(235)
         # for nnan in nans:
         #     smapz[nnan[0], nnan[1]] = -1
@@ -148,7 +177,8 @@ class Coordinator(object):
         #     plt.plot(pm[0], pm[1], 'y^')
         # plt.colorbar()
 
-        # plt.legend(["best_next", "c_pose", "prev. measurements"], bbox_to_anchor=(3.5, 1.0), fancybox=True, shadow=True)
+        # plt.legend(["best_next", "c_pose", "prev. measurements"], bbox_to_anchor=(3.5, 1.0), fancybox=True,
+        # shadow=True)
 
         # plt.subplot(234)
         # plt.imshow(max_mapz, origin='lower', cmap=cmo.cm.matter_r)
@@ -161,29 +191,23 @@ class Coordinator(object):
         # plt.colorbar()
         # plt.show(block=True)
 
-        c_max = 0.0
-        new_pos = None
-        # print(new_poses)
-        if self.acq_fusion == "max_sum":
-            for best_pos in new_poses:
-                suma = 0
-                for key in self.sensors:
-                    this_acq = gaussian_ei(best_pos[0],
-                                           self.surrogate(best_pos[0].reshape(1, -1), return_std=True, keys=[key])[0],
-                                           np.min(self.train_targets[key]),
-                                           c_point=pose[:2], xi=xi, masked=self.acq_mod == "masked")
-                    suma += this_acq
-                if suma > c_max:
-                    new_pos = best_pos[0]
-                    c_max = suma
-        elif self.acq_fusion == "simple_max":
-            for best_pos in new_poses:
-                if best_pos[1] > c_max:
-                    new_pos = best_pos[0]
-                    c_max = best_pos[1]
-        else:
-            new_pos = new_poses[0][0]
-
+        # if self.acq_fusion == "maxcoupled":
+        #     for best_pos in new_poses:
+        #         suma = 0
+        #         for key in self.sensors:
+        #             this_acq = gaussian_ei(best_pos[0],
+        #                                    self.surrogate(best_pos[0].reshape(1, -1), return_std=True, keys=[key])[0],
+        #                                    np.min(self.train_targets[key]),
+        #                                    c_point=pose[:2], xi=xi, masked=self.acq_mod == "masked")
+        #             suma += this_acq
+        #         if suma > c_max:
+        #             new_pos = best_pos[0]
+        #             c_max = suma
+        if self.acq_fusion == "coupled":
+            arr1inds = sum_all_acq.argsort()
+            sorted_arr1 = self.vector_pos[arr1inds[::-1]]
+            best_pos = find_vect_pos4region(sorted_arr1, reg, return_idx=False)
+            new_pos = best_pos
         if self.acq_mod == "split_path" or self.acq_mod == "truncated":
             beacons_splitted = []
             vect_dist = np.subtract(new_pos, pose[:2])
