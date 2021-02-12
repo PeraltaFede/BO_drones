@@ -46,13 +46,13 @@ def create_map(grid, resolution, obstacles_on=False, randomize_shekel=False, sen
                file=0):
     if load_from_db:
         if sensor == "s1":
-            file = 0
+            file = 4
         elif sensor == "s2":
-            file = 1
+            file = 5
         elif sensor == "s3":
-            file = 2
+            file = 6
         elif sensor == "s4":
-            file = 3
+            file = 7
         with open(path[-1] + '/data/Databases/numpy_files/random_{}.npy'.format(file), 'rb') as g:
             # with open('E:/ETSI/Proyecto/data/Databases/numpy_files/ground_truth_norm.npy', 'rb') as g:
             # _z = np.load(g)

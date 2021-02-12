@@ -11,13 +11,18 @@ show = "mse,score,time"
 
 datas = []
 dataype = []
-
+# for_comparison = ["decoupled,2,predictive_entropy_search", "coupled,2,predictive_entropy_search",
+#                   "decoupled,3,predictive_entropy_search", "coupled,3,predictive_entropy_search",
+#                   "decoupled,4,predictive_entropy_search", "coupled,4,predictive_entropy_search"]
 for_comparison = ["decoupled,2,gaussian_ei", "coupled,2,gaussian_ei",
-                  # "decoupled,2,predictive_entropy_search", "coupled,2,predictive_entropy_search",
                   "decoupled,3,gaussian_ei", "coupled,3,gaussian_ei",
-                  # "coupled,3,predictive_entropy_search", "coupled,3,predictive_entropy_search",
-                  "decoupled,4,gaussian_ei", "coupled,4,gaussian_ei",]
-                  # "decoupled,4,predictive_entropy_search", "coupled,4,predictive_entropy_search"]
+                  "decoupled,4,gaussian_ei", "coupled,4,gaussian_ei"]
+# for_comparison = ["2,coupled,2,gaussian_ei",
+#                   "2,coupled,2,predictive_entropy_search",
+#                   "3,coupled,3,gaussian_ei",
+#                   "3,coupled,3,predictive_entropy_search",
+#                   "4,coupled,4,gaussian_ei",
+#                   "4,coupled,4,predictive_entropy_search"]
 
 for name_file in name_files:
     with open(name_file, 'r') as f:
@@ -182,9 +187,11 @@ for key in for_comparison:
 
 # colors = ["#FFD100", "#FFD100AA"]
 # colors = ["#00629B", "#009CA6", "#78BE20", "#FFD100"]
-colors = ["#3B4D77", "#C09235", "#B72F56", "#91B333", "#00629B", "#009CA6", "#78BE20", "#FFD100"]
-width = 0.12  # the width of the ba
+colors = ["#3B4D77", "#C09235", "#B72F56", "#91B333", "#00629B", "#009CA6", "#78BE20", "#FFD100", "#3B4D77", "#C09235",
+          "#B72F56", "#91B333"]
+width = 0.06  # the width of the ba
 i = 0
+key = for_comparison[-1]
 
 if "mse" in show:
     plt.figure()
