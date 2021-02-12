@@ -172,6 +172,7 @@ class GymEnvironment(object):
             results = ""
             for mse, score in zip(mses, scores):
                 results += f",{mse},{score}"
+            print(keys)
             self.f.write(
                 "{},{},{},{},{},{}{}\n".format(self.timestep, len(self.coordinator.train_inputs), time() - self.t0,
                                                sum(c.distance_travelled for c in self.agents) / len(
