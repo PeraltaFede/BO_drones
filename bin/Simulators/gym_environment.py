@@ -2,6 +2,7 @@ from copy import deepcopy
 from sys import path
 from time import time
 
+from numpy import mean
 from numpy.linalg import norm
 
 from bin.Agents.gym_agent import SimpleAgent as Ga
@@ -61,11 +62,18 @@ class GymEnvironment(object):
             self.f.write(str(
                 "{},{},{},{},{},{}\n".format(len(self.agents), len(self.sensors), acq_fusion, len(self.coordinator.gps),
                                              self.coordinator.acquisition, self.coordinator.acq_mod)))
-            self.f.write("step,mse,score,qty,time,t_dist\n")
-            mse, score = self.reward()
-            self.f.write("{},{},{},{},{},{}\n".format(self.timestep, mse, score, len(self.coordinator.train_inputs), 0,
-                                                      sum(c.distance_travelled for c in self.agents) / len(
-                                                          self.agents)))
+            mses, scores, keys = self.reward()
+            titles = ""
+            for sensor in keys:
+                titles += f',mse_{sensor},score_{sensor}'
+            results = ""
+            for mse, score in zip(mses, scores):
+                results += f",{mse},{score}"
+            self.f.write(
+                "step,qty,time,t_dist,avg_mse,avg_score{}\n".format(titles))
+            self.f.write("{},{},{},{},{},{}{}\n".format(self.timestep, len(self.coordinator.train_inputs), 0,
+                                                        sum(c.distance_travelled for c in self.agents) / len(
+                                                            self.agents), mean(mses), mean(scores), results))
             self.t0 = time()
 
         self.render2gui = render2gui
@@ -134,11 +142,13 @@ class GymEnvironment(object):
         if next_idx == -1:
             self.timestep += 1
             if self.saving:
-                mse, score = -1, -1
-                self.f.write(
-                    "{},{},{},{},{},{}\n".format(self.timestep, mse, score, len(self.coordinator.train_inputs), 0,
-                                                 sum(c.distance_travelled for c in self.agents) / len(
-                                                     self.agents)))
+
+                results = ""
+                for i in range(len(self.sensors)):
+                    results += f",-1,-1"
+                self.f.write("{},{},{},{},{},{}{}\n".format(self.timestep, len(self.coordinator.train_inputs), 0,
+                                                            sum(c.distance_travelled for c in self.agents) / len(
+                                                                self.agents), -1, -1, results))
             return -1, -1
         for agent in self.agents:
             if agent.step(dist_left=dist2_simulate):
@@ -158,11 +168,14 @@ class GymEnvironment(object):
         self.timestep += 1
         reward = self.reward()
         if self.saving:
-            mse, score = self.reward()
-            self.f.write("{},{},{},{},{},{}\n".format(self.timestep, mse, score, len(self.coordinator.train_inputs),
-                                                      time() - self.t0,
-                                                      sum(c.distance_travelled for c in self.agents) / len(
-                                                          self.agents)))
+            mses, scores, keys = self.reward()
+            results = ""
+            for mse, score in zip(mses, scores):
+                results += f",{mse},{score}"
+            self.f.write(
+                "{},{},{},{},{},{}{}\n".format(self.timestep, len(self.coordinator.train_inputs), time() - self.t0,
+                                               sum(c.distance_travelled for c in self.agents) / len(
+                                                   self.agents), mean(mses), mean(scores), results))
             self.t0 = time()
         return reward
 
@@ -171,4 +184,4 @@ class GymEnvironment(object):
                 self.coordinator.gps.keys()]
         scores = [self.coordinator.get_score(self.environment.maps[key].T.flatten(), key) for key in
                   self.coordinator.gps.keys()]
-        return sum(mses) / len(mses), sum(scores) / len(scores)
+        return mses, scores, self.coordinator.gps.keys()

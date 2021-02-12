@@ -9,7 +9,8 @@ from bin.Simulators.gym_environment import GymEnvironment
 
 seeds = np.linspace(163343, 3647565, 100)
 for acq in ["gaussian_ei", "predictive_entropy_search"]:
-    for sensores in [["s1", "s2"], ["s1", "s2", "s3"], ["s1", "s2", "s3", "s4"]]:
+    for sensores in [["s1", "s2", "s3", "s4"], ["s1", "s2", "s3"], ["s1", "s2", "s3", "s4"],
+                     ["s4", "s5"], ["s4", "s5", "s6"], ["s4", "s5", "s6", "s7"]]:
         for fusion in ["coupled", "decoupled"]:
             print(fusion, sensores, acq)
             i = 0
