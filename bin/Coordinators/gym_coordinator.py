@@ -214,7 +214,7 @@ class Coordinator(object):
             beacons_splitted = []
             vect_dist = np.subtract(new_pos, pose[:2])
             ang = np.arctan2(vect_dist[1], vect_dist[0])
-            d = 220
+            d = 110
             for di in np.arange(0, np.linalg.norm(vect_dist), d)[1:]:
                 mini_goal = np.array([di * np.cos(ang) + pose[0], di * np.sin(ang) + pose[1]]).astype(np.int)
                 if self.map_data[mini_goal[1], mini_goal[0]] == 0:

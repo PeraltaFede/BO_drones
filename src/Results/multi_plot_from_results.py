@@ -14,15 +14,15 @@ dataype = []
 # for_comparison = ["decoupled,2,predictive_entropy_search", "coupled,2,predictive_entropy_search",
 #                   "decoupled,3,predictive_entropy_search", "coupled,3,predictive_entropy_search",
 #                   "decoupled,4,predictive_entropy_search", "coupled,4,predictive_entropy_search"]
-for_comparison = ["decoupled,2,gaussian_ei", "coupled,2,gaussian_ei",
-                  "decoupled,3,gaussian_ei", "coupled,3,gaussian_ei",
-                  "decoupled,4,gaussian_ei", "coupled,4,gaussian_ei"]
-# for_comparison = ["2,coupled,2,gaussian_ei",
-#                   "2,coupled,2,predictive_entropy_search",
-#                   "3,coupled,3,gaussian_ei",
-#                   "3,coupled,3,predictive_entropy_search",
-#                   "4,coupled,4,gaussian_ei",
-#                   "4,coupled,4,predictive_entropy_search"]
+# for_comparison = ["decoupled,2,gaussian_ei", "coupled,2,gaussian_ei",
+#                   "decoupled,3,gaussian_ei", "coupled,3,gaussian_ei",
+#                   "decoupled,4,gaussian_ei", "coupled,4,gaussian_ei"]
+for_comparison = ["2,coupled,2,gaussian_ei",
+                  "2,coupled,2,predictive_entropy_search",
+                  "3,coupled,3,gaussian_ei",
+                  "3,coupled,3,predictive_entropy_search",
+                  "4,coupled,4,gaussian_ei",
+                  "4,coupled,4,predictive_entropy_search"]
 
 for name_file in name_files:
     with open(name_file, 'r') as f:
@@ -100,8 +100,8 @@ for compare in for_comparison:
     time_std[compare] = []
 
 for i in range(len(datas)):
-    mse[dataype[i]].append(datas[i]["mse"].values)
-    score[dataype[i]].append(datas[i]["score"].values)
+    mse[dataype[i]].append(datas[i]["avg_mse"].values)
+    score[dataype[i]].append(datas[i]["avg_score"].values)
     qty[dataype[i]].append(datas[i]["qty"].values)
     time[dataype[i]].append(datas[i]["time"].values)
 
@@ -202,7 +202,8 @@ if "mse" in show:
         # print(mse_std[key])
         plt.bar(labels + (i - len(for_comparison) / 2 + 0.5) * width, mse_mean[key], width,
                 yerr=mse_std[key],
-                label="n_sensors: {1}, fusion: {0}, acq: {2}".format(*key.split(',')), color=colors[i])
+                # label="n_sensors: {1}, fusion: {0}, acq: {2}".format(*key.split(',')), color=colors[i])
+                label="n_sensors: {0}, fusion: {1}, acq: {3}".format(*key.split(',')), color=colors[i])
         #     plt.plot(labels + (i - len(for_comparison) / 2 + 0.5), mse_mean[key])
         i += 1
     # print('yes')
@@ -223,7 +224,8 @@ if "score" in show:
         labels = np.arange(qty_clean[key][0][0], max4key[key] + qty_clean[key][0][0])
         plt.bar(labels + (i - len(for_comparison) / 2 + 0.5) * width, score_mean[key], width,
                 yerr=score_std[key],
-                label="n_sensors: {1}, fusion: {0}, acq: {2}".format(*key.split(',')), color=colors[i])
+                # label="n_sensors: {1}, fusion: {0}, acq: {2}".format(*key.split(',')), color=colors[i])
+                label="n_sensors: {0}, fusion: {1}, acq: {3}".format(*key.split(',')), color=colors[i])
         i += 1
     plt.ylabel('R2Score', fontsize=30)
     plt.xticks(np.arange(0, max4key[key] + qty_clean[key][0][0]), fontsize=30)
@@ -242,7 +244,8 @@ if "time" in show:
         # print(mse_std[key])
         plt.bar(labels + (i - len(for_comparison) / 2 + 0.5) * width, time_mean[key], width,
                 yerr=time_std[key],
-                label="n_sensors: {1}, fusion: {0}, acq: {2}".format(*key.split(',')), color=colors[i])
+                # label="n_sensors: {1}, fusion: {0}, acq: {2}".format(*key.split(',')), color=colors[i])
+                label="n_sensors: {0}, fusion: {1}, acq: {3}".format(*key.split(',')), color=colors[i])
         #     plt.plot(labels + (i - len(for_comparison) / 2 + 0.5), mse_mean[key])
         i += 1
     # print('yes')
