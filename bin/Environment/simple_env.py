@@ -9,7 +9,7 @@ class Env(BaseEnv):
         super().__init__(map_path2yaml)
         self.maps = {}
 
-    def add_new_map(self, sensors, file=0):
+    def add_new_map(self, sensors, file=-1):
         for sensor in sensors:
             self.maps[sensor] = utils.create_map(self.grid, self.resolution, True, sensor=sensor, file=file)
 

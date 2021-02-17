@@ -77,10 +77,10 @@ def create_map(grid, resolution, obstacles_on=False, randomize_shekel=False, sen
     else:
         global w_obstacles, a, c
         w_obstacles = obstacles_on
-        xmin = 0
+        xmin = -1
         xmax = 1
         ymin = 0
-        ymax = 1
+        ymax = 2
         # _z = []
         if randomize_shekel:
             no_maxima = np.random.randint(2, 6)
@@ -110,7 +110,7 @@ def create_map(grid, resolution, obstacles_on=False, randomize_shekel=False, sen
         _y = np.arange(xmin, xmax, resolution * (ymax - ymin) / (grid.shape[0])) + yadd
         _x, _y = np.meshgrid(_x, _y)
         # if i == 0:
-        _z = np.fromiter(map(shekel_arg0, zip(_x.flat, _y.flat, grid.flat)), dtype=np.float,
+        _z = np.fromiter(map(rosenbrock_arg0, zip(_x.flat, _y.flat, grid.flat)), dtype=np.float,
                          count=_x.shape[0] * _x.shape[1]).reshape(_x.shape)
 
         # else:

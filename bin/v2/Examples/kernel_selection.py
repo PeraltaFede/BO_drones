@@ -1,6 +1,9 @@
+from sys import path
+
 import matplotlib.pyplot as plt
 import numpy as np
 
+path.extend([path[0][:path[0].rindex("bin") - 1]])
 from bin.Agents.pathplanning_agent import SimpleAgent
 from bin.Coordinators.informed_coordinator import Coordinator
 from bin.Environment.simple_env import Env
@@ -13,7 +16,7 @@ from bin.Environment.simple_env import Env
 
 
 EXPERIMENTS = 1
-SIZE = 9
+SIZE = 100
 seeds = np.linspace(76842153, 1123581321, 100)
 
 sensors = ["t"]
@@ -44,24 +47,23 @@ with open('E:/ETSI/Proyecto/data/Databases/numpy_files/nans.npy', 'rb') as g:
 # with open('E:/ETSI/Proyecto/data/Databases/numpy_files/nans.npy', 'wb') as g:
 #     np.save(g, nans)
 
-candidates = np.array([
-    [671, 906],
-    [625, 899],
-    [577, 900],
-    [538, 923],
-    [519, 950],
-    [504, 932],
-    [493, 892],
-    [487, 850],
-    [476, 809],
-    [501, 521],
-    [517, 481],
-    [551, 451],
-    [591, 429],
-    [630, 397],
-    [669, 365]
-
-])
+# candidates = np.array([
+#     [671, 906],
+#     [625, 899],
+#     [577, 900],
+#     [538, 923],
+#     [519, 950],
+#     [504, 932],
+#     [493, 892],
+#     [487, 850],
+#     [476, 809],
+#     [501, 521],
+#     [517, 481],
+#     [551, 451],
+#     [591, 429],
+#     [630, 397],
+#     [669, 365]
+# ])
 
 for k in range(EXPERIMENTS):
     print('current experiment is: ', k)
@@ -70,9 +72,9 @@ for k in range(EXPERIMENTS):
     x = []
     while len(d) < SIZE:
 
-        # candidate = np.round(np.random.uniform([0, 0], [999, 1499]).astype(int))
-        candidate = candidates[0]
-        candidates = candidates[1:]
+        candidate = np.round(np.random.uniform([0, 0], [999, 1499]).astype(int))
+        # candidate = candidates[0]
+        # candidates = candidates[1:]
         if env.grid[candidate[1], candidate[0]] == 0:
             x.append(candidate)
             d.append([candidate, env.maps["t"][candidate[1], candidate[0]]])
@@ -124,8 +126,9 @@ for key in mu.keys():
     plt.subplot(122)
     plt.imshow(mu[key], origin='lower', cmap='inferno')
     plt.plot(x[:, 0], x[:, 1], 'ob')
-    CS = plt.contour(mu[key], colors=('gray'),
+    CS = plt.contour(mu[key], colors=('gray', 'gray', 'gray', 'k', 'k', 'k', 'k'),
                      alpha=0.6, linewidths=1.0)
+
     plt.clabel(CS, inline=1, fontsize=10)
     plt.title("{} has MSE: {}".format(key, coords[i - 2].get_mse(env.maps['t'].T.flatten())))
     # plt.subplot(240 + i + 4)
