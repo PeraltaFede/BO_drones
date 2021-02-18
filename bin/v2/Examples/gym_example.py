@@ -23,7 +23,7 @@ for acq in ["gaussian_ei"]:
                 np.random.seed(np.round(seed).astype(int))
                 drones = [SimpleAgent(sensores, _id=0)]
                 sim = GymEnvironment(path[-1] + "/data/Map/Ypacarai/map.yaml", agents=drones, id_file=0,
-                                     acq=acq, acq_mod="truncated", render2gui=False, saving=False,
+                                     acq=acq, acq_mod="truncated", render2gui=False, saving=True,
                                      name_file="{}_{}_1A{}S".format(acq, fusion, len(sensores)), acq_fusion=fusion)
                 for k in range(20):
                     while True:
