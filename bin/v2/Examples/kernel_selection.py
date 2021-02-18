@@ -71,7 +71,6 @@ for k in range(EXPERIMENTS):
     d = []
     x = []
     while len(d) < SIZE:
-
         candidate = np.round(np.random.uniform([0, 0], [999, 1499]).astype(int))
         # candidate = candidates[0]
         # candidates = candidates[1:]

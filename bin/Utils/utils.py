@@ -39,7 +39,7 @@ def shekel_arg0(sol):
 
 
 def schwefel_arg0(sol):
-    return np.nan if w_obstacles and sol[2] == 1 else benchmarks.h1(sol[:2])[0]
+    return np.nan if w_obstacles and sol[2] == 1 else benchmarks.schwefel(sol[:2])[0]
 
 
 def create_map(grid, resolution, obstacles_on=False, randomize_shekel=False, sensor="", no_maxima=10, load_from_db=True,
@@ -62,7 +62,6 @@ def create_map(grid, resolution, obstacles_on=False, randomize_shekel=False, sen
         elif sensor == "s8":
             file = 7
         with open(path[-1] + '/data/Databases/numpy_files/random_{}.npy'.format(file), 'rb') as g:
-            print("file no", file)
             # with open('E:/ETSI/Proyecto/data/Databases/numpy_files/ground_truth_norm.npy', 'rb') as g:
             # _z = np.load(g)
             # print(np.nanmax(_z))
@@ -78,10 +77,10 @@ def create_map(grid, resolution, obstacles_on=False, randomize_shekel=False, sen
     else:
         global w_obstacles, a, c
         w_obstacles = obstacles_on
-        xmin = -1
-        xmax = 1
+        xmin = -5
+        xmax = 5
         ymin = 0
-        ymax = 2
+        ymax = 10
         # _z = []
         if randomize_shekel:
             no_maxima = np.random.randint(2, 6)
@@ -111,7 +110,7 @@ def create_map(grid, resolution, obstacles_on=False, randomize_shekel=False, sen
         _y = np.arange(xmin, xmax, resolution * (ymax - ymin) / (grid.shape[0])) + yadd
         _x, _y = np.meshgrid(_x, _y)
         # if i == 0:
-        _z = np.fromiter(map(rosenbrock_arg0, zip(_x.flat, _y.flat, grid.flat)), dtype=np.float,
+        _z = np.fromiter(map(ackley_arg0, zip(_x.flat, _y.flat, grid.flat)), dtype=np.float,
                          count=_x.shape[0] * _x.shape[1]).reshape(_x.shape)
 
         # else:

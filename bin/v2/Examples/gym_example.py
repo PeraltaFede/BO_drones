@@ -8,9 +8,13 @@ from bin.Agents.gym_agent import SimpleAgent
 from bin.Simulators.gym_environment import GymEnvironment
 
 seeds = np.linspace(163343, 3647565, 100)
-for acq in ["gaussian_ei", "predictive_entropy_search"]:
-    for sensores in [["s1", "s2"], ["s1", "s2", "s3"], ["s1", "s2", "s3", "s4"],
-                     ["s5", "s6"], ["s5", "s6", "s7"], ["s5", "s6", "s7", "s8"]]:
+for acq in ["gaussian_ei"]:
+    for sensores in [["s1", "s2"],
+                     ["s5", "s6"],
+                     ["s1", "s2", "s3"],
+                     ["s5", "s6", "s7"],
+                     ["s1", "s2", "s3", "s4"],
+                     ["s5", "s6", "s7", "s8"]]:
         for fusion in ["coupled", "decoupled"]:
             print(fusion, sensores, acq)
             i = 0
@@ -19,7 +23,7 @@ for acq in ["gaussian_ei", "predictive_entropy_search"]:
                 np.random.seed(np.round(seed).astype(int))
                 drones = [SimpleAgent(sensores, _id=0)]
                 sim = GymEnvironment(path[-1] + "/data/Map/Ypacarai/map.yaml", agents=drones, id_file=0,
-                                     acq=acq, acq_mod="truncated", render2gui=False, saving=True,
+                                     acq=acq, acq_mod="truncated", render2gui=False, saving=False,
                                      name_file="{}_{}_1A{}S".format(acq, fusion, len(sensores)), acq_fusion=fusion)
                 for k in range(20):
                     while True:
