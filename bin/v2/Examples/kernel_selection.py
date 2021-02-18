@@ -16,14 +16,14 @@ from bin.Environment.simple_env import Env
 
 
 EXPERIMENTS = 1
-SIZE = 100
+SIZE = 50
 seeds = np.linspace(76842153, 1123581321, 100)
 
 sensors = ["t"]
 
 drones = [SimpleAgent(sensors)]
 env = Env(map_path2yaml="E:/ETSI/Proyecto/data/Map/Ypacarai/map.yaml")
-env.add_new_map(sensors)
+env.add_new_map(sensors, file=53)
 
 plt.style.use("seaborn")
 
@@ -99,6 +99,8 @@ for k in range(EXPERIMENTS):
         #     sd[coord.k_name][nnan[0], nnan[1]] = -1
         # sd[coord.k_name] = np.ma.array(sd[coord.k_name], mask=(sd[coord.k_name] == -1))
 
+for coor in coords:
+    print(np.exp(coord.gp.kernel_.theta))
 # plt.style.use("seaborn")
 # legends = []
 # for key in mses:

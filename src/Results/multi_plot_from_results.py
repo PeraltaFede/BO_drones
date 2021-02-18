@@ -6,17 +6,18 @@ import pandas as pd
 
 plt.style.use("seaborn")
 
-name_files = glob.glob("E:/ETSI/Proyecto/results/SAMS/*.csv")
-show = "var"
+name_files = glob.glob("E:/ETSI/Proyecto/results/SAMS/new sams/*.csv")
+show = "score,var"
 
 datas = []
 dataype = []
 # for_comparison = ["decoupled,2,predictive_entropy_search", "coupled,2,predictive_entropy_search",
 #                   "decoupled,3,predictive_entropy_search", "coupled,3,predictive_entropy_search",
 #                   "decoupled,4,predictive_entropy_search", "coupled,4,predictive_entropy_search"]
-for_comparison = ["decoupled,2,gaussian_ei", "coupled,2,gaussian_ei", ]
-#                   "decoupled,3,gaussian_ei", "coupled,3,gaussian_ei",
-#                   "decoupled,4,gaussian_ei", "coupled,4,gaussian_ei"]
+for_comparison = ["decoupled,2,gaussian_ei", "coupled,2,gaussian_ei",
+                  "decoupled,3,gaussian_ei", "coupled,3,gaussian_ei",
+                  "decoupled,4,gaussian_ei", "coupled,4,gaussian_ei"]
+# for_comparison = ["decoupled", "coupled"]
 # for_comparison = ["2,coupled,2,gaussian_ei",
 #                   "2,coupled,2,predictive_entropy_search",
 #                   "3,coupled,3,gaussian_ei",
@@ -30,21 +31,24 @@ for name_file in name_files:
         rl = f.readline()  # RBF,gaussian_sei,masked
         for compare in for_comparison:
             if compare in rl:
-                dataype.append(compare)
+                dataype.append(f"NEW{compare}")
                 datas.append(pd.read_csv(name_file, skiprows=2))
                 break
 
-# name_files = glob.glob("E:/ETSI/Proyecto/results/multiagent/1dronms/*.csv")
-# for_comparison = ["1,m"]
-# for name_file in name_files:
-#     with open(name_file, 'r') as f:
-#         f.readline()
-#         rl = f.readline()  # RBF,gaussian_sei,masked
-#         for compare in for_comparison:
-#             if compare in rl:
-#                 dataype.append(compare)
-#                 datas.append(pd.read_csv(name_file, skiprows=2))
-#                 break
+name_files = glob.glob("E:/ETSI/Proyecto/results/SAMS/old sams/*.csv")
+
+for_comparison = ["decoupled,2,gaussian_ei", "coupled,2,gaussian_ei",
+                  "decoupled,3,gaussian_ei", "coupled,3,gaussian_ei",
+                  "decoupled,4,gaussian_ei", "coupled,4,gaussian_ei"]
+for name_file in name_files:
+    with open(name_file, 'r') as f:
+        f.readline()
+        rl = f.readline()  # RBF,gaussian_sei,masked
+        for compare in for_comparison:
+            if compare in rl:
+                dataype.append(f"OLD{compare}")
+                datas.append(pd.read_csv(name_file, skiprows=2))
+                break
 #
 # name_files = glob.glob("E:/ETSI/Proyecto/results/multiagent/1dronnewms/*.csv")
 #
@@ -63,6 +67,14 @@ for name_file in name_files:
 # for_comparison = ["1",
 #                   "1,m",
 #                   "1,"]
+
+for_comparison = ["NEWdecoupled,2,gaussian_ei", "NEWcoupled,2,gaussian_ei",
+                  "NEWdecoupled,3,gaussian_ei", "NEWcoupled,3,gaussian_ei",
+                  "NEWdecoupled,4,gaussian_ei", "NEWcoupled,4,gaussian_ei",
+                  "OLDdecoupled,2,gaussian_ei", "OLDcoupled,2,gaussian_ei",
+                  "OLDdecoupled,3,gaussian_ei", "OLDcoupled,3,gaussian_ei",
+                  "OLDdecoupled,4,gaussian_ei", "OLDcoupled,4,gaussian_ei"]
+
 for compare in for_comparison:
     print(compare, ": ", np.count_nonzero(np.array(dataype) == compare))
 
@@ -205,7 +217,7 @@ for key in for_comparison:
 # colors = ["#00629B", "#009CA6", "#78BE20", "#FFD100"]
 colors = ["#3B4D77", "#C09235", "#B72F56", "#91B333", "#00629B", "#009CA6", "#78BE20", "#FFD100", "#3B4D77", "#C09235",
           "#B72F56", "#91B333"]
-width = 0.4  # the width of the ba
+width = 0.9 / len(for_comparison)  # the width of the ba
 i = 0
 key = for_comparison[-1]
 
@@ -239,8 +251,9 @@ if "score" in show:
     for key in for_comparison:
         labels = np.arange(qty_clean[key][0][0], max4key[key] + qty_clean[key][0][0])
         plt.bar(labels + (i - len(for_comparison) / 2 + 0.5) * width, score_mean[key], width,
-                yerr=score_std[key],
-                label="n_sensors: {1}, fusion: {0}, acq: {2}".format(*key.split(',')), color=colors[i])
+                yerr=score_std[key], color=colors[i],
+                label=key)
+        # label="n_sensors: {1}, fusion: {0}, acq: {2}".format(*key.split(',')))
         # label="n_sensors: {0}, fusion: {1}, acq: {3}".format(*key.split(',')), color=colors[i])
         i += 1
     plt.ylabel('R2Score', fontsize=30)
@@ -254,8 +267,9 @@ if "var" in show:
     plt.figure()
     for key in for_comparison:
         labels = np.arange(qty_clean[key][0][0], max4key[key] + qty_clean[key][0][0])
-        plt.bar(labels + (i - len(for_comparison) / 2 + 0.5) * width, variance_mean[key], width,
-                label="n_sensors: {1}, fusion: {0}, acq: {2}".format(*key.split(',')), color=colors[i])
+        plt.bar(labels + (i - len(for_comparison) / 2 + 0.5) * width, variance_mean[key], width, color=colors[i],
+                label=key)
+        # label="n_sensors: {1}, fusion: {0}, acq: {2}".format(*key.split(',')))
         # label="n_sensors: {0}, fusion: {1}, acq: {3}".format(*key.split(',')), color=colors[i])
         i += 1
     plt.ylabel('Variance', fontsize=30)

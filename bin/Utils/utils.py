@@ -62,6 +62,7 @@ def create_map(grid, resolution, obstacles_on=False, randomize_shekel=False, sen
         elif sensor == "s8":
             file = 7
         with open(path[-1] + '/data/Databases/numpy_files/random_{}.npy'.format(file), 'rb') as g:
+            print("file no", file)
             # with open('E:/ETSI/Proyecto/data/Databases/numpy_files/ground_truth_norm.npy', 'rb') as g:
             # _z = np.load(g)
             # print(np.nanmax(_z))

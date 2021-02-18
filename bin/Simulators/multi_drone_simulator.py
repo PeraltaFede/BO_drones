@@ -110,11 +110,11 @@ class Simulator(object):
         # plt.show(block=True)
         if saving:
             self.f = open(
-                "E:/ETSI/Proyecto/results/multiagent/{}_{}_{}.csv".format(test_name, int(time.time()), self.file_no),
+                "E:/ETSI/Proyecto/results/{}_{}_{}.csv".format(test_name, int(time.time()), self.file_no),
                 "a")
             self.f.write("num,acq,masked\n")
             self.f.write(str(
-                "{},{},{}\n".format(len(self.agents), self.coordinator.acquisition, self.coordinator.acq_mod)))
+                "{},{},{}\n".format(len(self.agents)+50, self.coordinator.acquisition, self.coordinator.acq_mod)))
             self.f.write("step,mse,qty,time,t_dist\n")
             mse = self.coordinator.get_mse(self.environment.maps['t'].T.flatten())
             self.f.write("{},{},{},{},{}\n".format(0, mse, len(self.coordinator.data[1]), 0,

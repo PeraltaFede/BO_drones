@@ -6,12 +6,12 @@ import pandas as pd
 
 plt.style.use("seaborn")
 
-name_files = glob.glob("E:/ETSI/Proyecto/results/multiagent/*.csv")
+name_files = glob.glob("E:/ETSI/Proyecto/results/*.csv")
 
 datas = []
 dataype = []
 
-for_comparison = ["1", "2", "3", "4", "5"]
+for_comparison = ["51", "1"]
 # for_comparison = ["1"]
 
 for name_file in name_files:
@@ -20,9 +20,9 @@ for name_file in name_files:
         rl = f.readline()  # RBF,gaussian_sei,masked
         for compare in for_comparison:
             if compare in rl:
+                # if len(rl) > 0 and compare in name_file:
                 dataype.append(compare)
                 datas.append(pd.read_csv(name_file, skiprows=2))
-                print(pd.read_csv(name_file, skiprows=2))
                 break
 
 # name_files = glob.glob("E:/ETSI/Proyecto/results/multiagent/1dronms/*.csv")
@@ -55,11 +55,7 @@ for name_file in name_files:
 #                   "1,m",
 #                   "1,"]
 print(np.count_nonzero(np.array(dataype) == "1"))
-print(np.count_nonzero(np.array(dataype) == "2"))
-print(np.count_nonzero(np.array(dataype) == "3"))
-print(np.count_nonzero(np.array(dataype) == "4"))
-print(np.count_nonzero(np.array(dataype) == "5"))
-# print(np.count_nonzero(np.array(dataype) == "2,"))
+print(np.count_nonzero(np.array(dataype) == "51"))
 # print(np.count_nonzero(np.array(dataype) == "3,"))
 # print(np.count_nonzero(np.array(dataype) == "4,"))
 
@@ -75,6 +71,11 @@ time_clean = dict()
 time_mean = dict()
 time_std = dict()
 
+t_dist = dict()
+mse_interp = dict()
+mse_interp_mean = dict()
+mse_interp_std = dict()
+
 for compare in for_comparison:
     mse[compare] = []
     qty[compare] = []
@@ -88,10 +89,20 @@ for compare in for_comparison:
     time_mean[compare] = []
     time_std[compare] = []
 
+    t_dist[compare] = []
+    mse_interp[compare] = []
+    mse_interp_mean[compare] = []
+    mse_interp_std[compare] = []
+
+max_dist = 0
+
 for i in range(len(datas)):
     mse[dataype[i]].append(datas[i]["mse"].values)
     qty[dataype[i]].append(datas[i]["qty"].values)
     time[dataype[i]].append(datas[i]["time"].values)
+    t_dist[dataype[i]].append(datas[i]["t_dist"].values)
+    if t_dist[dataype[i]][-1][-1] > max_dist:
+        max_dist = t_dist[dataype[i]][-1][-1]
 
 for key in for_comparison:
     for run, meas, tim in zip(mse[key], qty[key], time[key]):
@@ -167,10 +178,31 @@ for compare in for_comparison:
 legends = []
 for key in for_comparison:
     legends.append(key)
+# max_dist = 1500
+x = np.linspace(0, max_dist, np.round(max_dist).astype(int))
+for compare in for_comparison:
+    for tdistrun, mserun in zip(t_dist[compare], mse[compare]):
+        mse_interp[compare].append(np.interp(x, tdistrun, mserun))
+for key in for_comparison:
+    mse_interp[key] = np.array(mse_interp[key]).T.reshape(len(x), -1)
 
+for key in for_comparison:
+    mse_interp_mean[key] = np.mean(mse_interp[key], axis=1)
+    mse_interp_std[key] = np.std(mse_interp[key], axis=1)
+
+for key in for_comparison:
+    plt.plot(x, mse_interp_mean[key], label=key)
+    # legends.append(key)
+    plt.fill_between(x, mse_interp_mean[key] - mse_interp_std[key],
+                     mse_interp_mean[key] + mse_interp_std[key], alpha=0.2)
+plt.xlabel("Step")
+plt.ylabel("MSE")
+plt.legend(prop={'size': 23})
+# plt.tight_layout()
+# plt.show(block=True)
 # colors = ["#FFD100", "#FFD100AA"]
-# colors = ["#00629B", "#009CA6", "#78BE20", "#FFD100"]
-colors = ["#3B4D77", "#C09235", "#B72F56", "#91B333", "#c"]
+# colors = ["#00629B", "#78BE20", ""]
+colors = ["#3B4D77", "#C09235", "#B72F56", "#91B333", "#FFD100", "#009CA6"]
 width = 0.18  # the width of the ba
 i = 0
 plt.figure()
@@ -192,32 +224,32 @@ plt.xticks(np.arange(0, max4key[key] + qty_clean[key][0][0]), fontsize=30)
 plt.xlabel("Measurements", fontsize=30)
 plt.yticks(fontsize=30)
 # plt.title("4 drones", fontsize=30)
-# plt.legend(["realnew", "old", "new"], prop={'size': 23})
+# plt.legend(["realnew", "old"], prop={'size': 23})
 plt.legend(prop={'size': 23})
 # plt.tight_layout()
 
-i = 0
-plt.figure()
-for key in for_comparison:
-    labels = np.arange(qty_clean[key][0][0], max4key[key] + qty_clean[key][0][0])
-    # print(labels + (i - len(for_comparison) / 2 + 0.5) * width)
-    # print(mse_mean[key])
-    # print(mse_std[key])
-    plt.bar(labels + (i - len(for_comparison) / 2 + 0.5) * width, time_mean[key], width,
-            yerr=time_std[key],
-            label=key, color=colors[i])
-    #     plt.plot(labels + (i - len(for_comparison) / 2 + 0.5), mse_mean[key])
-    i += 1
-# print('yes')
-# Add some text for labels, title and custom x-axis tick labels, etc.
-plt.ylabel('Time [s]', fontsize=30)
-plt.xticks(np.arange(0, max4key[key] + qty_clean[key][0][0]), fontsize=30)
-# plt.xticks(fontsize=30)
-plt.xlabel("Measurements", fontsize=30)
-plt.yticks(fontsize=30)
-# plt.title("4 drones", fontsize=30)
-# plt.legend(["realnew", "old", "new"], prop={'size': 23})
-plt.legend(prop={'size': 23})
-plt.tight_layout()
+# i = 0
+# plt.figure()
+# for key in for_comparison:
+#     labels = np.arange(qty_clean[key][0][0], max4key[key] + qty_clean[key][0][0])
+#     # print(labels + (i - len(for_comparison) / 2 + 0.5) * width)
+#     # print(mse_mean[key])
+#     # print(mse_std[key])
+#     plt.bar(labels + (i - len(for_comparison) / 2 + 0.5) * width, time_mean[key], width,
+#             yerr=time_std[key],
+#             label=key, color=colors[i])
+#     #     plt.plot(labels + (i - len(for_comparison) / 2 + 0.5), mse_mean[key])
+#     i += 1
+# # print('yes')
+# # Add some text for labels, title and custom x-axis tick labels, etc.
+# plt.ylabel('Time [s]', fontsize=30)
+# plt.xticks(np.arange(0, max4key[key] + qty_clean[key][0][0]), fontsize=30)
+# # plt.xticks(fontsize=30)
+# plt.xlabel("Measurements", fontsize=30)
+# plt.yticks(fontsize=30)
+# # plt.title("4 drones", fontsize=30)
+# plt.legend(["realnew", "old"], prop={'size': 23})
+# # plt.legend(prop={'size': 23})
+# plt.tight_layout()
 
 plt.show(block=True)

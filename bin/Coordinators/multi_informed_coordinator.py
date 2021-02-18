@@ -155,7 +155,9 @@ class Coordinator(object):
             # print('vd', vect_dist)
             ang = np.arctan2(vect_dist[1], vect_dist[0])
             # print('ang', ang)
-            d = 220
+            d = np.exp(self.gp.kernel_.theta)[0] / 2
+            # d = 220
+            # print(d)
             # print('x', d * np.cos(ang), vect_dist[0])
             # print('y', d * np.sin(ang), vect_dist[1])
             # if d * np.cos(ang) < vect_dist[0]:
