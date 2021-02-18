@@ -141,11 +141,11 @@ def gaussian_ei(x, model, y_opt=0.0, xi=0.01, c_point=np.zeros((1, 2)), masked=T
                              "your model with an (N, 1) vector instead of an "
                              "(N,) vector?"
                              .format(mu.ndim, std.ndim))
+        print('called sur for unknown with std True and _x all_vector_pos')
     else:
         mu = model[0]
         std = model[1]
     # return std
-
     values = np.zeros_like(mu)
     mask = std > 0
     improve = y_opt - xi - mu[mask]

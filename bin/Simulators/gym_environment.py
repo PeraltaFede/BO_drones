@@ -145,7 +145,7 @@ class GymEnvironment(object):
 
                 results = ""
                 for i in range(len(self.sensors)):
-                    results += f",-1,-1"
+                    results += ",-1,-1"
                 self.f.write("{},{},{},{},{},{}{}\n".format(self.timestep, len(self.coordinator.train_inputs), 0,
                                                             sum(c.distance_travelled for c in self.agents) / len(
                                                                 self.agents), -1, -1, results))
@@ -166,23 +166,22 @@ class GymEnvironment(object):
                 self.sender.send_new_drone_msg(agent.pose, agent.drone_id)
 
         self.timestep += 1
-        reward = self.reward()
         if self.saving:
             mses, scores, keys = self.reward()
             results = ""
             for mse, score in zip(mses, scores):
                 results += f",{mse},{score}"
-            print(keys)
+            # print(keys)
             self.f.write(
                 "{},{},{},{},{},{}{}\n".format(self.timestep, len(self.coordinator.train_inputs), time() - self.t0,
                                                sum(c.distance_travelled for c in self.agents) / len(
                                                    self.agents), mean(mses), mean(scores), results))
             self.t0 = time()
-        return reward
+        return scores
 
     def reward(self):
-        mses = [self.coordinator.get_mse(self.environment.maps[key].T.flatten(), key) for key in
+        mses = [self.coordinator.get_mse(self.environment.maps[key].flatten(), key) for key in
                 self.coordinator.gps.keys()]
-        scores = [self.coordinator.get_score(self.environment.maps[key].T.flatten(), key) for key in
+        scores = [self.coordinator.get_score(self.environment.maps[key].flatten(), key) for key in
                   self.coordinator.gps.keys()]
         return mses, scores, self.coordinator.gps.keys()

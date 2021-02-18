@@ -48,7 +48,6 @@ for acq in ["gaussian_ei"]:
                                 sim.sender.send_new_goal_msg(agent.next_pose, agent.drone_id)
                         else:
                             next_poses.append([])
-
                     print(sim.step(next_poses))
                     # mus, stds = sim.render()
                 if sim.saving:

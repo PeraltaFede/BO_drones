@@ -1,6 +1,3 @@
-from warnings import catch_warnings
-from warnings import simplefilter
-
 # import gpytorch
 import numpy as np
 # import torch as to
@@ -27,10 +24,17 @@ class Coordinator(object):
         self.train_inputs = [np.array([[], []])]
         self.train_targets = dict()
 
+        self.mus = dict()
+        self.stds = dict()
+        self.has_calculated = dict()
+
         for sensor, kernel in zip(sensors, k_names):
             if kernel == "RBF":  # "RBF" Matern" "RQ"
                 self.gps[sensor] = gpr.GaussianProcessRegressor(kernel=kernels.RBF(100), alpha=1e-7)
                 self.train_targets[sensor] = np.array([])
+                self.mus[sensor] = np.array([])
+                self.stds[sensor] = np.array([])
+                self.has_calculated[sensor] = False
 
         self.all_vector_pos = np.mgrid[0:self.map_data.shape[1]:1, 0:self.map_data.shape[0]:1].reshape(2, -1).T
         self.vector_pos = np.fliplr(np.asarray(np.where(self.map_data == 0)).reshape(2, -1).T)
@@ -40,6 +44,7 @@ class Coordinator(object):
         # max_sum: sum of acq on max for each maximum
 
         self.splitted_goals = []
+        self.nans = None
 
     def initialize_data_gpr(self, data: list):
         self.train_inputs = np.array(data[0]["pos"]).reshape(-1, 2)
@@ -60,17 +65,38 @@ class Coordinator(object):
     def fit_data(self):
         for key in self.sensors:
             self.gps[key].fit(self.train_inputs, self.train_targets[key])
+            self.has_calculated[key] = False
 
     def surrogate(self, _x=None, return_std=False, keys=None):
+        if keys is None:
+            keys = self.sensors
+        if _x is None:
+            _x = self.vector_pos
+
+        for key in keys:
+            if not self.has_calculated[key]:
+                mu, std = self.gps[key].predict(_x, True)
+                self.mus[key] = mu
+                self.stds[key] = std
+                self.has_calculated[key] = True
+                print('calculated')
+        if return_std:
+            # for key in keys:
+            #     print(np.sum(np.subtract(self.gps[key].predict(_x)[~self.nans], self.mus[key][~self.nans])))
+            #     print(np.sum(np.subtract(self.gps[key].predict(self.vector_pos), self.mus[key][~self.nans])))
+            # return [(self.mus[key][~self.nans], self.stds[key][~self.nans]) for key in keys]
+            return [(self.mus[key], self.stds[key]) for key in keys]
+        else:
+            return [self.mus[key] for key in keys]
         # catch any warning generated when making a prediction
-        with catch_warnings():
-            # ignore generated warnings
-            if keys is None:
-                keys = self.sensors
-            simplefilter("ignore")
-            if _x is None:
-                _x = self.all_vector_pos
-            return [self.gps[key].predict(_x, return_std) for key in keys]
+        # with catch_warnings():
+        #     # ignore generated warnings
+        #     if keys is None:
+        #         keys = self.sensors
+        #     simplefilter("ignore")
+        #     if _x is None:
+        #         _x = self.all_vector_pos
+        #     return [self.gps[key].predict(_x, return_std) for key in keys]
 
     def generate_new_goal(self, pose=np.zeros((1, 3)), other_poses=np.zeros((1, 3))):
         # nans = np.load(open('E:/ETSI/Proyecto/data/Databases/numpy_files/nans.npy', 'rb'))
@@ -126,7 +152,10 @@ class Coordinator(object):
                                           xi=xi,
                                           masked=self.acq_mod == "masked")
                 elif self.acquisition == "gaussian_ei":
-                    all_acq = gaussian_ei(self.vector_pos, self.gps[key], np.min(self.train_targets[key]),
+                    all_acq = gaussian_ei(self.vector_pos,
+                                          # self.gps[key],
+                                          self.surrogate(keys=[key], return_std=True)[0],
+                                          np.min(self.train_targets[key]),
                                           c_point=pose[:2],
                                           xi=xi,
                                           masked=self.acq_mod == "masked")
@@ -231,14 +260,18 @@ class Coordinator(object):
     def get_mse(self, y_true, key=None):
         if key is None:
             key = list(self.sensors)[0]
-        nan = np.isnan(y_true)
-        return mse(y_true[~nan], self.surrogate(keys=[key])[0][~nan])
+        if self.nans is None:
+            self.nans = np.isnan(y_true)
+        # return mse(y_true[~self.nans], self.surrogate(keys=[key])[0][~self.nans])
+        return mse(y_true[~self.nans], self.surrogate(keys=[key])[0])
 
     def get_score(self, y_true, key=None):
         if key is None:
             key = list(self.sensors)[0]
-        nan = np.isnan(y_true)
-        return r2_score(y_true[~nan], self.surrogate(keys=[key])[0][~nan])
+        if self.nans is None:
+            self.nans = np.isnan(y_true)
+        # return r2_score(y_true[~self.nans], self.surrogate(keys=[key])[0][~self.nans])
+        return r2_score(y_true[~self.nans], self.surrogate(keys=[key])[0])
 
     def get_acq(self, key, pose=np.zeros((1, 2)), acq_func="gaussian_ei", acq_mod="normal"):
         if acq_func == "gaussian_sei":
