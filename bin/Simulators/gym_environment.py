@@ -14,7 +14,7 @@ from bin.v2.Communications.simple_sender import Sender
 
 class GymEnvironment(object):
     def __init__(self, map_path2yaml, agents: list, acq="gaussian_ei", saving=False, acq_fusion="max_sum",
-                 acq_mod="normal", id_file=0, render2gui=True, initial_pos="circle", name_file=""):
+                 acq_mod="normal", id_file=0, render2gui=True, initial_pos="circle", name_file="", d=1.0):
         """
 
         :param map_path2yaml: file path to mapyaml
@@ -33,7 +33,7 @@ class GymEnvironment(object):
         self.sensors = set()
         self._init_maps()
         self.coordinator = Coordinator(self.environment.grid, self.sensors, acq=acq, acq_mod=acq_mod,
-                                       acq_fusion=acq_fusion)
+                                       acq_fusion=acq_fusion, d=d)
         self.timestep = 0
 
         # initializing environment
@@ -58,10 +58,11 @@ class GymEnvironment(object):
         if self.saving:
             self.f = open(
                 path[-1] + "/results/SAMS/{}_{}_{}.csv".format(name_file, int(time()), self.file_no), "a")
-            self.f.write("n_agent,n_sensors,acq_fusion,kernels,acq,acq_mod\n")
+            self.f.write("n_agent,n_sensors,acq_fusion,kernels,acq,acq_mod,prop\n")
             self.f.write(str(
-                "{},{},{},{},{},{}\n".format(len(self.agents), len(self.sensors), acq_fusion, len(self.coordinator.gps),
-                                             self.coordinator.acquisition, self.coordinator.acq_mod)))
+                "{},{},{},{},{},{},{}\n".format(len(self.agents), len(self.sensors), acq_fusion,
+                                                len(self.coordinator.gps), self.coordinator.acquisition,
+                                                self.coordinator.acq_mod, d)))
             mses, scores, keys = self.reward()
             titles = ""
             for sensor in keys:

@@ -12,7 +12,7 @@ from bin.Utils.voronoi_regions import calc_voronoi, find_vect_pos4region
 
 class Coordinator(object):
     def __init__(self, map_data, sensors: set, k_names=None, acq="gaussian_ei", acq_mod="masked",
-                 acq_fusion="decoupled"):
+                 acq_fusion="decoupled", d=1.0):
         if k_names is None:
             k_names = ["RBF"] * len(sensors)
         self.map_data = map_data
@@ -23,6 +23,7 @@ class Coordinator(object):
         self.gps = dict()
         self.train_inputs = [np.array([[], []])]
         self.train_targets = dict()
+        self.proportion = d
 
         self.mus = dict()
         self.stds = dict()
@@ -79,7 +80,6 @@ class Coordinator(object):
                 self.mus[key] = mu
                 self.stds[key] = std
                 self.has_calculated[key] = True
-                print('calculated')
         if return_std:
             # for key in keys:
             #     print(np.sum(np.subtract(self.gps[key].predict(_x)[~self.nans], self.mus[key][~self.nans])))
@@ -243,7 +243,8 @@ class Coordinator(object):
             beacons_splitted = []
             vect_dist = np.subtract(new_pos, pose[:2])
             ang = np.arctan2(vect_dist[1], vect_dist[0])
-            d = np.exp(np.min([self.gps[key].kernel_.theta[0] for key in list(self.sensors)])) / 2
+            # d = 50
+            d = np.exp(np.min([self.gps[key].kernel_.theta[0] for key in list(self.sensors)])) * self.proportion
             for di in np.arange(0, np.linalg.norm(vect_dist), d)[1:]:
                 mini_goal = np.array([di * np.cos(ang) + pose[0], di * np.sin(ang) + pose[1]]).astype(np.int)
                 if self.map_data[mini_goal[1], mini_goal[0]] == 0:

@@ -7,18 +7,18 @@ import pandas as pd
 plt.style.use("seaborn")
 
 name_files = glob.glob("E:/ETSI/Proyecto/results/SAMS/new sams/*.csv")
-show = "dist,var,score"
+show = "mse,score,var,dist,time"
 
 datas = []
 dataype = []
 # for_comparison = ["decoupled,2,predictive_entropy_search", "coupled,2,predictive_entropy_search",
 #                   "decoupled,3,predictive_entropy_search", "coupled,3,predictive_entropy_search",
 #                   "decoupled,4,predictive_entropy_search", "coupled,4,predictive_entropy_search"]
-# for_comparison = ["decoupled,2,gaussian_ei", "coupled,2,gaussian_ei",
-#                   "decoupled,3,gaussian_ei", "coupled,3,gaussian_ei",
-#                   "decoupled,4,gaussian_ei", "coupled,4,gaussian_ei"]
-# for_comparison = ["decoupled", "coupled"]
-for_comparison = ["decoupled,2,gaussian_ei", "coupled,2,gaussian_ei"]
+# for_comparison = [   "decoupled,2,gaussian_ei", "coupled,2,gaussian_ei", ]
+# "decoupled,3,gaussian_ei", "coupled,3,gaussian_ei",
+# "decoupled,4,gaussian_ei", "coupled,4,gaussian_ei"]
+for_comparison = ["decoupled", "coupled"]
+# for_comparison = ["decoupled,2,gaussian_ei", "coupled,2,gaussian_ei"]
 #                   "3,coupled,3,gaussian_ei",
 #                   "3,coupled,3,predictive_entropy_search",
 #                   "4,coupled,4,gaussian_ei",
@@ -30,49 +30,49 @@ for name_file in name_files:
         rl = f.readline()  # RBF,gaussian_sei,masked
         for compare in for_comparison:
             if compare in rl:
-                dataype.append(f"NEW{compare}")
-                # dataype.append(compare)
+                # dataype.append(f"110{compare}")
+                dataype.append(compare)
                 datas.append(pd.read_csv(name_file, skiprows=2))
                 break
+
+# name_files = glob.glob("E:/ETSI/Proyecto/results/SAMS/old sams/*.csv")
 #
-name_files = glob.glob("E:/ETSI/Proyecto/results/SAMS/old sams/*.csv")
+# for name_file in name_files:
+#     with open(name_file, 'r') as f:
+#         f.readline()
+#         rl = f.readline()  # RBF,gaussian_sei,masked
+#         for compare in for_comparison:
+#             if compare in rl:
+#                 dataype.append(f"220{compare}")
+#                 datas.append(pd.read_csv(name_file, skiprows=2))
+#                 break
 
-# for_comparison = ["decoupled,2,gaussian_ei", "coupled,2,gaussian_ei",
-#                   "decoupled,3,gaussian_ei", "coupled,3,gaussian_ei",
-#                   "decoupled,4,gaussian_ei", "coupled,4,gaussian_ei"]
-# for_comparison = ["decoupled", "coupled"]
+# name_files = glob.glob("E:/ETSI/Proyecto/results/SAMS/paper sams/*.csv")
 #
-for name_file in name_files:
-    with open(name_file, 'r') as f:
-        f.readline()
-        rl = f.readline()  # RBF,gaussian_sei,masked
-        for compare in for_comparison:
-            if compare in rl:
-                dataype.append(f"OLD{compare}")
-                datas.append(pd.read_csv(name_file, skiprows=2))
-                break
+# for name_file in name_files:
+#     with open(name_file, 'r') as f:
+#         f.readline()
+#         rl = f.readline()  # RBF,gaussian_sei,masked
+#         for compare in for_comparison:
+#             if compare in rl:
+#                 dataype.append(f"dyn{compare}")
+#                 datas.append(pd.read_csv(name_file, skiprows=2))
+#                 break
 
-name_files = glob.glob("E:/ETSI/Proyecto/results/SAMS/paper sams/*.csv")
-
-for name_file in name_files:
-    with open(name_file, 'r') as f:
-        f.readline()
-        rl = f.readline()  # RBF,gaussian_sei,masked
-        for compare in for_comparison:
-            if compare in rl:
-                dataype.append(f"PAP{compare}")
-                datas.append(pd.read_csv(name_file, skiprows=2))
-                break
-
-for_comparison = ["NEWdecoupled,2,gaussian_ei", "NEWcoupled,2,gaussian_ei",
-                  #                   "NEWdecoupled,3,gaussian_ei", "NEWcoupled,3,gaussian_ei",
-                  #                   "NEWdecoupled,4,gaussian_ei", "NEWcoupled,4,gaussian_ei",
-                  "OLDdecoupled,2,gaussian_ei", "OLDcoupled,2,gaussian_ei",
-                  #                   "OLDdecoupled,3,gaussian_ei", "OLDcoupled,3,gaussian_ei",
-                  #                   "OLDdecoupled,4,gaussian_ei", "OLDcoupled,4,gaussian_ei"
-                  "PAPdecoupled,2,gaussian_ei", "PAPcoupled,2,gaussian_ei", ]
-# for_comparison = ["NEWdecoupled", "NEWcoupled",
-#                   "OLDdecoupled", "OLDcoupled"]
+# for_comparison = [
+#     "110decoupled,2,gaussian_ei", "110coupled,2,gaussian_ei",
+#     # "110decoupled,3,gaussian_ei", "110coupled,3,gaussian_ei",
+#     # "110decoupled,4,gaussian_ei", "110coupled,4,gaussian_ei",
+#     # "220decoupled,2,gaussian_ei", "220coupled,2,gaussian_ei",
+#     # "220decoupled,3,gaussian_ei", "220coupled,3,gaussian_ei",
+#     # "220decoupled,4,gaussian_ei", "220coupled,4,gaussian_ei",
+#     "dyndecoupled,2,gaussian_ei", "dyncoupled,2,gaussian_ei",]
+#     # "dyndecoupled,3,gaussian_ei", "dyncoupled,3,gaussian_ei",
+# "dyndecoupled,4,gaussian_ei", "dyncoupled,4,gaussian_ei", ]
+# for_comparison = [
+#     "110decoupled", "110coupled",
+#     # "220decoupled", "220coupled",
+#     "dyndecoupled", "dyncoupled"]
 
 for compare in for_comparison:
     print(compare, ": ", np.count_nonzero(np.array(dataype) == compare))
@@ -224,10 +224,12 @@ legends = []
 for key in for_comparison:
     legends.append(key)
 
+colors = ["#3B4D77", "#C09235", "#B72F56", "#91B333", "#00629B", "#009CA6", "#78BE20", "#FFD100", "#3B4D77", "#C09235",
+          "#B72F56", "#91B333"]
 if "dist" in show:
     x = np.linspace(0, max_dist, np.round(max_dist).astype(int))
     for compare in for_comparison:
-        for tdistrun, mserun in zip(t_dist[compare], mse[compare]):
+        for tdistrun, mserun in zip(t_dist[compare], variance[compare]):
             fmo = np.where(mserun == -1)[0]
             # print(fmo)
             if len(fmo) > 0:
@@ -240,19 +242,30 @@ if "dist" in show:
     for key in for_comparison:
         mse_interp_mean[key] = np.mean(mse_interp[key], axis=1)
         mse_interp_std[key] = np.std(mse_interp[key], axis=1)
+    selected = np.arange(500, 1550, 250).astype(np.int)
 
+    width = 90 / len(for_comparison)  # the width of the ba
+    i = 0
     for key in for_comparison:
         plt.plot(x, mse_interp_mean[key], label=key)
         plt.fill_between(x, mse_interp_mean[key] - mse_interp_std[key],
                          mse_interp_mean[key] + mse_interp_std[key], alpha=0.2)
-    plt.xlabel("Step")
-    plt.ylabel("MSE")
-    plt.legend(prop={'size': 23})
+
+        # plt.bar(selected + (i - len(for_comparison) / 2 + 0.5) * width,
+        #         mse_interp_mean[key][selected],
+        #         width,
+        #         yerr=mse_interp_std[key][selected], label=key, color=colors[i])
+        i += 1
+
+    plt.ylabel('MSE', fontsize=30)
+    plt.xticks(selected, fontsize=30)
+    plt.xlabel("Distance", fontsize=30)
+    plt.yticks(fontsize=30)
+    plt.title("MSE", fontsize=30)
+    plt.legend(prop={'size': 13}, fancybox=True, shadow=True, frameon=True)
 
 # colors = ["#FFD100", "#FFD100AA"]
 # colors = ["#00629B", "#009CA6", "#78BE20", "#FFD100"]
-colors = ["#3B4D77", "#C09235", "#B72F56", "#91B333", "#00629B", "#009CA6", "#78BE20", "#FFD100", "#3B4D77", "#C09235",
-          "#B72F56", "#91B333"]
 width = 0.9 / len(for_comparison)  # the width of the ba
 i = 0
 key = for_comparison[-1]
@@ -265,8 +278,9 @@ if "mse" in show:
         # print(mse_mean[key])
         # print(mse_std[key])
         plt.bar(labels + (i - len(for_comparison) / 2 + 0.5) * width, mse_mean[key], width,
-                yerr=mse_std[key],
-                label="n_sensors: {1}, fusion: {0}, acq: {2}".format(*key.split(',')), color=colors[i])
+                yerr=mse_std[key], color=colors[i],
+                label=key)
+        # label="n_sensors: {1}, fusion: {0}, acq: {2}".format(*key.split(',')))
         # label="n_sensors: {0}, fusion: {1}, acq: {3}".format(*key.split(',')), color=colors[i])
         #     plt.plot(labels + (i - len(for_comparison) / 2 + 0.5), mse_mean[key])
         i += 1
@@ -323,8 +337,9 @@ if "time" in show:
         # print(mse_mean[key])
         # print(mse_std[key])
         plt.bar(labels + (i - len(for_comparison) / 2 + 0.5) * width, time_mean[key], width,
-                yerr=time_std[key],
-                label="n_sensors: {1}, fusion: {0}, acq: {2}".format(*key.split(',')), color=colors[i])
+                yerr=time_std[key], color=colors[i],
+                label=key)
+        # label="n_sensors: {1}, fusion: {0}, acq: {2}".format(*key.split(',')))
         # label="n_sensors: {0}, fusion: {1}, acq: {3}".format(*key.split(',')), color=colors[i])
         #     plt.plot(labels + (i - len(for_comparison) / 2 + 0.5), mse_mean[key])
         i += 1
