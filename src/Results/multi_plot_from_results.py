@@ -6,8 +6,8 @@ import pandas as pd
 
 plt.style.use("seaborn")
 
-name_files = glob.glob("E:/ETSI/Proyecto/results/SAMS/new sams/*.csv")
-show = "mse,score,var,dist,time"
+name_files = glob.glob("E:/ETSI/Proyecto/results/SAMS/*.csv")
+show = "dist,mse,time,var,score"
 
 datas = []
 dataype = []
@@ -17,6 +17,8 @@ dataype = []
 # for_comparison = [   "decoupled,2,gaussian_ei", "coupled,2,gaussian_ei", ]
 # "decoupled,3,gaussian_ei", "coupled,3,gaussian_ei",
 # "decoupled,4,gaussian_ei", "coupled,4,gaussian_ei"]
+# for_comparison = ["2,coupled", "3,coupled", "4,coupled",
+#                   "2,decoupled", "3,decoupled", "4,decoupled"]
 for_comparison = ["decoupled", "coupled"]
 # for_comparison = ["decoupled,2,gaussian_ei", "coupled,2,gaussian_ei"]
 #                   "3,coupled,3,gaussian_ei",
@@ -30,8 +32,19 @@ for name_file in name_files:
         rl = f.readline()  # RBF,gaussian_sei,masked
         for compare in for_comparison:
             if compare in rl:
-                # dataype.append(f"110{compare}")
-                dataype.append(compare)
+                if "0.5" in rl:
+                    # continue
+                    dataype.append(f"0.50,{compare}")
+                elif "0.75" in rl:
+                    # continue
+                    dataype.append(f"0.75,{compare}")
+                elif "0.25" in rl:
+                    # continue
+                    dataype.append(f"0.25,{compare}")
+                else:
+                    # continue
+                    dataype.append(f"1.00,{compare}")
+                # dataype.append(compare)
                 datas.append(pd.read_csv(name_file, skiprows=2))
                 break
 
@@ -73,6 +86,25 @@ for name_file in name_files:
 #     "110decoupled", "110coupled",
 #     # "220decoupled", "220coupled",
 #     "dyndecoupled", "dyncoupled"]
+
+# for_comparison = ["1.00,2,coupled", "1.00,3,coupled", "1.00,4,coupled",
+#                   "1.00,2,decoupled", "1.00,3,decoupled", "1.00,4,decoupled",
+#                   "0.75,2,coupled", "0.75,3,coupled", "0.75,4,coupled",
+#                   "0.75,2,decoupled", "0.75,3,decoupled", "0.75,4,decoupled",
+#                   "0.50,2,coupled", "0.50,3,coupled", "0.50,4,coupled",
+#                   "0.50,2,decoupled", "0.50,3,decoupled", "0.50,4,decoupled",
+#                   "0.25,2,coupled", "0.25,3,coupled", "0.25,4,coupled",
+#                   "0.25,2,decoupled", "0.25,3,decoupled", "0.25,4,decoupled"]
+
+
+# for_comparison = ["0.25,2,coupled", "0.25,3,coupled", "0.25,4,coupled",
+#                   "0.25,2,decoupled", "0.25,3,decoupled", "0.25,4,decoupled",
+#                   "0.50,2,coupled", "0.50,3,coupled", "0.50,4,coupled",
+#                   "0.50,2,decoupled", "0.50,3,decoupled", "0.50,4,decoupled"
+#                   ]
+#
+for_comparison = ["1.00,coupled", "1.00,decoupled", "0.75,coupled", "0.75,decoupled", "0.50,coupled", "0.50,decoupled",
+                  "0.25,coupled", "0.25,decoupled"]
 
 for compare in for_comparison:
     print(compare, ": ", np.count_nonzero(np.array(dataype) == compare))
@@ -158,7 +190,6 @@ for key in for_comparison:
             variance_clean[key][i].extend(list(np.full(max4key[key] - len(variance_clean[key][i]), np.nan)))
             qty_clean[key][i].extend(list(np.full(max4key[key] - len(qty_clean[key][i]), np.nan)))
             time_clean[key][i].extend(list(np.full(max4key[key] - len(time_clean[key][i]), np.nan)))
-
 # minimum = 100000000000000
 # method = 0
 # name = "0"
@@ -224,37 +255,49 @@ legends = []
 for key in for_comparison:
     legends.append(key)
 
-colors = ["#3B4D77", "#C09235", "#B72F56", "#91B333", "#00629B", "#009CA6", "#78BE20", "#FFD100", "#3B4D77", "#C09235",
-          "#B72F56", "#91B333"]
+colors = ["#3B4D77", "#C09235", "#B72F56", "#91B333", "#00629B", "#009CA6",
+          "#78AA20", "#FFAA00", "#3BAA77", "#C0AA35", "#B7AA56", "#91AA33"]
 if "dist" in show:
     x = np.linspace(0, max_dist, np.round(max_dist).astype(int))
-    for compare in for_comparison:
-        for tdistrun, mserun in zip(t_dist[compare], variance[compare]):
-            fmo = np.where(mserun == -1)[0]
-            # print(fmo)
-            if len(fmo) > 0:
-                mse_interp[compare].append(np.interp(x, tdistrun[:fmo[0]], mserun[:fmo[0]]))
-            else:
-                mse_interp[compare].append(np.interp(x, tdistrun, mserun))
-    for key in for_comparison:
-        mse_interp[key] = np.array(mse_interp[key]).T.reshape(len(x), -1)
 
-    for key in for_comparison:
-        mse_interp_mean[key] = np.mean(mse_interp[key], axis=1)
-        mse_interp_std[key] = np.std(mse_interp[key], axis=1)
-    selected = np.arange(500, 1550, 250).astype(np.int)
+    # for key in for_comparison:
+    #     print(key)
+    #     for a in [mse[key], score[key], variance[key], time[key]]:
+    #         for tdistrun, mserun in zip(t_dist[key], a):
+    #             fmo = np.where(mserun == -1)[0]
+    #             # print(fmo)
+    #             if len(fmo) > 0:
+    #                 mse_interp[key].append(np.interp(x, tdistrun[:fmo[0]], mserun[:fmo[0]]))
+    #             else:
+    #                 mse_interp[key].append(np.interp(x, tdistrun, mserun))
+    #         mse_interp[key] = np.array(mse_interp[key]).T.reshape(len(x), -1)
+    #         mse_interp_mean[key] = np.mean(mse_interp[key], axis=1)
+    #         mse_interp_std[key] = np.std(mse_interp[key], axis=1)
+    #         print(f"${np.round(mse_interp_mean[key][1500], 4)} \pm {np.round(mse_interp_std[key][1500], 4)}$ & ")
+    #         mse_interp[key] = []
 
+    selected = np.arange(250, 1800, 250).astype(np.int)
     width = 90 / len(for_comparison)  # the width of the ba
     i = 0
     for key in for_comparison:
-        plt.plot(x, mse_interp_mean[key], label=key)
+        for tdistrun, mserun in zip(t_dist[key], score[key]):
+            fmo = np.where(mserun == -1)[0]
+            # print(fmo)
+            if len(fmo) > 0:
+                mse_interp[key].append(np.interp(x, tdistrun[:fmo[0]], mserun[:fmo[0]]))
+            else:
+                mse_interp[key].append(np.interp(x, tdistrun, mserun))
+        mse_interp[key] = np.array(mse_interp[key]).T.reshape(len(x), -1)
+        mse_interp_mean[key] = np.mean(mse_interp[key], axis=1)
+        mse_interp_std[key] = np.std(mse_interp[key], axis=1)
+        plt.plot(x, mse_interp_mean[key], label=key, color=colors[i])
         plt.fill_between(x, mse_interp_mean[key] - mse_interp_std[key],
-                         mse_interp_mean[key] + mse_interp_std[key], alpha=0.2)
+                         mse_interp_mean[key] + mse_interp_std[key], alpha=0.2, color=colors[i])
 
-        # plt.bar(selected + (i - len(for_comparison) / 2 + 0.5) * width,
-        #         mse_interp_mean[key][selected],
-        #         width,
-        #         yerr=mse_interp_std[key][selected], label=key, color=colors[i])
+        plt.bar(selected + (i - len(for_comparison) / 2 + 0.5) * width,
+                mse_interp_mean[key][selected],
+                width,
+                yerr=mse_interp_std[key][selected], label=key, color=colors[i])
         i += 1
 
     plt.ylabel('MSE', fontsize=30)
@@ -277,8 +320,10 @@ if "mse" in show:
         # print(labels + (i - len(for_comparison) / 2 + 0.5) * width)
         # print(mse_mean[key])
         # print(mse_std[key])
-        plt.bar(labels + (i - len(for_comparison) / 2 + 0.5) * width, mse_mean[key], width,
-                yerr=mse_std[key], color=colors[i],
+        plt.bar(labels + (i - len(for_comparison) / 2 + 0.5) * width, score_mean[key],
+                width,
+                # yerr=mse_std[key],
+                color=colors[i],
                 label=key)
         # label="n_sensors: {1}, fusion: {0}, acq: {2}".format(*key.split(',')))
         # label="n_sensors: {0}, fusion: {1}, acq: {3}".format(*key.split(',')), color=colors[i])
@@ -300,8 +345,12 @@ if "score" in show:
     plt.figure()
     for key in for_comparison:
         labels = np.arange(qty_clean[key][0][0], max4key[key] + qty_clean[key][0][0])
-        plt.bar(labels + (i - len(for_comparison) / 2 + 0.5) * width, score_mean[key], width,
-                yerr=score_std[key], color=colors[i],
+        # print(key, np.round(np.mean(score_mean[key] / labels), 4), np.round(np.std(score_mean[key] / labels), 4))
+        plt.bar(labels + (i - len(for_comparison) / 2 + 0.5) * width,
+                score_mean[key] / labels,
+                width,
+                # yerr=score_std[key],
+                color=colors[i],
                 label=key)
         # label="n_sensors: {1}, fusion: {0}, acq: {2}".format(*key.split(',')))
         # label="n_sensors: {0}, fusion: {1}, acq: {3}".format(*key.split(',')), color=colors[i])

@@ -10,12 +10,12 @@ from bin.Simulators.gym_environment import GymEnvironment
 seeds = np.linspace(163343, 3647565, 100)
 for d in [1, 0.75, 0.5, 0.25]:
     for acq in ["gaussian_ei"]:
-        for sensores in [["s1", "s2"],
-                         ["s5", "s6"],
-                         ["s1", "s2", "s3"],
-                         ["s5", "s6", "s7"],
-                         ["s1", "s2", "s3", "s4"],
-                         ["s5", "s6", "s7", "s8"]]:
+        for sensores in [["s1", "s2", "s3", "s4", "s5"],
+                         # ["s5", "s6"],
+                         # ["s1", "s2", "s3"],
+                         # ["s5", "s6", "s7"],
+                         # ["s1", "s2", "s3", "s4"],
+                         ["s5", "s6", "s7", "s8", "s1"]]:
             for fusion in ["coupled", "decoupled"]:
                 print(fusion, sensores, acq, d)
                 i = 0
