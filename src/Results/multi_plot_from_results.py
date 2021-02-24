@@ -7,7 +7,7 @@ import pandas as pd
 plt.style.use("seaborn")
 
 name_files = glob.glob("E:/ETSI/Proyecto/results/SAMS/*.csv")
-show = "dist,mse,time,var,score"
+show = "mse,score"
 
 datas = []
 dataype = []
@@ -41,6 +41,12 @@ for name_file in name_files:
                 elif "0.25" in rl:
                     # continue
                     dataype.append(f"0.25,{compare}")
+                elif "0.375" in rl:
+                    # continue
+                    dataype.append(f"0.375,{compare}")
+                elif "0.125" in rl:
+                    # continue
+                    dataype.append(f"0.125,{compare}")
                 else:
                     # continue
                     dataype.append(f"1.00,{compare}")
@@ -103,8 +109,18 @@ for name_file in name_files:
 #                   "0.50,2,decoupled", "0.50,3,decoupled", "0.50,4,decoupled"
 #                   ]
 #
-for_comparison = ["1.00,coupled", "1.00,decoupled", "0.75,coupled", "0.75,decoupled", "0.50,coupled", "0.50,decoupled",
-                  "0.25,coupled", "0.25,decoupled"]
+for_comparison = ["1.00,coupled",
+                  "1.00,decoupled",
+                  "0.75,coupled",
+                  "0.75,decoupled",
+                  "0.50,coupled",
+                  "0.50,decoupled",
+                  # "0.375,coupled",
+                  # "0.375,decoupled",
+                  "0.25,coupled",
+                  "0.25,decoupled"]
+                  # "0.125,coupled",
+                  # "0.125,decoupled", ]
 
 for compare in for_comparison:
     print(compare, ": ", np.count_nonzero(np.array(dataype) == compare))
@@ -132,6 +148,9 @@ t_dist = dict()
 mse_interp = dict()
 mse_interp_mean = dict()
 mse_interp_std = dict()
+t_dist_clean = dict()
+t_dist_mean = dict()
+t_dist_std = dict()
 
 for compare in for_comparison:
     mse[compare] = []
@@ -157,6 +176,9 @@ for compare in for_comparison:
     mse_interp[compare] = []
     mse_interp_mean[compare] = []
     mse_interp_std[compare] = []
+    t_dist_clean[compare] = []
+    t_dist_mean[compare] = []
+    t_dist_std[compare] = []
 
 max_dist = 0
 for i in range(len(datas)):
@@ -172,13 +194,14 @@ for i in range(len(datas)):
     variance[dataype[i]].append(np.var(scores, axis=0))
 
 for key in for_comparison:
-    for run, meas, tim, sco, var in zip(mse[key], qty[key], time[key], score[key], variance[key]):
+    for run, meas, tim, sco, var, dis in zip(mse[key], qty[key], time[key], score[key], variance[key], t_dist[key]):
         muestra, indice = np.unique(meas, return_index=True)
         mse_clean[key].append(list(run[indice.astype(int)]))
         score_clean[key].append(list(sco[indice.astype(int)]))
         variance_clean[key].append(list(var[indice.astype(int)]))
         qty_clean[key].append(list(muestra))
         time_clean[key].append(list(tim[indice]))
+        t_dist_clean[key].append(list(dis[indice]))
 
         if max4key[key] < len(indice):
             max4key[key] = len(indice)
@@ -190,6 +213,7 @@ for key in for_comparison:
             variance_clean[key][i].extend(list(np.full(max4key[key] - len(variance_clean[key][i]), np.nan)))
             qty_clean[key][i].extend(list(np.full(max4key[key] - len(qty_clean[key][i]), np.nan)))
             time_clean[key][i].extend(list(np.full(max4key[key] - len(time_clean[key][i]), np.nan)))
+            t_dist_clean[key][i].extend(list(np.full(max4key[key] - len(t_dist_clean[key][i]), np.nan)))
 # minimum = 100000000000000
 # method = 0
 # name = "0"
@@ -206,6 +230,7 @@ for key in for_comparison:
     variance_clean[key] = np.array(variance_clean[key]).T.reshape(max4key[key], -1)
     qty_clean[key] = np.array(qty_clean[key]).T.reshape(max4key[key], -1)
     time_clean[key] = np.array(time_clean[key]).T.reshape(max4key[key], -1)
+    t_dist_clean[key] = np.array(t_dist_clean[key]).T.reshape(max4key[key], -1)
     # print(key)
     # print(method)
     # print(minimum)
@@ -219,6 +244,9 @@ for compare in for_comparison:
     time_mean[compare] = np.nanmean(time_clean[compare], axis=1)
     time_std[compare] = np.nanstd(time_clean[compare], axis=1)
     variance_mean[compare] = np.nanmean(variance_clean[compare], axis=1)
+    t_dist_mean[compare] = np.nanmean(t_dist_clean[compare], axis=1)
+    t_dist_std[compare] = np.nanstd(t_dist_clean[compare], axis=1)
+
     # print(compare)
     # print(mse_mean[compare])
     # print(mse_std[compare])
@@ -316,13 +344,19 @@ key = for_comparison[-1]
 if "mse" in show:
     plt.figure()
     for key in for_comparison:
+        print(key)
+        print(np.mean(score_mean[key][1:] / t_dist_mean[key][1:]))
+        print(np.mean(variance_mean[key][1:] / t_dist_mean[key][1:]))
+        # print(mse_mean[key][-1]/t_dist_mean[key][-1])
+        # print(variance_mean[key][-1]/t_dist_mean[key][-1])
+        print(np.mean(time_mean[key][1:]))
         labels = np.arange(qty_clean[key][0][0], max4key[key] + qty_clean[key][0][0])
         # print(labels + (i - len(for_comparison) / 2 + 0.5) * width)
         # print(mse_mean[key])
         # print(mse_std[key])
-        plt.bar(labels + (i - len(for_comparison) / 2 + 0.5) * width, score_mean[key],
+        plt.bar(labels[1:] + (i - len(for_comparison) / 2 + 0.5) * width, score_mean[key][1:] / t_dist_mean[key][1:],
                 width,
-                # yerr=mse_std[key],
+                # yerr=t_dist_std[key],
                 color=colors[i],
                 label=key)
         # label="n_sensors: {1}, fusion: {0}, acq: {2}".format(*key.split(',')))
@@ -332,7 +366,7 @@ if "mse" in show:
     # print('yes')
     # Add some text for labels, title and custom x-axis tick labels, etc.
     plt.ylabel('MSE', fontsize=30)
-    plt.xticks(np.arange(0, max4key[key] + qty_clean[key][0][0]), fontsize=30)
+    plt.xticks(np.arange(2, max4key[key] + qty_clean[key][0][0]), fontsize=30)
     # plt.xticks(fontsize=30)
     plt.xlabel("Measurements", fontsize=30)
     plt.yticks(fontsize=30)
@@ -347,7 +381,7 @@ if "score" in show:
         labels = np.arange(qty_clean[key][0][0], max4key[key] + qty_clean[key][0][0])
         # print(key, np.round(np.mean(score_mean[key] / labels), 4), np.round(np.std(score_mean[key] / labels), 4))
         plt.bar(labels + (i - len(for_comparison) / 2 + 0.5) * width,
-                score_mean[key] / labels,
+                score_mean[key],
                 width,
                 # yerr=score_std[key],
                 color=colors[i],

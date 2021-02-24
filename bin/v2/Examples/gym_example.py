@@ -7,14 +7,17 @@ path.extend([path[0][:path[0].rindex("bin") - 1]])
 from bin.Agents.gym_agent import SimpleAgent
 from bin.Simulators.gym_environment import GymEnvironment
 
+# todo hacer simulación
 seeds = np.linspace(163343, 3647565, 100)
-for d in [1, 0.75, 0.5, 0.25]:
+for d in [0.375, 0.125]:
     for acq in ["gaussian_ei"]:
-        for sensores in [["s1", "s2", "s3", "s4", "s5"],
-                         # ["s5", "s6"],
-                         # ["s1", "s2", "s3"],
-                         # ["s5", "s6", "s7"],
-                         # ["s1", "s2", "s3", "s4"],
+        for sensores in [["s1", "s2"],
+                         ["s5", "s6"],
+                         ["s1", "s2", "s3"],
+                         ["s5", "s6", "s7"],
+                         ["s1", "s2", "s3", "s4"],
+                         ["s5", "s6", "s7", "s8"],
+                         ["s1", "s2", "s3", "s4", "s5"],
                          ["s5", "s6", "s7", "s8", "s1"]]:
             for fusion in ["coupled", "decoupled"]:
                 print(fusion, sensores, acq, d)
@@ -27,7 +30,7 @@ for d in [1, 0.75, 0.5, 0.25]:
                                          acq=acq, acq_mod="truncated", render2gui=False, saving=True,
                                          name_file="{}_{}_{}_1A{}S".format(acq, fusion, d, len(sensores)),
                                          acq_fusion=fusion, d=d)
-                    for k in range(40):
+                    for k in range(50):
                         while True:
                             if sim.render2gui and not sim.sender.should_update():
                                 time.sleep(1)
