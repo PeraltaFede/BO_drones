@@ -9,8 +9,8 @@ from bin.Simulators.gym_environment import GymEnvironment
 
 # todo hacer simulación
 seeds = np.linspace(163343, 3647565, 100)
-for d in [0.375, 0.125]:
-    for acq in ["gaussian_ei"]:
+for d in [0.25]:
+    for acq in ["predictive_entropy_search"]:
         for sensores in [["s1", "s2"],
                          ["s5", "s6"],
                          ["s1", "s2", "s3"],

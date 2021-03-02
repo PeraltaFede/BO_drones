@@ -7,7 +7,7 @@ import pandas as pd
 plt.style.use("seaborn")
 
 name_files = glob.glob("E:/ETSI/Proyecto/results/SAMS/*.csv")
-show = "mse,score"
+show = "dist,mse,score"
 
 datas = []
 dataype = []
@@ -109,18 +109,19 @@ for name_file in name_files:
 #                   "0.50,2,decoupled", "0.50,3,decoupled", "0.50,4,decoupled"
 #                   ]
 #
-for_comparison = ["1.00,coupled",
-                  "1.00,decoupled",
-                  "0.75,coupled",
-                  "0.75,decoupled",
-                  "0.50,coupled",
-                  "0.50,decoupled",
-                  # "0.375,coupled",
-                  # "0.375,decoupled",
-                  "0.25,coupled",
-                  "0.25,decoupled"]
-                  # "0.125,coupled",
-                  # "0.125,decoupled", ]
+for_comparison = [
+    "1.00,coupled",
+    "1.00,decoupled",
+    "0.75,coupled",
+    "0.75,decoupled",
+    "0.50,coupled",
+    "0.50,decoupled",
+    "0.375,coupled",
+    "0.375,decoupled",
+    "0.25,coupled",
+    "0.25,decoupled",
+    "0.125,coupled",
+    "0.125,decoupled", ]
 
 for compare in for_comparison:
     print(compare, ": ", np.count_nonzero(np.array(dataype) == compare))
@@ -287,7 +288,10 @@ colors = ["#3B4D77", "#C09235", "#B72F56", "#91B333", "#00629B", "#009CA6",
           "#78AA20", "#FFAA00", "#3BAA77", "#C0AA35", "#B7AA56", "#91AA33"]
 if "dist" in show:
     x = np.linspace(0, max_dist, np.round(max_dist).astype(int))
-
+    # print(np.nanmax(t_dist_mean["0.125,coupled"]))
+    # print(np.nanmax(t_dist["0.125,coupled"]))
+    # print(np.nanmax(t_dist_mean["0.125,decoupled"]))
+    # print(np.nanmax(t_dist["0.125,decoupled"]))
     # for key in for_comparison:
     #     print(key)
     #     for a in [mse[key], score[key], variance[key], time[key]]:
@@ -308,7 +312,7 @@ if "dist" in show:
     width = 90 / len(for_comparison)  # the width of the ba
     i = 0
     for key in for_comparison:
-        for tdistrun, mserun in zip(t_dist[key], score[key]):
+        for tdistrun, mserun in zip(t_dist[key], mse[key]):
             fmo = np.where(mserun == -1)[0]
             # print(fmo)
             if len(fmo) > 0:
@@ -341,38 +345,86 @@ width = 0.9 / len(for_comparison)  # the width of the ba
 i = 0
 key = for_comparison[-1]
 
+c_proportion_of_l_s = []
+d_proportion_of_l_s = []
+c_ratio_score_t_d = []
+d_ratio_score_t_d = []
+
 if "mse" in show:
     plt.figure()
     for key in for_comparison:
-        print(key)
-        print(np.mean(score_mean[key][1:] / t_dist_mean[key][1:]))
-        print(np.mean(variance_mean[key][1:] / t_dist_mean[key][1:]))
+        # print(key)
+        # print(np.mean(score_mean[key][1:] / t_dist_mean[key][1:]))
+        if "decoupled" in key:
+            # d_proportion_of_l_s.append(1 / float(key[:4]))
+            d_proportion_of_l_s.append(float(key[:4]))
+            # d_ratio_score_t_d.append(mse_interp_mean[key][1500])
+            d_ratio_score_t_d.append(np.mean(mse_mean[key][1:] / t_dist_mean[key][1:]))
+        else:
+            # c_proportion_of_l_s.append(1 / float(key[:4]))
+            c_proportion_of_l_s.append(float(key[:4]))
+            # c_ratio_score_t_d.append(mse_interp_mean[key][1500])
+            c_ratio_score_t_d.append(np.mean(mse_mean[key][1:] / t_dist_mean[key][1:]))
+        # print(np.mean(variance_mean[key][1:] / t_dist_mean[key][1:]))
         # print(mse_mean[key][-1]/t_dist_mean[key][-1])
         # print(variance_mean[key][-1]/t_dist_mean[key][-1])
-        print(np.mean(time_mean[key][1:]))
+        # print(np.mean(time_mean[key][1:]))
         labels = np.arange(qty_clean[key][0][0], max4key[key] + qty_clean[key][0][0])
         # print(labels + (i - len(for_comparison) / 2 + 0.5) * width)
         # print(mse_mean[key])
         # print(mse_std[key])
-        plt.bar(labels[1:] + (i - len(for_comparison) / 2 + 0.5) * width, score_mean[key][1:] / t_dist_mean[key][1:],
-                width,
-                # yerr=t_dist_std[key],
-                color=colors[i],
-                label=key)
+        # plt.bar(labels[1:] + (i - len(for_comparison) / 2 + 0.5) * width, score_mean[key][1:] / t_dist_mean[key][1:],
+        #         width,
+        #         # yerr=t_dist_std[key],
+        #         color=colors[i],
+        #         label=key)
         # label="n_sensors: {1}, fusion: {0}, acq: {2}".format(*key.split(',')))
         # label="n_sensors: {0}, fusion: {1}, acq: {3}".format(*key.split(',')), color=colors[i])
         #     plt.plot(labels + (i - len(for_comparison) / 2 + 0.5), mse_mean[key])
         i += 1
+    # xx = np.linspace(1.0, 10.0, 1000)
+    xx = np.linspace(0.0, 1.0, 1000)
+    from scipy.interpolate import splev, splrep
+
+    agh = [
+        "1.00,coupled",
+        "0.75,coupled",
+        "0.50,coupled",
+        "0.375,coupled",
+        "0.25,coupled",
+        "0.125,coupled"]
+
+    for key, xi, yi in zip(agh, d_proportion_of_l_s,
+                           d_ratio_score_t_d):
+        plt.text(xi, yi + 0.00005, f"$n = {max4key[key]}$", fontsize=20)
+
+    plt.plot(c_proportion_of_l_s, c_ratio_score_t_d, 'or')
+    # plt.plot(np.log2(c_proportion_of_l_s), c_ratio_score_t_d, 'or')
+    plt.plot(d_proportion_of_l_s, d_ratio_score_t_d, 'og')
+    # plt.plot(np.log2(d_proportion_of_l_s), d_ratio_score_t_d, 'og')
+    # print(c_proportion_of_l_s, c_ratio_score_t_d)
+    tck = splrep(c_proportion_of_l_s[::-1], c_ratio_score_t_d[::-1], s=0)
+    # tck = splrep(c_proportion_of_l_s, c_ratio_score_t_d, s=0)
+    yy = splev(xx, tck)
+    plt.plot(xx, yy, '-r')
+    # plt.plot(np.log2(xx), yy, '-r')
+    tck = splrep(d_proportion_of_l_s[::-1], d_ratio_score_t_d[::-1], s=0)
+    # tck = splrep(d_proportion_of_l_s, d_ratio_score_t_d, s=0)
+    yy = splev(xx, tck)
+    plt.plot(xx, yy, '-g')
+    # plt.plot(np.log2(xx), yy, '-g')
     # print('yes')
     # Add some text for labels, title and custom x-axis tick labels, etc.
-    plt.ylabel('MSE', fontsize=30)
-    plt.xticks(np.arange(2, max4key[key] + qty_clean[key][0][0]), fontsize=30)
-    # plt.xticks(fontsize=30)
-    plt.xlabel("Measurements", fontsize=30)
+    plt.ylabel('MSE/dist', fontsize=30)
+    # plt.xticks(np.arange(2, max4key[key] + qty_clean[key][0][0]), fontsize=30)
+    plt.xticks([0.0, 0.125, 0.25, 0.375, 0.5, 0.75, 1.0], fontsize=30)
+    plt.xlabel("$\\lambda$", fontsize=30)
+    # plt.gca().set_xscale('log', base=2)
+    # plt.xlabel("$\\frac{1}{\\lambda}$", fontsize=30)
     plt.yticks(fontsize=30)
-    plt.title("MSE", fontsize=30)
+    plt.title("MSE/dist", fontsize=30)
     # plt.legend(["realnew", "old", "new"], prop={'size': 23})
-    plt.legend(prop={'size': 13}, fancybox=True, shadow=True, frameon=True)
+    plt.legend(["Coupled", "Decoupled"], prop={'size': 13}, fancybox=True, shadow=True, frameon=True)
     # plt.tight_layout()
 i = 0
 if "score" in show:
@@ -436,5 +488,4 @@ if "time" in show:
     # plt.title("4 drones", fontsize=30)
     # plt.legend(["realnew", "old", "new"], prop={'size': 23})
     plt.legend(prop={'size': 13}, fancybox=True, shadow=True, frameon=True)
-
 plt.show(block=True)
