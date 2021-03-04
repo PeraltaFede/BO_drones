@@ -4,21 +4,23 @@ from sys import path
 import numpy as np
 
 path.extend([path[0][:path[0].rindex("bin") - 1]])
-from bin.Agents.gym_agent import SimpleAgent
+from bin.Agents.gym_agent_trimmed import SimpleAgent
 from bin.Simulators.gym_environment import GymEnvironment
 
 # todo hacer simulación
 seeds = np.linspace(163343, 3647565, 100)
-for d in [0.25]:
-    for acq in ["predictive_entropy_search"]:
-        for sensores in [["s1", "s2"],
-                         ["s5", "s6"],
-                         ["s1", "s2", "s3"],
-                         ["s5", "s6", "s7"],
+for acq in ["gaussian_ei", "predictive_entropy_search"]:
+    ds = [0.125, 0.25, 0.375, 0.5, 0.75, 1.0] if acq == "gaussian_ei" else [0.25]
+    for d in ds:
+        for sensores in [["s1", "s2", "s3", "s4", "s5"],
+                         ["s5", "s6", "s7", "s8", "s1"],
                          ["s1", "s2", "s3", "s4"],
                          ["s5", "s6", "s7", "s8"],
-                         ["s1", "s2", "s3", "s4", "s5"],
-                         ["s5", "s6", "s7", "s8", "s1"]]:
+                         ["s1", "s2", "s3"],
+                         ["s5", "s6", "s7"],
+                         ["s1", "s2"],
+                         ["s5", "s6"]
+                         ]:
             for fusion in ["coupled", "decoupled"]:
                 print(fusion, sensores, acq, d)
                 i = 0

@@ -1,10 +1,8 @@
-# import gpytorch
 import numpy as np
-# import torch as to
 from sklearn.metrics import mean_squared_error as mse
 from sklearn.metrics import r2_score
 from skopt.learning.gaussian_process import gpr, kernels
-
+from hummingbird.ml import convert
 from bin.Utils.acquisition_functions import gaussian_sei, maxvalue_entropy_search, gaussian_pi, gaussian_ei, max_std, \
     predictive_entropy_search
 from bin.Utils.voronoi_regions import calc_voronoi, find_vect_pos4region
@@ -31,7 +29,9 @@ class Coordinator(object):
 
         for sensor, kernel in zip(sensors, k_names):
             if kernel == "RBF":  # "RBF" Matern" "RQ"
-                self.gps[sensor] = gpr.GaussianProcessRegressor(kernel=kernels.RBF(100), alpha=1e-7)
+                helper = gpr.GaussianProcessRegressor(kernel=kernels.RBF(100), alpha=1e-7)
+                self.gps[sensor] = convert(helper, 'torch')
+                self.gps[sensor].to('cuda')
                 self.train_targets[sensor] = np.array([])
                 self.mus[sensor] = np.array([])
                 self.stds[sensor] = np.array([])
@@ -122,7 +122,6 @@ class Coordinator(object):
             sum_sigmas = None
             for _, sigma in gps:
                 sum_sigmas = sigma if sum_sigmas is None else sigma + sum_sigmas
-            # todo cambiar xstar por pareto set
             x_star = self.vector_pos[np.where(sum_sigmas == np.max(sum_sigmas))[0][0]]
             for i in range(len(self.sensors)):
                 mu, sigma = gps[i]

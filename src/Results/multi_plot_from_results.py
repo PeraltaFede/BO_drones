@@ -7,7 +7,7 @@ import pandas as pd
 plt.style.use("seaborn")
 
 name_files = glob.glob("E:/ETSI/Proyecto/results/SAMS/*.csv")
-show = "dist,mse,score"
+show = "dist,score,var,time"
 
 datas = []
 dataype = []
@@ -33,22 +33,23 @@ for name_file in name_files:
         for compare in for_comparison:
             if compare in rl:
                 if "0.5" in rl:
-                    # continue
+                    continue
                     dataype.append(f"0.50,{compare}")
                 elif "0.75" in rl:
-                    # continue
+                    continue
                     dataype.append(f"0.75,{compare}")
                 elif "0.25" in rl:
                     # continue
-                    dataype.append(f"0.25,{compare}")
+                    dataype.append(f"ei,{compare}")
+                    # dataype.append(f"0.25,{compare}")
                 elif "0.375" in rl:
-                    # continue
+                    continue
                     dataype.append(f"0.375,{compare}")
                 elif "0.125" in rl:
-                    # continue
+                    continue
                     dataype.append(f"0.125,{compare}")
                 else:
-                    # continue
+                    continue
                     dataype.append(f"1.00,{compare}")
                 # dataype.append(compare)
                 datas.append(pd.read_csv(name_file, skiprows=2))
@@ -66,7 +67,7 @@ for name_file in name_files:
 #                 datas.append(pd.read_csv(name_file, skiprows=2))
 #                 break
 
-# name_files = glob.glob("E:/ETSI/Proyecto/results/SAMS/paper sams/*.csv")
+# name_files = glob.glob("E:/ETSI/Proyecto/results/SAMS/pes/*.csv")
 #
 # for name_file in name_files:
 #     with open(name_file, 'r') as f:
@@ -74,7 +75,7 @@ for name_file in name_files:
 #         rl = f.readline()  # RBF,gaussian_sei,masked
 #         for compare in for_comparison:
 #             if compare in rl:
-#                 dataype.append(f"dyn{compare}")
+#                 dataype.append(f"pes,{compare}")
 #                 datas.append(pd.read_csv(name_file, skiprows=2))
 #                 break
 
@@ -109,19 +110,26 @@ for name_file in name_files:
 #                   "0.50,2,decoupled", "0.50,3,decoupled", "0.50,4,decoupled"
 #                   ]
 #
+# for_comparison = [
+#     "1.00,coupled",
+#     "1.00,decoupled",
+#     "0.75,coupled",
+#     "0.75,decoupled",
+#     "0.50,coupled",
+#     "0.50,decoupled",
+#     "0.375,coupled",
+#     "0.375,decoupled",
+#     "0.25,coupled",
+#     "0.25,decoupled",
+#     "0.125,coupled",
+#     "0.125,decoupled", ]
+
 for_comparison = [
-    "1.00,coupled",
-    "1.00,decoupled",
-    "0.75,coupled",
-    "0.75,decoupled",
-    "0.50,coupled",
-    "0.50,decoupled",
-    "0.375,coupled",
-    "0.375,decoupled",
-    "0.25,coupled",
-    "0.25,decoupled",
-    "0.125,coupled",
-    "0.125,decoupled", ]
+    "ei,coupled",
+    "ei,decoupled",
+    # "pes,coupled",
+    # "pes,decoupled"
+]
 
 for compare in for_comparison:
     print(compare, ": ", np.count_nonzero(np.array(dataype) == compare))
@@ -308,23 +316,30 @@ if "dist" in show:
     #         print(f"${np.round(mse_interp_mean[key][1500], 4)} \pm {np.round(mse_interp_std[key][1500], 4)}$ & ")
     #         mse_interp[key] = []
 
-    selected = np.arange(250, 1800, 250).astype(np.int)
+    selected = np.arange(250, max_dist, 250).astype(np.int)
     width = 90 / len(for_comparison)  # the width of the ba
     i = 0
     for key in for_comparison:
+        # mse = dict()
+        # qty = dict()
+        # score = dict()
+        #  = dict()
         for tdistrun, mserun in zip(t_dist[key], mse[key]):
             fmo = np.where(mserun == -1)[0]
+
             # print(fmo)
             if len(fmo) > 0:
                 mse_interp[key].append(np.interp(x, tdistrun[:fmo[0]], mserun[:fmo[0]]))
+                plt.plot(tdistrun[:fmo[0]], mserun[:fmo[0]], color=colors[i], alpha=0.05)
             else:
                 mse_interp[key].append(np.interp(x, tdistrun, mserun))
+                plt.plot(tdistrun, mserun, color=colors[i], alpha=0.05)
         mse_interp[key] = np.array(mse_interp[key]).T.reshape(len(x), -1)
         mse_interp_mean[key] = np.mean(mse_interp[key], axis=1)
         mse_interp_std[key] = np.std(mse_interp[key], axis=1)
         plt.plot(x, mse_interp_mean[key], label=key, color=colors[i])
-        plt.fill_between(x, mse_interp_mean[key] - mse_interp_std[key],
-                         mse_interp_mean[key] + mse_interp_std[key], alpha=0.2, color=colors[i])
+        # plt.fill_between(x, mse_interp_mean[key] - mse_interp_std[key],
+        #                  mse_interp_mean[key] + mse_interp_std[key], alpha=0.2, color=colors[i])
 
         plt.bar(selected + (i - len(for_comparison) / 2 + 0.5) * width,
                 mse_interp_mean[key][selected],
@@ -435,7 +450,7 @@ if "score" in show:
         plt.bar(labels + (i - len(for_comparison) / 2 + 0.5) * width,
                 score_mean[key],
                 width,
-                # yerr=score_std[key],
+                yerr=score_std[key],
                 color=colors[i],
                 label=key)
         # label="n_sensors: {1}, fusion: {0}, acq: {2}".format(*key.split(',')))

@@ -5,7 +5,7 @@ from time import time
 from numpy import mean
 from numpy.linalg import norm
 
-from bin.Agents.gym_agent import SimpleAgent as Ga
+from bin.Agents.gym_agent_trimmed import SimpleAgent as Ga
 from bin.Coordinators.gym_coordinator import Coordinator
 from bin.Environment.simple_env import Env
 from bin.Utils.utils import get_init_pos4
@@ -167,8 +167,8 @@ class GymEnvironment(object):
                 self.sender.send_new_drone_msg(agent.pose, agent.drone_id)
 
         self.timestep += 1
+        mses, scores, keys = self.reward()
         if self.saving:
-            mses, scores, keys = self.reward()
             results = ""
             for mse, score in zip(mses, scores):
                 results += f",{mse},{score}"
