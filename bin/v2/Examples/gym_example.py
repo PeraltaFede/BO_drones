@@ -7,7 +7,6 @@ path.extend([path[0][:path[0].rindex("bin") - 1]])
 from bin.Agents.gym_agent_trimmed import SimpleAgent
 from bin.Simulators.gym_environment import GymEnvironment
 
-# todo hacer simulación
 seeds = np.linspace(163343, 3647565, 100)
 for acq in ["gaussian_ei", "predictive_entropy_search"]:
     ds = [0.125, 0.25, 0.375, 0.5, 0.75, 1.0] if acq == "gaussian_ei" else [0.25]
@@ -21,7 +20,7 @@ for acq in ["gaussian_ei", "predictive_entropy_search"]:
                          ["s1", "s2"],
                          ["s5", "s6"]
                          ]:
-            for fusion in ["coupled", "decoupled"]:
+            for fusion in ["decoupled", "coupled"]:
                 print(fusion, sensores, acq, d)
                 i = 0
                 for seed in seeds:
@@ -55,7 +54,7 @@ for acq in ["gaussian_ei", "predictive_entropy_search"]:
                                     sim.sender.send_new_goal_msg(agent.next_pose, agent.drone_id)
                             else:
                                 next_poses.append([])
-                        print(sim.step(next_poses))
+                        print(k, sim.step(next_poses))
                         # mus, stds = sim.render()
                     if sim.saving:
                         sim.f.close()

@@ -21,6 +21,7 @@ yticks = np.arange(0, 1500, 200)
 xnticks = [str(num * 10) for num in xticks]
 ynticks = [str(num * 10) for num in yticks]
 i = 0
+
 print(np.nanmax(maps[0]))
 print(np.nanmin(maps[0]))
 print(np.nanmax(maps[1]))

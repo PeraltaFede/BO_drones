@@ -163,11 +163,13 @@ class SimpleAgent(object):
                 i2remove = 0
                 for goal in self.path:
                     d = np.linalg.norm(self.pose[:2] - goal[:2])
-                    if (dist_left is None or (d <= dist_left)) and self.distance_travelled + dist_left < 1500.0:
+                    if (dist_left is None or (d <= dist_left)) and self.distance_travelled + d < 1500.0:
                         self.distance_travelled += d
                         self.pose = deepcopy(goal)
                         dist_left -= d
                     else:
+                        if self.distance_travelled + d > 1500.0:
+                            dist_left = 1501 - self.distance_travelled
                         diff = np.subtract(goal[:2], self.pose[:2])
                         angle = np.arctan2(diff[1], diff[0])
                         while dist_left > 0.51:
@@ -176,12 +178,10 @@ class SimpleAgent(object):
                             self.distance_travelled += np.linalg.norm(np.subtract(new_pose[:2], self.pose[:2]))
                             self.pose = new_pose
                             if self.distance_travelled > 1500:
-                                print(self.pose, self.next_pose)
                                 # print('slow down turbo')
                                 self.pose = np.round(np.append(new_pose, 0)).astype(np.int)
                                 self.position_flag = False
                                 self.next_pose = self.pose
-                                print(self.pose, self.next_pose)
                                 break
 
                         if self.distance_travelled > 1500:

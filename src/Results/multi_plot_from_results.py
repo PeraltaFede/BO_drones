@@ -6,7 +6,7 @@ import pandas as pd
 
 plt.style.use("seaborn")
 
-name_files = glob.glob("E:/ETSI/Proyecto/results/SAMS/*.csv")
+name_files = glob.glob("E:/ETSI/Proyecto/results/SAMS/old/*.csv")
 show = "dist,score,var,time"
 
 datas = []
@@ -19,12 +19,44 @@ dataype = []
 # "decoupled,4,gaussian_ei", "coupled,4,gaussian_ei"]
 # for_comparison = ["2,coupled", "3,coupled", "4,coupled",
 #                   "2,decoupled", "3,decoupled", "4,decoupled"]
-for_comparison = ["decoupled", "coupled"]
+for_comparison = ["5,decoupled"]
 # for_comparison = ["decoupled,2,gaussian_ei", "coupled,2,gaussian_ei"]
 #                   "3,coupled,3,gaussian_ei",
 #                   "3,coupled,3,predictive_entropy_search",
 #                   "4,coupled,4,gaussian_ei",
 #                   "4,coupled,4,predictive_entropy_search"]
+
+# for name_file in name_files:
+#     with open(name_file, 'r') as f:
+#         f.readline()
+#         rl = f.readline()  # RBF,gaussian_sei,masked
+#         for compare in for_comparison:
+#             if compare in rl:
+#                 if "0.5" in rl:
+#                     continue
+#                     dataype.append(f"0.50,{compare}")
+#                 elif "0.75" in rl:
+#                     continue
+#                     dataype.append(f"0.75,{compare}")
+#                 elif "0.25" in rl:
+#                     continue
+#                     dataype.append(f"ei,{compare}")
+#                     # dataype.append(f"0.25,{compare}")
+#                 elif "0.375" in rl:
+#                     continue
+#                     dataype.append(f"0.375,{compare}")
+#                 elif "0.125" in rl:
+#                     # continue
+#                     dataype.append(f"old,0.125,{compare[2:]}")
+#                 else:
+#                     continue
+#                     dataype.append(f"1.00,{compare}")
+#                 # dataype.append(compare)
+#                 datas.append(pd.read_csv(name_file, skiprows=2))
+#                 break
+
+name_files = glob.glob("E:/ETSI/Proyecto/results/SAMS/*.csv")
+for_comparison = ["5,decoupled", "5,coupled"]
 
 for name_file in name_files:
     with open(name_file, 'r') as f:
@@ -32,40 +64,9 @@ for name_file in name_files:
         rl = f.readline()  # RBF,gaussian_sei,masked
         for compare in for_comparison:
             if compare in rl:
-                if "0.5" in rl:
-                    continue
-                    dataype.append(f"0.50,{compare}")
-                elif "0.75" in rl:
-                    continue
-                    dataype.append(f"0.75,{compare}")
-                elif "0.25" in rl:
-                    # continue
-                    dataype.append(f"ei,{compare}")
-                    # dataype.append(f"0.25,{compare}")
-                elif "0.375" in rl:
-                    continue
-                    dataype.append(f"0.375,{compare}")
-                elif "0.125" in rl:
-                    continue
-                    dataype.append(f"0.125,{compare}")
-                else:
-                    continue
-                    dataype.append(f"1.00,{compare}")
-                # dataype.append(compare)
+                dataype.append(f"new,0.125,{compare[2:]}")
                 datas.append(pd.read_csv(name_file, skiprows=2))
                 break
-
-# name_files = glob.glob("E:/ETSI/Proyecto/results/SAMS/old sams/*.csv")
-#
-# for name_file in name_files:
-#     with open(name_file, 'r') as f:
-#         f.readline()
-#         rl = f.readline()  # RBF,gaussian_sei,masked
-#         for compare in for_comparison:
-#             if compare in rl:
-#                 dataype.append(f"220{compare}")
-#                 datas.append(pd.read_csv(name_file, skiprows=2))
-#                 break
 
 # name_files = glob.glob("E:/ETSI/Proyecto/results/SAMS/pes/*.csv")
 #
@@ -125,10 +126,8 @@ for name_file in name_files:
 #     "0.125,decoupled", ]
 
 for_comparison = [
-    "ei,coupled",
-    "ei,decoupled",
-    # "pes,coupled",
-    # "pes,decoupled"
+    "new,0.125,decoupled",
+    "new,0.125,coupled",
 ]
 
 for compare in for_comparison:
@@ -198,7 +197,6 @@ for i in range(len(datas)):
     t_dist[dataype[i]].append(datas[i]["t_dist"].values)
     if t_dist[dataype[i]][-1][-1] > max_dist:
         max_dist = t_dist[dataype[i]][-1][-1]
-
     scores = [datas[i][x].values for x in datas[i].columns if "score_" in x]
     variance[dataype[i]].append(np.var(scores, axis=0))
 
@@ -292,8 +290,8 @@ legends = []
 for key in for_comparison:
     legends.append(key)
 
-colors = ["#3B4D77", "#C09235", "#B72F56", "#91B333", "#00629B", "#009CA6",
-          "#78AA20", "#FFAA00", "#3BAA77", "#C0AA35", "#B7AA56", "#91AA33"]
+colors = ["#FFAA00", "#3BAA77", "#B72F56", "#91B333", "#00629B", "#009CA6",
+          "#78AA20", "#3B4D77", "#C09235", "#C0AA35", "#B7AA56", "#91AA33"]
 if "dist" in show:
     x = np.linspace(0, max_dist, np.round(max_dist).astype(int))
     # print(np.nanmax(t_dist_mean["0.125,coupled"]))
@@ -326,14 +324,14 @@ if "dist" in show:
         #  = dict()
         for tdistrun, mserun in zip(t_dist[key], mse[key]):
             fmo = np.where(mserun == -1)[0]
-
-            # print(fmo)
             if len(fmo) > 0:
+
                 mse_interp[key].append(np.interp(x, tdistrun[:fmo[0]], mserun[:fmo[0]]))
-                plt.plot(tdistrun[:fmo[0]], mserun[:fmo[0]], color=colors[i], alpha=0.05)
+                plt.plot(tdistrun[:fmo[0]], mserun[:fmo[0]], color=colors[i], alpha=0.1)
+                # plt.plot(tdistrun[fmo[0] - 1], mserun[fmo[0] - 1], '.', color=colors[i])
             else:
                 mse_interp[key].append(np.interp(x, tdistrun, mserun))
-                plt.plot(tdistrun, mserun, color=colors[i], alpha=0.05)
+                plt.plot(tdistrun, mserun, color=colors[i], alpha=0.1)
         mse_interp[key] = np.array(mse_interp[key]).T.reshape(len(x), -1)
         mse_interp_mean[key] = np.mean(mse_interp[key], axis=1)
         mse_interp_std[key] = np.std(mse_interp[key], axis=1)
@@ -341,10 +339,10 @@ if "dist" in show:
         # plt.fill_between(x, mse_interp_mean[key] - mse_interp_std[key],
         #                  mse_interp_mean[key] + mse_interp_std[key], alpha=0.2, color=colors[i])
 
-        plt.bar(selected + (i - len(for_comparison) / 2 + 0.5) * width,
-                mse_interp_mean[key][selected],
-                width,
-                yerr=mse_interp_std[key][selected], label=key, color=colors[i])
+        # plt.bar(selected + (i - len(for_comparison) / 2 + 0.5) * width,
+        #         mse_interp_mean[key][selected],
+        #         width,
+        #         yerr=mse_interp_std[key][selected], label=key, color=colors[i])
         i += 1
 
     plt.ylabel('MSE', fontsize=30)
