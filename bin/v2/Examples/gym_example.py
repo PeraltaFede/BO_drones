@@ -11,8 +11,9 @@ seeds = np.linspace(163343, 3647565, 100)
 for acq in ["gaussian_ei", "predictive_entropy_search"]:
     ds = [0.125, 0.25, 0.375, 0.5, 0.75, 1.0] if acq == "gaussian_ei" else [0.25]
     for d in ds:
-        for sensores in [["s1", "s2", "s3", "s4", "s5"],
-                         ["s5", "s6", "s7", "s8", "s1"],
+        for sensores in [
+            # ["s1", "s2", "s3", "s4", "s5"],
+            #              ["s5", "s6", "s7", "s8", "s1"],
                          ["s1", "s2", "s3", "s4"],
                          ["s5", "s6", "s7", "s8"],
                          ["s1", "s2", "s3"],
