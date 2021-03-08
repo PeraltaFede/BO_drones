@@ -41,7 +41,6 @@ class Coordinator(object):
 
         self.data = [np.array([[], []]), np.array([])]
 
-        # TODO: ordenar todo variando 1ro en y luego en x como esta vector pos
         self.all_vector_pos = np.mgrid[0:self.map_data.shape[1]:1, 0:self.map_data.shape[0]:1].reshape(2, -1).T
         self.vector_pos = np.fliplr(np.asarray(np.where(self.map_data == 0)).reshape(2, -1).T)
 

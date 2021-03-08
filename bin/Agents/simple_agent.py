@@ -43,7 +43,6 @@ class SimpleAgent(object):
         if self.voronoi_reg == -1:
             self.agent_env = env
         else:
-            # TODO: unir env con regions[voronoi_reg]
             self.agent_env = env
 
     def reached_pose(self):

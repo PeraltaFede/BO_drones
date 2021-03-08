@@ -177,13 +177,8 @@ class SimpleAgent(object):
                             dist_left -= np.linalg.norm(np.subtract(new_pose[:2], self.pose[:2]))
                             self.distance_travelled += np.linalg.norm(np.subtract(new_pose[:2], self.pose[:2]))
                             self.pose = new_pose
-
-                            agh = np.round(np.append(new_pose, 0)).astype(np.int)
-                            print(self.pose, self.agent_env.grid[agh[1], agh[0]])
                             if self.distance_travelled > 1500:
-                                print(self.pose, new_pose, self.next_pose, goal)
                                 self.pose = np.round(np.append(new_pose, 0)).astype(np.int)
-                                print(self.agent_env.grid[self.pose[1], self.pose[0]])
                                 self.position_flag = False
                                 self.next_pose = self.pose
                                 break

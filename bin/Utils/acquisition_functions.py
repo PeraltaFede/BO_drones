@@ -73,7 +73,7 @@ def gaussian_sei(x, model, y_opt=0.0, xi=0.01, c_point=np.zeros((1, 2)), masked=
 
     values = np.zeros_like(mu)
     mask = sigma > 0
-    imp = y_opt - mu[mask] - xi  # todo ?????
+    imp = y_opt - mu[mask] - xi
     # imp += np.interp(np.exp(-cdist([c_point], x)).reshape(mu.shape), [-1, 0], [np.nanmin(imp), np.nanmax(imp)])
     # print(np.nanmax(imp))
     # print(np.nanmin(imp))

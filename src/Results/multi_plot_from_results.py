@@ -5,9 +5,7 @@ import numpy as np
 import pandas as pd
 
 plt.style.use("seaborn")
-
-name_files = glob.glob("E:/ETSI/Proyecto/results/SAMS/old/*.csv")
-show = "dist,score,var,time"
+show = "dist,score,var,time,mse"
 
 datas = []
 dataype = []
@@ -27,34 +25,6 @@ for_comparison = ["decoupled", "coupled"]
 #                   "4,coupled,4,gaussian_ei",
 #                   "4,coupled,4,predictive_entropy_search"]
 
-for name_file in name_files:
-    with open(name_file, 'r') as f:
-        f.readline()
-        rl = f.readline()  # RBF,gaussian_sei,masked
-        for compare in for_comparison:
-            if compare in rl:
-                if "0.5" in rl:
-                    continue
-                    dataype.append(f"old,0.50,{compare}")
-                elif "0.75" in rl:
-                    continue
-                    dataype.append(f"old,0.75,{compare}")
-                elif "0.25" in rl:
-                    continue
-                    dataype.append(f"old,0.25,{compare}")
-                elif "0.375" in rl:
-                    continue
-                    dataype.append(f"old,0.375,{compare}")
-                elif "0.125" in rl:
-                    continue
-                    dataype.append(f"old,0.125,{compare}")
-                else:
-                    continue
-                    dataype.append(f"1.00,{compare}")
-                # dataype.append(compare)
-                datas.append(pd.read_csv(name_file, skiprows=2))
-                break
-
 name_files = glob.glob("E:/ETSI/Proyecto/results/SAMS/*.csv")
 
 for name_file in name_files:
@@ -71,16 +41,16 @@ for name_file in name_files:
                     dataype.append(f"0.75,{compare}")
                 elif "0.25" in rl:
                     # continue
-                    dataype.append(f"new,{compare}")
-                    # dataype.append(f"new,0.25,{compare}")
+                    # dataype.append(f"new,{compare}")
+                    dataype.append(f"new,0.25,{compare}")
                 elif "0.375" in rl:
                     # continue
-                    dataype.append(f"new,{compare}")
-                    # dataype.append(f"new,0.375,{compare}")
+                    # dataype.append(f"new,{compare}")
+                    dataype.append(f"new,0.375,{compare}")
                 elif "0.125" in rl:
                     # continue
-                    # dataype.append(f"new,0.125,{compare}")
-                    dataype.append(f"new,{compare}")
+                    dataype.append(f"new,0.125,{compare}")
+                    # dataype.append(f"new,{compare}")
                 else:
                     continue
                     dataype.append(f"1.00,{compare}")
@@ -145,18 +115,12 @@ for name_file in name_files:
 #     "0.125,decoupled", ]
 
 for_comparison = [
-    "new,decoupled",
-    # "old,0.125,decoupled",
-    "new,coupled",
-    # "old,0.125,coupled",
-    # "new,0.375,decoupled",
-    # "old,0.375,decoupled",
-    # "new,0.375,coupled",
-    # "old,0.375,coupled",
-    # "new,0.25,decoupled",
-    # "old,0.25,decoupled",
-    # "new,0.25,coupled",
-    # "old,0.25,coupled",
+    "new,0.125,decoupled",
+    "new,0.125,coupled",
+    "new,0.375,decoupled",
+    "new,0.375,coupled",
+    "new,0.25,decoupled",
+    "new,0.25,coupled",
 ]
 
 for compare in for_comparison:
@@ -399,14 +363,14 @@ if "mse" in show:
         # print(np.mean(score_mean[key][1:] / t_dist_mean[key][1:]))
         if "decoupled" in key:
             # d_proportion_of_l_s.append(1 / float(key[:4]))
-            d_proportion_of_l_s.append(float(key[:4]))
-            # d_ratio_score_t_d.append(mse_interp_mean[key][1500])
-            d_ratio_score_t_d.append(np.mean(mse_mean[key][1:] / t_dist_mean[key][1:]))
+            d_proportion_of_l_s.append(float(key[4:-10]))
+            d_ratio_score_t_d.append(mse_interp_mean[key][1499])
+            # d_ratio_score_t_d.append(np.mean(mse_mean[key][1:] / t_dist_mean[key][1:]))
         else:
             # c_proportion_of_l_s.append(1 / float(key[:4]))
-            c_proportion_of_l_s.append(float(key[:4]))
-            # c_ratio_score_t_d.append(mse_interp_mean[key][1500])
-            c_ratio_score_t_d.append(np.mean(mse_mean[key][1:] / t_dist_mean[key][1:]))
+            c_proportion_of_l_s.append(float(key[4:-8]))
+            c_ratio_score_t_d.append(mse_interp_mean[key][1499])
+            # c_ratio_score_t_d.append(np.mean(mse_mean[key][1:] / t_dist_mean[key][1:]))
         # print(np.mean(variance_mean[key][1:] / t_dist_mean[key][1:]))
         # print(mse_mean[key][-1]/t_dist_mean[key][-1])
         # print(variance_mean[key][-1]/t_dist_mean[key][-1])
@@ -426,36 +390,24 @@ if "mse" in show:
         i += 1
     # xx = np.linspace(1.0, 10.0, 1000)
     xx = np.linspace(0.0, 1.0, 1000)
-    from scipy.interpolate import splev, splrep
 
     agh = [
-        "1.00,coupled",
-        "0.75,coupled",
-        "0.50,coupled",
-        "0.375,coupled",
-        "0.25,coupled",
-        "0.125,coupled"]
+        # "1.00,coupled",
+        # "0.75,coupled",
+        # "0.50,coupled",
+        "new,0.375,coupled",
+        "new,0.25,coupled",
+        "new,0.125,coupled"]
 
     for key, xi, yi in zip(agh, d_proportion_of_l_s,
                            d_ratio_score_t_d):
         plt.text(xi, yi + 0.00005, f"$n = {max4key[key]}$", fontsize=20)
 
-    plt.plot(c_proportion_of_l_s, c_ratio_score_t_d, 'or')
-    # plt.plot(np.log2(c_proportion_of_l_s), c_ratio_score_t_d, 'or')
+        # plt.bar(xi, yi, 0.05,
+        #         label=key)
+
     plt.plot(d_proportion_of_l_s, d_ratio_score_t_d, 'og')
-    # plt.plot(np.log2(d_proportion_of_l_s), d_ratio_score_t_d, 'og')
-    # print(c_proportion_of_l_s, c_ratio_score_t_d)
-    tck = splrep(c_proportion_of_l_s[::-1], c_ratio_score_t_d[::-1], s=0)
-    # tck = splrep(c_proportion_of_l_s, c_ratio_score_t_d, s=0)
-    yy = splev(xx, tck)
-    plt.plot(xx, yy, '-r')
-    # plt.plot(np.log2(xx), yy, '-r')
-    tck = splrep(d_proportion_of_l_s[::-1], d_ratio_score_t_d[::-1], s=0)
-    # tck = splrep(d_proportion_of_l_s, d_ratio_score_t_d, s=0)
-    yy = splev(xx, tck)
-    plt.plot(xx, yy, '-g')
-    # plt.plot(np.log2(xx), yy, '-g')
-    # print('yes')
+    plt.plot(c_proportion_of_l_s, c_ratio_score_t_d, 'or')
     # Add some text for labels, title and custom x-axis tick labels, etc.
     plt.ylabel('MSE/dist', fontsize=30)
     # plt.xticks(np.arange(2, max4key[key] + qty_clean[key][0][0]), fontsize=30)

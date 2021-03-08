@@ -100,7 +100,6 @@ class Simulator(object):
         data = self.environment.render_maps()
 
         for i in range(imax):
-            # todo next_pos = self.coordinator.generate_new_goal()
             if isinstance(self.agents, sa.SimpleAgent):
                 self.agents.next_pose = next_pos
                 self.agents.step()

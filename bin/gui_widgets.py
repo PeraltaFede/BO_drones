@@ -487,7 +487,6 @@ class GUI(QMainWindow):
                         #     data = np.power(data - self.real_map, 2)
                         for nnan in self.nans:
                             data[nnan[0], nnan[1]] = -1
-                        # todo: plt.contour(self.environment.render_maps()["t"], colors='k', alpha=0.3, linewidths=1.0)
 
                         self.data[i] = np.ma.array(data, mask=(data == -1))
 
