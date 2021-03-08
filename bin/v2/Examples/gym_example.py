@@ -44,7 +44,7 @@ for acq in ["gaussian_ei", "predictive_entropy_search"]:
                                     continue
                                 else:
                                     break
-                            # Selection of best next measurement position occurs here
+                            # Selection of best next measurement position occurs her
                             next_poses = []
                             for agent in sim.agents:
                                 # print('current pose is', agent.pose)
