@@ -7,14 +7,20 @@ import numpy as np
 # plt.style.use("seaborn")
 maps = []
 # glob.glob("E:/ETSI/Proyecto/data/Databases/numpy_files/random*")
-for namefile in ["E:/ETSI/Proyecto/data/Databases/numpy_files/random_12.npy",
-                 "E:/ETSI/Proyecto/data/Databases/numpy_files/random_54.npy",
-                 "E:/ETSI/Proyecto/data/Databases/numpy_files/random_60.npy"]:
+for namefile in [  # "E:/ETSI/Proyecto/data/Databases/numpy_files/random_0.npy",
+    # "E:/ETSI/Proyecto/data/Databases/numpy_files/random_1.npy",
+    "E:/ETSI/Proyecto/data/Databases/numpy_files/random_2.npy",
+    # "E:/ETSI/Proyecto/data/Databases/numpy_files/random_3.npy",
+    "E:/ETSI/Proyecto/data/Databases/numpy_files/random_4.npy",
+    # "E:/ETSI/Proyecto/data/Databases/numpy_files/random_5.npy",
+    "E:/ETSI/Proyecto/data/Databases/numpy_files/random_6.npy",
+    "E:/ETSI/Proyecto/data/Databases/numpy_files/random_7.npy"
+]:
     with open(namefile, 'rb') as g:
         print(namefile)
         maps.append(np.load(g))
 
-current_cmap = copy(cm.get_cmap("plasma"))
+current_cmap = copy(cm.get_cmap("pink"))
 current_cmap.set_bad(color="#00000000")
 xticks = np.arange(0, 1000, 200)
 yticks = np.arange(0, 1500, 200)
@@ -22,19 +28,15 @@ xnticks = [str(num * 10) for num in xticks]
 ynticks = [str(num * 10) for num in yticks]
 i = 0
 
-print(np.nanmax(maps[0]))
-print(np.nanmin(maps[0]))
-print(np.nanmax(maps[1]))
-print(np.nanmin(maps[1]))
-print(np.nanmax(maps[2]))
-print(np.nanmin(maps[2]))
+[print(np.nanmin(mapz), np.nanmax(mapz)) for mapz in maps]
 
-for fig in maps:
-    plt.figure()
+for fig, iid in zip(maps, range(4)):
+    plt.subplot(141 + iid)
     img = plt.imshow(fig, origin='lower', cmap=current_cmap, zorder=5)
-    # cbar = plt.colorbar(orientation='vertical')
-    # cbar.ax.tick_params(labelsize=20)
-    CS = plt.contour(fig, colors=('gray', 'gray', 'gray', 'k', 'k', 'k', 'k'),
+    # if iid == 2:
+    #     cbar = plt.colorbar(orientation='vertical')
+    #     cbar.ax.tick_params(labelsize=20)
+    CS = plt.contour(fig, colors='k',
                      alpha=0.6, linewidths=1.0, zorder=10)
     plt.grid(True, zorder=0, color="white")
     plt.gca().set_facecolor('#eaeaf2')
