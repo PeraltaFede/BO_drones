@@ -5,7 +5,7 @@ import numpy as np
 import pandas as pd
 
 plt.style.use("seaborn")
-show = "mse,dist,score"
+show = "time,dist,score"
 
 datas = []
 dataype = []
@@ -17,8 +17,8 @@ dataype = []
 # "decoupled,4,gaussian_ei", "coupled,4,gaussian_ei"]
 # for_comparison = ["2,coupled", "3,coupled", "4,coupled",
 #                   "2,decoupled", "3,decoupled", "4,decoupled"]
+# for_comparison = [",coupled"]
 for_comparison = [",coupled"]
-# for_comparison = ["decoupled", "coupled"]
 # for_comparison = ["decoupled,2,gaussian_ei", "coupled,2,gaussian_ei"]
 #                   "3,coupled,3,gaussian_ei",
 #                   "3,coupled,3,predictive_entropy_search",
@@ -43,18 +43,19 @@ for name_file in name_files:
         for compare in for_comparison:
             if compare in rl:
                 if "0.5" in rl:
-                    # continue
-                    dataype.append(f"0.50,{compare[1:]}")
+                    continue
+                    dataype.append(f"0.50,{compare}")
                 elif "0.75" in rl:
                     continue
                     dataype.append(f"0.75,{compare}")
                 elif "0.25" in rl:
                     # continue
-                    # dataype.append(f"new,{compare}")
+                    # dataype.append(f"0.25,{compare}")
                     dataype.append(f"0.25,{compare[1:]}")
                 elif "0.375" in rl:
                     # continue
-                    # dataype.append(f"new,{compare}")
+                    # dataype.append(f"0.375,{compare}")
+                    # dataype.append(f"ei,{compare[1:]}")
                     dataype.append(f"0.375,{compare[1:]}")
                 elif "0.125" in rl:
                     continue
@@ -72,9 +73,18 @@ for name_file in name_files:
 #     with open(name_file, 'r') as f:
 #         f.readline()
 #         rl = f.readline()  # RBF,gaussian_sei,masked
+#         rest_all_lines = f.readlines()
+#         flag = False
+#         for line in rest_all_lines:
+#             if "pos:" in line:
+#                 flag = True
+#                 print(name_file)
+#                 break
+#         if flag:
+#             continue
 #         for compare in for_comparison:
 #             if compare in rl:
-#                 dataype.append(f"pes,{compare}")
+#                 dataype.append(f"pes,{compare[1:]}")
 #                 datas.append(pd.read_csv(name_file, skiprows=2))
 #                 break
 
@@ -88,10 +98,9 @@ for name_file in name_files:
 #     "dyndecoupled,2,gaussian_ei", "dyncoupled,2,gaussian_ei",]
 #     # "dyndecoupled,3,gaussian_ei", "dyncoupled,3,gaussian_ei",
 # "dyndecoupled,4,gaussian_ei", "dyncoupled,4,gaussian_ei", ]
-# for_comparison = [
-#     "110decoupled", "110coupled",
-#     # "220decoupled", "220coupled",
-#     "dyndecoupled", "dyncoupled"]
+
+for_comparison = [
+    "0.375,coupled", "0.25,coupled"]
 
 # for_comparison = ["1.00,2,coupled", "1.00,3,coupled", "1.00,4,coupled",
 #                   "1.00,2,decoupled", "1.00,3,decoupled", "1.00,4,decoupled",
@@ -109,20 +118,20 @@ for name_file in name_files:
 #                   "0.50,2,decoupled", "0.50,3,decoupled", "0.50,4,decoupled"
 #                   ]
 #
-for_comparison = [
-    # "1.00,coupled",
-    # "1.00,decoupled",
-    # "0.75,coupled",
-    # "0.75,decoupled",
-    "0.50,coupled",
-    # "0.50,decoupled",
-    "0.375,coupled",
-    # "0.375,decoupled",
-    "0.25,coupled",
-    # "0.25,decoupled",
-    # "0.125,coupled",
-    # "0.125,decoupled",
-]
+# for_comparison = [
+#     "1.00,coupled",
+#     "1.00,decoupled",
+#     "0.75,coupled",
+#     "0.75,decoupled",
+#     "0.50,coupled",
+#     "0.50,decoupled",
+#     "0.375,coupled",
+#     "0.375,decoupled",
+#     "0.25,coupled",
+#     "0.25,decoupled",
+#     "0.125,coupled",
+#     "0.125,decoupled",
+# ]
 
 # for_comparison = [
 #     "new,0.125,decoupled",
@@ -145,6 +154,7 @@ qty_clean = dict()
 score_clean = dict()
 variance_clean = dict()
 max4key = dict()
+mean4key = dict()
 mse_mean = dict()
 mse_std = dict()
 variance_mean = dict()
@@ -175,6 +185,7 @@ for compare in for_comparison:
     score_mean[compare] = []
     score_std[compare] = []
     max4key[compare] = -1
+    mean4key[compare] = 0
     time[compare] = []
     time_clean[compare] = []
     time_mean[compare] = []
@@ -212,6 +223,7 @@ for key in for_comparison:
         qty_clean[key].append(list(muestra))
         time_clean[key].append(list(tim[indice]))
         t_dist_clean[key].append(list(dis[indice]))
+        mean4key[key] += len(mse_clean[key][-1])
 
         if max4key[key] < len(indice):
             max4key[key] = len(indice)
@@ -224,6 +236,8 @@ for key in for_comparison:
             qty_clean[key][i].extend(list(np.full(max4key[key] - len(qty_clean[key][i]), np.nan)))
             time_clean[key][i].extend(list(np.full(max4key[key] - len(time_clean[key][i]), np.nan)))
             t_dist_clean[key][i].extend(list(np.full(max4key[key] - len(t_dist_clean[key][i]), np.nan)))
+    mean4key[key] /= len(mse_clean[key])
+
 # minimum = 100000000000000
 # method = 0
 # name = "0"
@@ -296,8 +310,10 @@ for key in for_comparison:
 # colors = ["#A6CEE3", "#1F78B4", "#B2DF8A", "#33A02C", "#FB9A99", "#E31A1C",
 #           "#FDBF6F", "#FF7F00", "#CAB2D6", "#6A3D9A", "#FFFF99", "#B15928"]
 
-colors = ["#A6CEE3", "#1F78B4", "#33A02C",
-          "#FF7F00", "#6A3D9A", "#B15928"]
+# colors = ["#A6CEE3", "#1F78B4", "#33A02C",
+#           "#FF7F00", "#6A3D9A", "#B15928"]
+colors = ["#1F78B4", "#B15928", "#33A02C",
+          "#FF7F00", "#6A3D9A", "#A6CEE3"]
 
 if "dist" in show:
     x = np.linspace(0, 1501, 1501)
@@ -370,6 +386,11 @@ c_proportion_of_l_s = []
 d_proportion_of_l_s = []
 c_ratio_score_t_d = []
 d_ratio_score_t_d = []
+
+print(mse_interp_mean["0.375,coupled"][-1])
+print(mse_interp_mean["0.25,coupled"][-1])
+print(mse_interp_mean["0.375,coupled"][-1]/mse_interp_mean["0.25,coupled"][-1])
+print(mse_interp_mean["0.25,coupled"][-1]/mse_interp_mean["0.375,coupled"][-1])
 if "mse" in show:
     plt.figure()
     for key in for_comparison:
@@ -404,22 +425,23 @@ if "mse" in show:
         # i += 1
 
     agh = [
-        "1.00,decoupled",
-        "0.75,decoupled",
-        "0.50,decoupled",
-        "0.375,decoupled",
-        "0.25,decoupled",
-        "0.125,decoupled"]
+        "1.00,coupled",
+        "0.75,coupled",
+        "0.50,coupled",
+        "0.375,coupled",
+        "0.25,coupled",
+        "0.125,coupled"]
     for key, xi, yi in zip(agh, d_proportion_of_l_s,
-                           np.max([d_ratio_score_t_d, c_ratio_score_t_d], axis=0)):
-        plt.text(xi, yi + 0.0125, f"$n = {max4key[key]}$", fontsize=20)
+                           c_ratio_score_t_d):
+        plt.text(xi, yi + 0.0125, f"$n = {1 + np.round(mean4key[key]).astype(int)}$", fontsize=20)
+        # plt.text(xi, yi + 0.05, f"$m = {np.round(max4key[key]).astype(int)}$", fontsize=20)
 
     plt.bar(c_proportion_of_l_s[0] - 0.0125, c_ratio_score_t_d[0], 0.025, label="coupled", color=colors[i + 1])
 
-    # plt.bar(d_proportion_of_l_s[0] + 0.0125, d_ratio_score_t_d[0], 0.025, label="decoupled", color=colors[i])
-    # for xi, yi in zip(d_proportion_of_l_s,
-    #                   d_ratio_score_t_d):
-    #     plt.bar(xi + 0.0125, yi, 0.025, color=colors[i])
+    plt.bar(d_proportion_of_l_s[0] + 0.0125, d_ratio_score_t_d[0], 0.025, label="decoupled", color=colors[i])
+    for xi, yi in zip(d_proportion_of_l_s,
+                      d_ratio_score_t_d):
+        plt.bar(xi + 0.0125, yi, 0.025, color=colors[i])
     for xi, yi in zip(c_proportion_of_l_s,
                       c_ratio_score_t_d):
         plt.bar(xi - 0.0125, yi, 0.025, color=colors[i + 1])
@@ -436,7 +458,7 @@ if "mse" in show:
     plt.yticks(fontsize=30)
     plt.title("$R^2(x) \\mid d=15.000 [m]$", fontsize=30)
     # plt.legend(["realnew", "old", "new"], prop={'size': 23})
-    plt.legend(prop={'size': 13}, fancybox=True, shadow=True, frameon=True)
+    plt.legend(prop={'size': 25}, fancybox=True, shadow=True, frameon=True)
     # plt.tight_layout()
 i = 0
 if "score" in show:

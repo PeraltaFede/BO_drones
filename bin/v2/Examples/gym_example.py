@@ -26,7 +26,7 @@ for acq in ["gaussian_ei", "predictive_entropy_search"]:
             ["s5", "s6", "s7", "s8", "s1"]
         ]
         for sensores in ss:
-            fs = ["coupled", "decoupled"] if acq != "gaussian_ei" else ["decoupled"] if "s5" in ss else ["coupled"]
+            fs = ["coupled", "decoupled"] if acq != "gaussian_ei" else ["decoupled"] if "s5" in sensores else ["coupled"]
             for fusion in fs:
                 print(fusion, sensores, acq, d)
                 i = 0
@@ -50,7 +50,7 @@ for acq in ["gaussian_ei", "predictive_entropy_search"]:
                                     continue
                                 else:
                                     break
-                            # Selection of best next measurement position occurs her
+                            # Selection of best next measurement position occurs here
                             next_poses = []
                             for agent in sim.agents:
                                 # print('current pose is', agent.pose)
