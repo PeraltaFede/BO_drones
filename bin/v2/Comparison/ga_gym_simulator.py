@@ -6,10 +6,10 @@ from numpy import mean
 from numpy.linalg import norm
 
 from bin.Agents.gym_agent_trimmed import SimpleAgent as Ga
-from bin.v2.Comparison.ga_gym_coordinator import Coordinator
 from bin.Environment.simple_env import Env
 from bin.Utils.utils import get_init_pos4
 from bin.v2.Communications.simple_sender import Sender
+from bin.v2.Comparison.ga_gym_coordinator import Coordinator
 
 
 class GAGymEnvironment(object):
@@ -59,9 +59,8 @@ class GAGymEnvironment(object):
                 path[-1] + "/results/SAMS/{}_{}_{}.csv".format(name_file, int(time()), self.file_no), "a")
             self.f.write("n_agent,n_sensors,acq_fusion,kernels,acq,acq_mod,prop\n")
             self.f.write(str(
-                "{},{},{},{},{},{},{}\n".format(len(self.agents), len(self.sensors), acq_fusion,
-                                                len(self.coordinator.gps), self.coordinator.acquisition,
-                                                self.coordinator.acq_mod, d)))
+                "{},{},{},{},{}\n".format(len(self.agents), len(self.sensors), acq_fusion,
+                                          len(self.coordinator.gps), d)))
             mses, scores, keys = self.reward()
             titles = ""
             for sensor in keys:

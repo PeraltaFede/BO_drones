@@ -1,4 +1,5 @@
 import json
+from sys import path
 
 import numpy as np
 from sklearn.metrics import mean_squared_error as mse
@@ -111,7 +112,7 @@ class Coordinator(object):
         return r2_score(y_true[~self.nans], self.surrogate(keys=[key])[0])
 
     def obtain_points(self):
-        with open("E:/ETSI/Proyecto/data/Map/Ypacarai/beacons_normalized.json") as f:
+        with open(path[-1] + "/data/Map/Ypacarai/beacons_normalized.json") as f:
             scale = 1407.6
             data = json.load(f)
             xpos = data['x1 ']['xRel'] * scale
