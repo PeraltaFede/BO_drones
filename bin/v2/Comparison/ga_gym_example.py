@@ -26,7 +26,7 @@ for d in [0.375]:
             np.random.seed(np.round(seed).astype(int))
             drones = [SimpleAgent(sensores, _id=0)]
             sim = GAGymEnvironment(path[-1] + "/data/Map/Ypacarai/map.yaml", agents=drones, id_file=0,
-                                   render2gui=False, saving=False,
+                                   render2gui=False, saving=True,
                                    name_file="GA_{}_1A{}S".format(d, len(sensores)), d=d)
             try:
                 for k in range(50):
