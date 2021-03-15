@@ -60,7 +60,7 @@ class GymEnvironment(object):
                 path[-1] + "/results/SAMS/{}_{}_{}.csv".format(name_file, int(time()), self.file_no), "a")
             self.f.write("n_agent,n_sensors,acq_fusion,kernels,acq,acq_mod,prop\n")
             self.f.write(str(
-                "{},{},{},{},{},{},{}\n".format(len(self.agents), len(self.sensors), acq_fusion,
+                "{},{},noisy{},{},{},{},{}\n".format(len(self.agents), len(self.sensors), acq_fusion,
                                                 len(self.coordinator.gps), self.coordinator.acquisition,
                                                 self.coordinator.acq_mod, d)))
             mses, scores, keys = self.reward()

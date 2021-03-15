@@ -18,7 +18,7 @@ dataype = []
 # for_comparison = ["2,coupled", "3,coupled", "4,coupled",
 #                   "2,decoupled", "3,decoupled", "4,decoupled"]
 # for_comparison = [",coupled"]
-for_comparison = [",coupled"]
+for_comparison = ["noisycoupled"]
 # for_comparison = ["decoupled,2,gaussian_ei", "coupled,2,gaussian_ei"]
 #                   "3,coupled,3,gaussian_ei",
 #                   "3,coupled,3,predictive_entropy_search",
