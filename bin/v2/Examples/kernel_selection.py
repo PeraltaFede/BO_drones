@@ -16,27 +16,27 @@ from bin.Environment.simple_env import Env
 
 
 EXPERIMENTS = 1
-SIZE = 50
+SIZE = 25
 seeds = np.linspace(76842153, 1123581321, 100)
 
 sensors = ["t"]
 
 drones = [SimpleAgent(sensors)]
 env = Env(map_path2yaml="E:/ETSI/Proyecto/data/Map/Ypacarai/map.yaml")
-env.add_new_map(sensors, file=53)
+env.add_new_map(sensors, file=1)
 
 plt.style.use("seaborn")
 
-plt.subplot(121)
+plt.subplot(241)
 plt.imshow(env.render_maps()["t"], origin='lower', cmap='inferno')
 CS = plt.contour(env.render_maps()["t"], colors=('gray', 'gray', 'gray', 'k', 'k', 'k', 'k'),
                  alpha=0.6, linewidths=1.0)
 plt.clabel(CS, inline=1, fontsize=10)
 plt.title("Ground Truth")
 plt.show(block=False)
-plt.pause(0.00001)
+plt.pause(0.01)
 
-mses = {"RBF": []}  # "Matern": [], "RQ": [],
+mses = {"RBF": [], "RBF_N": [], "RQ": []}
 with open('E:/ETSI/Proyecto/data/Databases/numpy_files/nans.npy', 'rb') as g:
     nans = np.load(g)
 # nans = []
@@ -78,9 +78,9 @@ for k in range(EXPERIMENTS):
             x.append(candidate)
             d.append([candidate, env.maps["t"][candidate[1], candidate[0]]])
     coords = [
-        # Coordinator(env.grid, "t", "RQ"),
-        Coordinator(env.grid, "t", "RBF")
-        # Coordinator(env.grid, "t", "Matern")
+        Coordinator(env.grid, "t", "RQ"),
+        Coordinator(env.grid, "t", "RBF"),
+        Coordinator(env.grid, "t", "RBF_N")
     ]
     mu = dict()
     sd = dict()
@@ -89,17 +89,18 @@ for k in range(EXPERIMENTS):
         mses[coord.k_name].append(coord.get_mse(env.maps['t'].T.flatten()))
         cmu, csd = coord.surrogate(return_std=True, return_sensor=False)
         mu[coord.k_name] = cmu.reshape((1000, 1500)).T
-        # sd[coord.k_name] = csd.reshape((1000, 1500)).T
+        sd[coord.k_name] = csd.reshape((1000, 1500)).T
 
         for nnan in nans:
             mu[coord.k_name][nnan[0], nnan[1]] = -1
         mu[coord.k_name] = np.ma.array(mu[coord.k_name], mask=(mu[coord.k_name] == -1))
-        # for nnan in nans:
-        #     sd[coord.k_name][nnan[0], nnan[1]] = -1
-        # sd[coord.k_name] = np.ma.array(sd[coord.k_name], mask=(sd[coord.k_name] == -1))
-
-for coor in coords:
-    print(np.exp(coord.gp.kernel_.theta))
+        for nnan in nans:
+            sd[coord.k_name][nnan[0], nnan[1]] = -1
+        sd[coord.k_name] = np.ma.array(sd[coord.k_name], mask=(sd[coord.k_name] == -1))
+        # print(np.exp(coord.gp.kernel_.theta))
+        print(coord.gp.noise_)
+        print(coord.gp.noise)
+        print(coord.gp.get_params())
 # plt.style.use("seaborn")
 # legends = []
 # for key in mses:
@@ -123,8 +124,9 @@ x = np.array(x)
 #
 i = 2
 for key in mu.keys():
-    #     plt.subplot(240 + i)
-    plt.subplot(122)
+    # plt.subplot(130 + i)
+    # plt.subplot(122)
+    plt.subplot(240 + i)
     plt.imshow(mu[key], origin='lower', cmap='inferno')
     plt.plot(x[:, 0], x[:, 1], 'ob')
     CS = plt.contour(mu[key], colors=('gray', 'gray', 'gray', 'k', 'k', 'k', 'k'),
@@ -132,10 +134,10 @@ for key in mu.keys():
 
     plt.clabel(CS, inline=1, fontsize=10)
     plt.title("{} has MSE: {}".format(key, coords[i - 2].get_mse(env.maps['t'].T.flatten())))
-    # plt.subplot(240 + i + 4)
-    # plt.imshow(sd[key], origin='lower', cmap='viridis')
-    # plt.plot(x[:, 0], x[:, 1], 'ob')
-    # plt.title("95% conf. std")
-#     i += 1
+    plt.subplot(240 + i + 4)
+    plt.imshow(sd[key], origin='lower', cmap='viridis')
+    plt.plot(x[:, 0], x[:, 1], 'ob')
+    plt.title("95% conf. std")
+    i += 1
 #
 plt.show(block=True)

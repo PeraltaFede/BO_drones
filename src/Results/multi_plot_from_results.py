@@ -5,7 +5,7 @@ import numpy as np
 import pandas as pd
 
 plt.style.use("seaborn")
-show = "time,dist,score"
+show = "time,dist,score,var"
 
 datas = []
 dataype = []
@@ -49,14 +49,14 @@ for name_file in name_files:
                     continue
                     dataype.append(f"0.75,{compare}")
                 elif "0.25" in rl:
-                    # continue
+                    continue
                     # dataype.append(f"0.25,{compare}")
                     dataype.append(f"0.25,{compare[1:]}")
                 elif "0.375" in rl:
                     # continue
                     # dataype.append(f"0.375,{compare}")
-                    # dataype.append(f"ei,{compare[1:]}")
-                    dataype.append(f"0.375,{compare[1:]}")
+                    dataype.append(f"ei,{compare[1:]}")
+                    # dataype.append(f"0.375,{compare[1:]}")
                 elif "0.125" in rl:
                     continue
                     dataype.append(f"0.125,{compare}")
@@ -67,27 +67,46 @@ for name_file in name_files:
                 # dataype.append(compare)
                 datas.append(pd.read_csv(name_file, skiprows=2))
                 break
-# name_files = glob.glob("E:/ETSI/Proyecto/results/SAMS/pes/*.csv")
-#
-# for name_file in name_files:
-#     with open(name_file, 'r') as f:
-#         f.readline()
-#         rl = f.readline()  # RBF,gaussian_sei,masked
-#         rest_all_lines = f.readlines()
-#         flag = False
-#         for line in rest_all_lines:
-#             if "pos:" in line:
-#                 flag = True
-#                 print(name_file)
-#                 break
-#         if flag:
-#             continue
-#         for compare in for_comparison:
-#             if compare in rl:
-#                 dataype.append(f"pes,{compare[1:]}")
-#                 datas.append(pd.read_csv(name_file, skiprows=2))
-#                 break
+name_files = glob.glob("E:/ETSI/Proyecto/results/SAMS/pes/*.csv")
+for name_file in name_files:
+    with open(name_file, 'r') as f:
+        f.readline()
+        rl = f.readline()  # RBF,gaussian_sei,masked
+        rest_all_lines = f.readlines()
+        flag = False
+        for line in rest_all_lines:
+            if "pos:" in line:
+                flag = True
+                print(name_file)
+                break
+        if flag:
+            continue
+        for compare in for_comparison:
+            if compare in rl:
+                dataype.append(f"pes,{compare[1:]}")
+                datas.append(pd.read_csv(name_file, skiprows=2))
+                break
+name_files = glob.glob("E:/ETSI/Proyecto/results/SAMS/ga/*.csv")
+for_comparison = [",0.375"]
 
+for name_file in name_files:
+    with open(name_file, 'r') as f:
+        f.readline()
+        rl = f.readline()  # RBF,gaussian_sei,masked
+        rest_all_lines = f.readlines()
+        flag = False
+        for line in rest_all_lines:
+            if "pos:" in line:
+                flag = True
+                print(name_file)
+                break
+        if flag:
+            continue
+        for compare in for_comparison:
+            if compare in rl:
+                dataype.append(f"ga,{compare[1:]}")
+                datas.append(pd.read_csv(name_file, skiprows=2))
+                break
 # for_comparison = [
 #     "110decoupled,2,gaussian_ei", "110coupled,2,gaussian_ei",
 #     # "110decoupled,3,gaussian_ei", "110coupled,3,gaussian_ei",
@@ -100,7 +119,7 @@ for name_file in name_files:
 # "dyndecoupled,4,gaussian_ei", "dyncoupled,4,gaussian_ei", ]
 
 for_comparison = [
-    "0.375,coupled", "0.25,coupled"]
+    "ei,coupled", "pes,coupled", "ga,0.375"]
 
 # for_comparison = ["1.00,2,coupled", "1.00,3,coupled", "1.00,4,coupled",
 #                   "1.00,2,decoupled", "1.00,3,decoupled", "1.00,4,decoupled",
@@ -314,7 +333,7 @@ for key in for_comparison:
 #           "#FF7F00", "#6A3D9A", "#B15928"]
 colors = ["#1F78B4", "#B15928", "#33A02C",
           "#FF7F00", "#6A3D9A", "#A6CEE3"]
-
+titles = ["Proposed", "PESMOC", "GA"]
 if "dist" in show:
     x = np.linspace(0, 1501, 1501)
     # print(np.nanmax(t_dist_mean["0.125,coupled"]))
@@ -369,12 +388,13 @@ if "dist" in show:
                 label=key, color=colors[i])
         i += 1
 
-    plt.ylabel('R2S', fontsize=30)
+    plt.ylabel('$R^2(x)$', fontsize=30)
     plt.xticks(selected, [str(d * 10) for d in selected], fontsize=30)
     plt.xlabel("Distance [m]", fontsize=30)
     plt.yticks(fontsize=30)
-    plt.title("$R^2(x) \\mid d=15.000 [m]$", fontsize=30)
-    plt.legend(loc='upper left', prop={'size': 25}, fancybox=True, shadow=True, frameon=True)
+    plt.title("$R^2(x)$ Score vs Distance", fontsize=30)
+    plt.legend(titles, loc='upper left', prop={'size': 25}, fancybox=True, shadow=True,
+               frameon=True)
 
 # colors = ["#FFD100", "#FFD100AA"]
 # colors = ["#00629B", "#009CA6", "#78BE20", "#FFD100"]
@@ -387,10 +407,10 @@ d_proportion_of_l_s = []
 c_ratio_score_t_d = []
 d_ratio_score_t_d = []
 
-print(mse_interp_mean["0.375,coupled"][-1])
-print(mse_interp_mean["0.25,coupled"][-1])
-print(mse_interp_mean["0.375,coupled"][-1]/mse_interp_mean["0.25,coupled"][-1])
-print(mse_interp_mean["0.25,coupled"][-1]/mse_interp_mean["0.375,coupled"][-1])
+# print(mse_interp_mean["0.375,coupled"][-1])
+# print(mse_interp_mean["0.25,coupled"][-1])
+# print(mse_interp_mean["0.375,coupled"][-1] / mse_interp_mean["0.25,coupled"][-1])
+# print(mse_interp_mean["0.25,coupled"][-1] / mse_interp_mean["0.375,coupled"][-1])
 if "mse" in show:
     plt.figure()
     for key in for_comparison:
@@ -458,7 +478,7 @@ if "mse" in show:
     plt.yticks(fontsize=30)
     plt.title("$R^2(x) \\mid d=15.000 [m]$", fontsize=30)
     # plt.legend(["realnew", "old", "new"], prop={'size': 23})
-    plt.legend(prop={'size': 25}, fancybox=True, shadow=True, frameon=True)
+    plt.legend(titles, prop={'size': 25}, fancybox=True, shadow=True, frameon=True)
     # plt.tight_layout()
 i = 0
 if "score" in show:
@@ -475,12 +495,12 @@ if "score" in show:
         # label="n_sensors: {1}, fusion: {0}, acq: {2}".format(*key.split(',')))
         # label="n_sensors: {0}, fusion: {1}, acq: {3}".format(*key.split(',')), color=colors[i])
         i += 1
-    plt.ylabel('R2Score', fontsize=30)
+    plt.ylabel('$R^2(x)$', fontsize=30)
     plt.xticks(np.arange(0, max4key[key] + qty_clean[key][0][0]), fontsize=30)
     plt.xlabel("Measurements", fontsize=30)
     plt.yticks(fontsize=30)
-    plt.title("R2Score", fontsize=30)
-    plt.legend(prop={'size': 13}, fancybox=True, shadow=True, frameon=True)
+    plt.title("$R^2(x)$ Score vs Measurements", fontsize=30)
+    plt.legend(titles, prop={'size': 25}, fancybox=True, shadow=True, frameon=True)
 i = 0
 if "var" in show:
     plt.figure()
@@ -491,12 +511,13 @@ if "var" in show:
         # label="n_sensors: {1}, fusion: {0}, acq: {2}".format(*key.split(',')))
         # label="n_sensors: {0}, fusion: {1}, acq: {3}".format(*key.split(',')), color=colors[i])
         i += 1
-    plt.ylabel('Variance', fontsize=30)
+    plt.ylabel('$var(x)$', fontsize=30)
     plt.xticks(np.arange(0, max4key[key] + qty_clean[key][0][0]), fontsize=30)
     plt.xlabel("Measurements", fontsize=30)
     plt.yticks(fontsize=30)
-    plt.title("Var(x)", fontsize=30)
-    plt.legend(prop={'size': 13}, fancybox=True, shadow=True, frameon=True)
+    plt.title("Variance of different $R^2(x)$ Scores", fontsize=30)
+    plt.legend(titles, loc='upper right', prop={'size': 25}, fancybox=True, shadow=True,
+               frameon=True)
 i = 0
 if "time" in show:
     plt.figure()
@@ -519,7 +540,8 @@ if "time" in show:
     # plt.xticks(fontsize=30)
     plt.xlabel("Measurements", fontsize=30)
     plt.yticks(fontsize=30)
-    # plt.title("4 drones", fontsize=30)
+    plt.title("Computational Time", fontsize=30)
     # plt.legend(["realnew", "old", "new"], prop={'size': 23})
-    plt.legend(prop={'size': 13}, fancybox=True, shadow=True, frameon=True)
+    plt.legend(titles, loc='upper left', prop={'size': 25}, fancybox=True, shadow=True,
+               frameon=True)
 plt.show(block=True)

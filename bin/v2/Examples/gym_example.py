@@ -14,9 +14,6 @@ for acq in ["gaussian_ei", "predictive_entropy_search"]:
     for d in ds:
         ss = [
             ["s1", "s2"],
-            ["s5", "s6"]
-        ] if acq == "gaussian_ei" else [
-            ["s1", "s2"],
             ["s5", "s6"],
             ["s1", "s2", "s3"],
             ["s5", "s6", "s7"],
@@ -26,21 +23,18 @@ for acq in ["gaussian_ei", "predictive_entropy_search"]:
             ["s5", "s6", "s7", "s8", "s1"]
         ]
         for sensores in ss:
-            fs = ["coupled", "decoupled"] if acq != "gaussian_ei" else ["decoupled"] if "s5" in sensores else ["coupled"]
+            fs = ["coupled"]
             for fusion in fs:
                 print(fusion, sensores, acq, d)
                 i = 0
                 for seed in seeds:
                     i += 1
-                    if "decoupled" in fs and "gaussian_ei" in acq:
-                        if i <= 45:
-                            continue
 
                     np.random.seed(np.round(seed).astype(int))
                     drones = [SimpleAgent(sensores, _id=0)]
                     sim = GymEnvironment(path[-1] + "/data/Map/Ypacarai/map.yaml", agents=drones, id_file=0,
                                          acq=acq, acq_mod="truncated", render2gui=False, saving=True,
-                                         name_file="{}_{}_{}_1A{}S".format(acq, fusion, d, len(sensores)),
+                                         name_file="noisy_{}_{}_{}_1A{}S".format(acq, fusion, d, len(sensores)),
                                          acq_fusion=fusion, d=d)
                     try:
                         for k in range(50):
