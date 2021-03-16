@@ -61,8 +61,8 @@ class GymEnvironment(object):
             self.f.write("n_agent,n_sensors,acq_fusion,kernels,acq,acq_mod,prop\n")
             self.f.write(str(
                 "{},{},noisy{},{},{},{},{}\n".format(len(self.agents), len(self.sensors), acq_fusion,
-                                                len(self.coordinator.gps), self.coordinator.acquisition,
-                                                self.coordinator.acq_mod, d)))
+                                                     len(self.coordinator.gps), self.coordinator.acquisition,
+                                                     self.coordinator.acq_mod, d)))
             mses, scores, keys = self.reward()
             titles = ""
             for sensor in keys:
@@ -138,7 +138,6 @@ class GymEnvironment(object):
         for pose, agent in zip(action, self.agents):
             if len(pose) > 0:
                 agent.next_pose = pose
-
         next_idx, dist2_simulate = self._select_next_drone()
         if next_idx == -1:
             self.timestep += 1
@@ -172,7 +171,6 @@ class GymEnvironment(object):
             results = ""
             for mse, score in zip(mses, scores):
                 results += f",{mse},{score}"
-            # print(keys)
             self.f.write(
                 "{},{},{},{},{},{}{}\n".format(self.timestep, len(self.coordinator.train_inputs), time() - self.t0,
                                                sum(c.distance_travelled for c in self.agents) / len(

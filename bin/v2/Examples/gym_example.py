@@ -29,7 +29,6 @@ for acq in ["gaussian_ei", "predictive_entropy_search"]:
                 i = 0
                 for seed in seeds:
                     i += 1
-
                     np.random.seed(np.round(seed).astype(int))
                     drones = [SimpleAgent(sensores, _id=0)]
                     sim = GymEnvironment(path[-1] + "/data/Map/Ypacarai/map.yaml", agents=drones, id_file=0,
@@ -47,7 +46,6 @@ for acq in ["gaussian_ei", "predictive_entropy_search"]:
                             # Selection of best next measurement position occurs here
                             next_poses = []
                             for agent in sim.agents:
-                                # print('current pose is', agent.pose)
                                 if agent.reached_pose():
                                     # TODO: creo que debe ser [] instead
                                     next_poses.append(sim.coordinator.generate_new_goal(pose=agent.pose,
@@ -55,13 +53,11 @@ for acq in ["gaussian_ei", "predictive_entropy_search"]:
                                                                                                      sim.agents
                                                                                                      if
                                                                                                      agt is not agent]))
-                                    # print('current goal is', next_poses[-1])
                                     if sim.render2gui:
                                         sim.sender.send_new_goal_msg(agent.next_pose, agent.drone_id)
                                 else:
                                     next_poses.append([])
                             print(k, sim.step(next_poses))
-                            # mus, stds = sim.render()
                     except Exception as e:
                         sim.f.write(f"pos: {sim.agents[0].pose} " + str(e))
                     finally:
