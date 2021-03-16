@@ -9,6 +9,7 @@ w_obstacles = False
 a = []
 c = []
 
+
 # maxz = 0
 # meanz = 0
 
@@ -42,7 +43,7 @@ def schwefel_arg0(sol):
 
 
 def create_map(grid, resolution, obstacles_on=False, randomize_shekel=True, sensor="", no_maxima=10, load_from_db=True,
-               file=0):
+               file=0, noiseless=False):
     if load_from_db:
         if sensor == "s1":
             file = 0
@@ -60,7 +61,11 @@ def create_map(grid, resolution, obstacles_on=False, randomize_shekel=True, sens
             file = 6
         elif sensor == "s8":
             file = 7
-        with open(path[-1] + '/data/Databases/numpy_files/noisy_random_{}.npy'.format(file), 'rb') as g:
+        if noiseless:
+            name = path[-1] + '/data/Databases/numpy_files/random_{}.npy'.format(file)
+        else:
+            name = path[-1] + '/data/Databases/numpy_files/noisy_random_{}.npy'.format(file)
+        with open(name, 'rb') as g:
             # with open('E:/ETSI/Proyecto/data/Databases/numpy_files/ground_truth_norm.npy', 'rb') as g:
             # _z = np.load(g)
             # print(np.nanmax(_z))

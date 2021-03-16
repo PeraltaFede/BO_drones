@@ -5,7 +5,7 @@ import numpy as np
 import pandas as pd
 
 plt.style.use("seaborn")
-show = "time,dist,score,var"
+show = "var"
 
 datas = []
 dataype = []
@@ -17,8 +17,8 @@ dataype = []
 # "decoupled,4,gaussian_ei", "coupled,4,gaussian_ei"]
 # for_comparison = ["2,coupled", "3,coupled", "4,coupled",
 #                   "2,decoupled", "3,decoupled", "4,decoupled"]
-# for_comparison = [",coupled"]
-for_comparison = ["noisycoupled"]
+for_comparison = [",coupled"]
+# for_comparison = ["noisycoupled"]
 # for_comparison = ["decoupled,2,gaussian_ei", "coupled,2,gaussian_ei"]
 #                   "3,coupled,3,gaussian_ei",
 #                   "3,coupled,3,predictive_entropy_search",
