@@ -13,20 +13,19 @@ from bin.v2.Comparison.ga_gym_coordinator import Coordinator
 
 
 class GAGymEnvironment(object):
-    def __init__(self, map_path2yaml, agents: list, acq="gaussian_ei", saving=False, acq_fusion="max_sum",
-                 acq_mod="normal", id_file=0, render2gui=True, initial_pos="circle", name_file="", d=1.0):
+    def __init__(self, map_path2yaml, agents: list, saving=False, acq_fusion="max_sum", id_file=0, render2gui=True,
+                 initial_pos="circle", name_file="", d=1.0):
         """
 
         :param map_path2yaml: file path to mapyaml
         :param agents: list of simple agents. ALL agents have the same set of sensors
-        :param acq: str of the acquisition function name
-        :param acq_mod: str of the modification of the AF
         :param id_file: int unique file id [0, 1, 2, ... , n]
         :param render2gui: bool if visualization mode is online (performed through MQTT)
         """
         # instancing variables
         self.environment = Env(map_path2yaml=map_path2yaml)
         self.agents = agents
+        self.noise_comp = True
         for agent in self.agents:
             assert isinstance(agent, Ga), "All agents should be instances of gym.SimpleAgent"
         self.file_no = id_file
@@ -59,7 +58,7 @@ class GAGymEnvironment(object):
                 path[-1] + "/results/SAMS/{}_{}_{}.csv".format(name_file, int(time()), self.file_no), "a")
             self.f.write("n_agent,n_sensors,acq_fusion,kernels,acq,acq_mod,prop\n")
             self.f.write(str(
-                "{},{},{},{},{}\n".format(len(self.agents), len(self.sensors), acq_fusion,
+                "{},noisy{},{},{},{}\n".format(len(self.agents), len(self.sensors), acq_fusion,
                                           len(self.coordinator.gps), d)))
             mses, scores, keys = self.reward()
             titles = ""
@@ -95,7 +94,7 @@ class GAGymEnvironment(object):
         """
         for agent in self.agents:
             [self.sensors.add(sensor) for sensor in agent.sensors]
-        self.environment.add_new_map(self.sensors, file=self.file_no)
+        self.environment.add_new_map(self.sensors, file=self.file_no, clone4noiseless=self.noise_comp)
 
     def _load_envs_into_agents(self):
         """
@@ -179,8 +178,14 @@ class GAGymEnvironment(object):
         return scores
 
     def reward(self):
-        mses = [self.coordinator.get_mse(self.environment.maps[key].flatten(), key) for key in
-                self.coordinator.gps.keys()]
-        scores = [self.coordinator.get_score(self.environment.maps[key].flatten(), key) for key in
-                  self.coordinator.gps.keys()]
+        if self.noise_comp:
+            mses = [self.coordinator.get_mse(self.environment.maps[f"noiseless_{key}"].flatten(), key) for key in
+                    self.coordinator.gps.keys()]
+            scores = [self.coordinator.get_score(self.environment.maps[f"noiseless_{key}"].flatten(), key) for key in
+                      self.coordinator.gps.keys()]
+        else:
+            mses = [self.coordinator.get_mse(self.environment.maps[key].flatten(), key) for key in
+                    self.coordinator.gps.keys()]
+            scores = [self.coordinator.get_score(self.environment.maps[key].flatten(), key) for key in
+                      self.coordinator.gps.keys()]
         return mses, scores, self.coordinator.gps.keys()
