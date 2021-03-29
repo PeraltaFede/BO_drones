@@ -11,7 +11,8 @@ class Env(BaseEnv):
 
     def add_new_map(self, sensors, file=-1, clone4noiseless=False):
         for sensor in sensors:
-            self.maps[sensor] = utils.create_map(self.grid, self.resolution, True, sensor=sensor, file=file)
+            self.maps[sensor] = utils.create_map(self.grid, self.resolution, True, sensor=sensor, file=file,
+                                                 noiseless=True)
             if clone4noiseless:
                 self.maps[f"noiseless_{sensor}"] = utils.create_map(self.grid, self.resolution, True, sensor=sensor,
                                                                     file=file

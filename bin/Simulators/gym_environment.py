@@ -26,7 +26,7 @@ class GymEnvironment(object):
         """
         # instancing variables
         self.environment = Env(map_path2yaml=map_path2yaml)
-        self.noiseless_maps = True
+        self.noiseless_maps = False
         self.agents = agents
         for agent in self.agents:
             assert isinstance(agent, Ga), "All agents should be instances of gym.SimpleAgent"
@@ -61,9 +61,9 @@ class GymEnvironment(object):
                 path[-1] + "/results/SAMS/{}_{}_{}.csv".format(name_file, int(time()), self.file_no), "a")
             self.f.write("n_agent,n_sensors,acq_fusion,kernels,acq,acq_mod,prop\n")
             self.f.write(str(
-                "{},{},noisy{},{},{},{},{}\n".format(len(self.agents), len(self.sensors), acq_fusion,
-                                                     len(self.coordinator.gps), self.coordinator.acquisition,
-                                                     self.coordinator.acq_mod, d)))
+                "{},{},{},{},{},{},{}\n".format(len(self.agents), len(self.sensors), acq_fusion,
+                                                len(self.coordinator.gps), self.coordinator.acquisition,
+                                                self.coordinator.acq_mod, d)))
             mses, scores, keys = self.reward()
             titles = ""
             for sensor in keys:

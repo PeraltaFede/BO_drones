@@ -25,7 +25,7 @@ class GAGymEnvironment(object):
         # instancing variables
         self.environment = Env(map_path2yaml=map_path2yaml)
         self.agents = agents
-        self.noise_comp = True
+        self.noise_comp = False
         for agent in self.agents:
             assert isinstance(agent, Ga), "All agents should be instances of gym.SimpleAgent"
         self.file_no = id_file

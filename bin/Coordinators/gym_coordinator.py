@@ -4,7 +4,7 @@ import numpy as np
 # import torch as to
 from sklearn.metrics import mean_squared_error as mse
 from sklearn.metrics import r2_score
-from skopt.learning.gaussian_process import gpr,kernels
+from skopt.learning.gaussian_process import kernels
 
 from bin.Utils.acquisition_functions import gaussian_sei, maxvalue_entropy_search, gaussian_pi, gaussian_ei, max_std, \
     predictive_entropy_search

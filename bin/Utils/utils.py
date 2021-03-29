@@ -59,8 +59,10 @@ def create_map(grid, resolution, obstacles_on=False, randomize_shekel=True, sens
             file = 5
         elif sensor == "s7":
             file = 6
-        elif sensor == "s8":
+        # elif sensor == "s8":
+        else:
             file = 7
+
         if noiseless:
             name = path[-1] + '/data/Databases/numpy_files/random_{}.npy'.format(file)
         else:

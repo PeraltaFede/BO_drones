@@ -27,7 +27,7 @@ class Coordinator(object):
 
         for sensor, kernel in zip(sensors, k_names):
             if kernel == "RBF":  # "RBF" Matern" "RQ"
-                self.gps[sensor] = gprnew.GaussianProcessRegressor(kernel=kernels.RBF(100), alpha=1e-7, noise=0.01)
+                self.gps[sensor] = gprnew.GaussianProcessRegressor(kernel=kernels.RBF(100), alpha=1e-7)
                 self.train_targets[sensor] = np.array([])
                 self.mus[sensor] = np.array([])
                 self.stds[sensor] = np.array([])
@@ -60,6 +60,7 @@ class Coordinator(object):
                 self.train_targets[key] = np.append(self.train_targets[key], new_data[key])
 
     def fit_data(self):
+        print(self.train_inputs)
         for key in self.sensors:
             self.gps[key].fit(self.train_inputs, self.train_targets[key])
             self.has_calculated[key] = False
