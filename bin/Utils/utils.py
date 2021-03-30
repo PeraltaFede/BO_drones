@@ -42,8 +42,8 @@ def schwefel_arg0(sol):
     return np.nan if w_obstacles and sol[2] == 1 else benchmarks.schwefel(sol[:2])[0]
 
 
-def create_map(grid, resolution, obstacles_on=False, randomize_shekel=False, sensor="", no_maxima=10, load_from_db=True,
-               file=0):
+def create_map(grid, resolution, obstacles_on=False, randomize_shekel=True, sensor="", no_maxima=10, load_from_db=True,
+               file=0, noiseless=False):
     if load_from_db:
         if sensor == "s1":
             file = 0
@@ -59,9 +59,15 @@ def create_map(grid, resolution, obstacles_on=False, randomize_shekel=False, sen
             file = 5
         elif sensor == "s7":
             file = 6
-        elif sensor == "s8":
+        # elif sensor == "s8":
+        else:
             file = 7
-        with open(path[-1] + '/data/Databases/numpy_files/random_{}.npy'.format(file), 'rb') as g:
+
+        if noiseless:
+            name = path[-1] + '/data/Databases/numpy_files/random_{}.npy'.format(file)
+        else:
+            name = path[-1] + '/data/Databases/numpy_files/noisy_random_{}.npy'.format(file)
+        with open(name, 'rb') as g:
             # with open('E:/ETSI/Proyecto/data/Databases/numpy_files/ground_truth_norm.npy', 'rb') as g:
             # _z = np.load(g)
             # print(np.nanmax(_z))
@@ -110,7 +116,7 @@ def create_map(grid, resolution, obstacles_on=False, randomize_shekel=False, sen
         _y = np.arange(xmin, xmax, resolution * (ymax - ymin) / (grid.shape[0])) + yadd
         _x, _y = np.meshgrid(_x, _y)
         # if i == 0:
-        _z = np.fromiter(map(ackley_arg0, zip(_x.flat, _y.flat, grid.flat)), dtype=np.float,
+        _z = np.fromiter(map(shekel_arg0, zip(_x.flat, _y.flat, grid.flat)), dtype=np.float,
                          count=_x.shape[0] * _x.shape[1]).reshape(_x.shape)
 
         # else:
@@ -137,8 +143,8 @@ def create_map(grid, resolution, obstacles_on=False, randomize_shekel=False, sen
         # print(np.nanmin(_z))
         # _z = _z / np.linalg.norm(_z, ord=2, axis=1, keepdims=True)
 
-        # with open('E:/ETSI/Proyecto/data/Databases/numpy_files/shww.npy', 'wb') as g:
-        #     np.save(g, _z)
+        with open(f'E:/ETSI/Proyecto/data/Databases/numpy_files/noise_random_{file}.npy', 'wb') as g:
+            np.save(g, _z)
         return _z
 
 

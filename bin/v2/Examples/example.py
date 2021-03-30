@@ -18,7 +18,7 @@ for seed in seeds:
     i += 1
     np.random.seed(np.round(seed).astype(int))
     drones = [SimpleAgent(["t"])]
-    sim = Simulator("E:/ETSI/Proyecto/data/Map/Ypacarai/map.yaml", drones, "t", test_name="test_EI_S", saving=True,
+    sim = Simulator("E:/ETSI/Proyecto/data/Map/Ypacarai/map.yaml", drones, "t", test_name="test_EI_S", saving=False,
                     acq="gaussian_ei", acq_mod="split_path")
     sim.run_simulation()
     print(i)

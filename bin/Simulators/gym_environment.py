@@ -26,6 +26,7 @@ class GymEnvironment(object):
         """
         # instancing variables
         self.environment = Env(map_path2yaml=map_path2yaml)
+        self.noiseless_maps = False
         self.agents = agents
         for agent in self.agents:
             assert isinstance(agent, Ga), "All agents should be instances of gym.SimpleAgent"
@@ -97,7 +98,7 @@ class GymEnvironment(object):
         """
         for agent in self.agents:
             [self.sensors.add(sensor) for sensor in agent.sensors]
-        self.environment.add_new_map(self.sensors, file=self.file_no)
+        self.environment.add_new_map(self.sensors, file=self.file_no, clone4noiseless=self.noiseless_maps)
 
     def _load_envs_into_agents(self):
         """
@@ -138,7 +139,6 @@ class GymEnvironment(object):
         for pose, agent in zip(action, self.agents):
             if len(pose) > 0:
                 agent.next_pose = pose
-
         next_idx, dist2_simulate = self._select_next_drone()
         if next_idx == -1:
             self.timestep += 1
@@ -172,7 +172,6 @@ class GymEnvironment(object):
             results = ""
             for mse, score in zip(mses, scores):
                 results += f",{mse},{score}"
-            # print(keys)
             self.f.write(
                 "{},{},{},{},{},{}{}\n".format(self.timestep, len(self.coordinator.train_inputs), time() - self.t0,
                                                sum(c.distance_travelled for c in self.agents) / len(
@@ -181,8 +180,14 @@ class GymEnvironment(object):
         return scores
 
     def reward(self):
-        mses = [self.coordinator.get_mse(self.environment.maps[key].flatten(), key) for key in
-                self.coordinator.gps.keys()]
-        scores = [self.coordinator.get_score(self.environment.maps[key].flatten(), key) for key in
-                  self.coordinator.gps.keys()]
+        if self.noiseless_maps:
+            mses = [self.coordinator.get_mse(self.environment.maps[f"noiseless_{key}"].flatten(), key) for key in
+                    self.coordinator.gps.keys()]
+            scores = [self.coordinator.get_score(self.environment.maps[f"noiseless_{key}"].flatten(), key) for key in
+                      self.coordinator.gps.keys()]
+        else:
+            mses = [self.coordinator.get_mse(self.environment.maps[key].flatten(), key) for key in
+                    self.coordinator.gps.keys()]
+            scores = [self.coordinator.get_score(self.environment.maps[key].flatten(), key) for key in
+                      self.coordinator.gps.keys()]
         return mses, scores, self.coordinator.gps.keys()

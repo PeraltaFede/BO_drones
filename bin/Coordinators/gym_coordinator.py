@@ -1,18 +1,20 @@
 # import gpytorch
+
 import numpy as np
 # import torch as to
 from sklearn.metrics import mean_squared_error as mse
 from sklearn.metrics import r2_score
-from skopt.learning.gaussian_process import gpr, kernels
+from skopt.learning.gaussian_process import kernels
 
 from bin.Utils.acquisition_functions import gaussian_sei, maxvalue_entropy_search, gaussian_pi, gaussian_ei, max_std, \
     predictive_entropy_search
 from bin.Utils.voronoi_regions import calc_voronoi, find_vect_pos4region
+from src.gpr import gprnew
 
 
 class Coordinator(object):
     def __init__(self, map_data, sensors: set, k_names=None, acq="gaussian_ei", acq_mod="masked",
-                 acq_fusion="decoupled", d=1.0):
+                 acq_fusion="decoupled", d=0.375):
         if k_names is None:
             k_names = ["RBF"] * len(sensors)
         self.map_data = map_data
@@ -31,7 +33,7 @@ class Coordinator(object):
 
         for sensor, kernel in zip(sensors, k_names):
             if kernel == "RBF":  # "RBF" Matern" "RQ"
-                self.gps[sensor] = gpr.GaussianProcessRegressor(kernel=kernels.RBF(100), alpha=1e-7)
+                self.gps[sensor] = gprnew.GaussianProcessRegressor(kernel=kernels.RBF(100), alpha=1e-7, noise=0.01)
                 self.train_targets[sensor] = np.array([])
                 self.mus[sensor] = np.array([])
                 self.stds[sensor] = np.array([])
