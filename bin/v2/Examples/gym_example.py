@@ -8,15 +8,21 @@ from bin.Agents.gym_agent_trimmed import SimpleAgent
 from bin.Simulators.gym_environment import GymEnvironment
 
 seeds = np.linspace(163343, 3647565, 100)
-for acq in ["predictive_entropy_search"]:
-    # ds = [0.25, 0.375, 0.5, 0.75, 1.0] if acq == "gaussian_ei" else [0.25]
-    ds = [0.375]
+for acq in ["gaussian_ei", "predictive_entropy_search"]:
+    ds = [0.25, 0.375, 0.5, 0.75, 1.0] if acq == "gaussian_ei" else [0.375]
     for d in ds:
         ss = [
+            ["s1", "s2"],
             ["s5", "s6"],
+            ["s1", "s2", "s3"],
+            ["s5", "s6", "s7"],
+            ["s1", "s2", "s3", "s4"],
+            ["s5", "s6", "s7", "s8"],
+            ["s1", "s2", "s3", "s4", "s5"],
+            ["s5", "s6", "s7", "s8", "s1"],
         ]
         for sensores in ss:
-            fs = ["coupled"]
+            fs = ["decoupled", "coupled"] if acq == "gaussian_ei" else ["coupled"]
             for fusion in fs:
                 print(fusion, sensores, acq, d)
                 i = 0
@@ -24,13 +30,10 @@ for acq in ["predictive_entropy_search"]:
                     i += 1
                     np.random.seed(np.round(seed).astype(int))
                     drones = [SimpleAgent(sensores, _id=0)]
-                    if i <= 4:
-                        continue
                     sim = GymEnvironment(path[-1] + "/data/Map/Ypacarai/map.yaml", agents=drones, id_file=0,
-                                         acq=acq, acq_mod="truncated", render2gui=False, saving=False,
+                                         acq=acq, acq_mod="truncated", render2gui=False, saving=True,
                                          name_file="{}_{}_{}_1A{}S".format(acq, fusion, d, len(sensores)),
                                          acq_fusion=fusion, d=d)
-
                     try:
                         for k in range(50):
                             while True:
@@ -43,7 +46,6 @@ for acq in ["predictive_entropy_search"]:
                             next_poses = []
                             for agent in sim.agents:
                                 if agent.reached_pose():
-                                    # TODO: creo que debe ser [] instead
                                     next_poses.append(sim.coordinator.generate_new_goal(pose=agent.pose,
                                                                                         other_poses=[agt.pose for agt in
                                                                                                      sim.agents
