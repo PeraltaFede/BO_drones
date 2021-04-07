@@ -177,7 +177,7 @@ class GymEnvironment(object):
                                                sum(c.distance_travelled for c in self.agents) / len(
                                                    self.agents), mean(mses), mean(scores), results))
             self.t0 = time()
-        return scores
+        return mses
 
     def reward(self):
         if self.noiseless_maps:
