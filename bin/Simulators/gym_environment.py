@@ -78,7 +78,7 @@ class GymEnvironment(object):
             # self.f.write(
             #     "step,qty,time,t_dist,avg_mse,avg_score{}\n".format(titles))
             self.f.write(
-                "step,qty,time,t_dist,avg_bic\n".format(titles))
+                "step,qty,time,t_dist,avg_bic{}\n".format(titles))
             # self.f.write("{},{},{},{},{},{}{}\n".format(self.timestep, len(self.coordinator.train_inputs), 0,
             #                                             sum(c.distance_travelled for c in self.agents) / len(
             #                                                 self.agents), mean(mses), mean(scores), results))
