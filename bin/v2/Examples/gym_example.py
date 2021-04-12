@@ -9,7 +9,7 @@ from bin.Simulators.gym_environment import GymEnvironment
 
 seeds = np.linspace(163343, 3647565, 100)
 for acq in ["gaussian_ei", "predictive_entropy_search"]:
-    ds = [0.25, 0.375, 0.5, 0.75, 1.0] if acq == "gaussian_ei" else [0.375]
+    ds = [0.125, 0.25, 0.375, 0.5, 0.75, 1.0] if acq == "gaussian_ei" else [0.375]
     # ds = [0.375]
     for d in ds:
         ss = [

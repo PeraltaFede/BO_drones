@@ -5,26 +5,11 @@ import numpy as np
 import pandas as pd
 
 plt.style.use("seaborn")
-show = "dist,score"
+show = "dist,score,var,time"
+for_comparison = [",decoupled", ",coupled"]
 
 datas = []
 dataype = []
-# for_comparison = ["decoupled,2,predictive_entropy_search", "coupled,2,predictive_entropy_search",
-#                   "decoupled,3,predictive_entropy_search", "coupled,3,predictive_entropy_search",
-#                   "decoupled,4,predictive_entropy_search", "coupled,4,predictive_entropy_search"]
-# for_comparison = [   "decoupled,2,gaussian_ei", "coupled,2,gaussian_ei", ]
-# "decoupled,3,gaussian_ei", "coupled,3,gaussian_ei",
-# "decoupled,4,gaussian_ei", "coupled,4,gaussian_ei"]
-# for_comparison = ["2,coupled", "3,coupled", "4,coupled",
-#                   "2,decoupled", "3,decoupled", "4,decoupled"]
-for_comparison = [",decoupled", ",coupled"]
-# for_comparison = [",coupled"]
-# for_comparison = ["noisycoupled"]
-# for_comparison = ["decoupled,2,gaussian_ei", "coupled,2,gaussian_ei"]
-#                   "3,coupled,3,gaussian_ei",
-#                   "3,coupled,3,predictive_entropy_search",
-#                   "4,coupled,4,gaussian_ei",
-#                   "4,coupled,4,predictive_entropy_search"]
 
 name_files = glob.glob("E:/ETSI/Proyecto/results/SAMS/*.csv")
 
@@ -32,6 +17,8 @@ for name_file in name_files:
     with open(name_file, 'r') as f:
         f.readline()
         rl = f.readline()  # RBF,gaussian_sei,masked
+        if "predictive_entropy_search" in rl:
+            continue
         rest_all_lines = f.readlines()
         flag = False
         for line in rest_all_lines:
@@ -44,37 +31,34 @@ for name_file in name_files:
         for compare in for_comparison:
             if compare in rl:
                 if "0.5" in rl:
-                    continue
-                    # dataype.append(f"0.50,{compare}")
+                    # continue
                     dataype.append(f"0.50,{compare[1:]}")
                 elif "0.75" in rl:
-                    continue
+                    # continue
                     dataype.append(f"0.75,{compare[1:]}")
                 elif "0.25" in rl:
-                    continue
-                    # dataype.append(f"0.25,{compare}")
+                    # continue
                     dataype.append(f"0.25,{compare[1:]}")
                 elif "0.375" in rl:
-                    continue
-                    # dataype.append(f"0.375,{compare}")
-                    # dataype.append(f"ei,{compare[1:]}")
-                    # dataype.append(f"ei,{compare}")
+                    # continue
                     dataype.append(f"0.375,{compare[1:]}")
                 elif "0.125" in rl:
                     # continue
                     dataype.append(f"0.125,{compare[1:]}")
-                    # dataype.append(f"new,{compare}")
                 else:
-                    continue
+                    # continue
                     dataype.append(f"1.00,{compare[1:]}")
-                # dataype.append(compare)
                 datas.append(pd.read_csv(name_file, skiprows=2))
                 break
-name_files = glob.glob("E:/ETSI/Proyecto/results/NEWSAMS/*.csv")
+
+# name_files = glob.glob("E:/ETSI/Proyecto/results/SAMS/*.csv")
+
 for name_file in name_files:
     with open(name_file, 'r') as f:
         f.readline()
         rl = f.readline()  # RBF,gaussian_sei,masked
+        if "gaussian_ei" in rl:
+            continue
         rest_all_lines = f.readlines()
         flag = False
         for line in rest_all_lines:
@@ -85,8 +69,8 @@ for name_file in name_files:
             continue
         for compare in for_comparison:
             if compare in rl:
-                dataype.append(f"0.521,{compare[1:]}")
-                # dataype.append(f"pes,{compare}")
+                # dataype.append(f"0.521,{compare[1:]}")
+                dataype.append(f"pes,{compare}")
                 datas.append(pd.read_csv(name_file, skiprows=2))
                 break
 # name_files = glob.glob("E:/ETSI/Proyecto/results/SAMS/ga/*.csv")
@@ -111,68 +95,22 @@ for name_file in name_files:
 #                 # dataype.append(f"ga,noisy")
 #                 datas.append(pd.read_csv(name_file, skiprows=2))
 #                 break
-# for_comparison = [
-#     "110decoupled,2,gaussian_ei", "110coupled,2,gaussian_ei",
-#     # "110decoupled,3,gaussian_ei", "110coupled,3,gaussian_ei",
-#     # "110decoupled,4,gaussian_ei", "110coupled,4,gaussian_ei",
-#     # "220decoupled,2,gaussian_ei", "220coupled,2,gaussian_ei",
-#     # "220decoupled,3,gaussian_ei", "220coupled,3,gaussian_ei",
-#     # "220decoupled,4,gaussian_ei", "220coupled,4,gaussian_ei",
-#     "dyndecoupled,2,gaussian_ei", "dyncoupled,2,gaussian_ei",]
-#     # "dyndecoupled,3,gaussian_ei", "dyncoupled,3,gaussian_ei",
-# "dyndecoupled,4,gaussian_ei", "dyncoupled,4,gaussian_ei", ]
 
-# for_comparison = [
-#     "ei,noisycoupled",
-#     "pes,noisycoupled",
-#     "ga,0.375"]
-
-# for_comparison = [
-#     "ei,coupled",
-#     "pes,coupled",
-#     "ga,0.375"]
-
-# for_comparison = ["1.00,2,coupled", "1.00,3,coupled", "1.00,4,coupled",
-#                   "1.00,2,decoupled", "1.00,3,decoupled", "1.00,4,decoupled",
-#                   "0.75,2,coupled", "0.75,3,coupled", "0.75,4,coupled",
-#                   "0.75,2,decoupled", "0.75,3,decoupled", "0.75,4,decoupled",
-#                   "0.50,2,coupled", "0.50,3,coupled", "0.50,4,coupled",
-#                   "0.50,2,decoupled", "0.50,3,decoupled", "0.50,4,decoupled",
-#                   "0.25,2,coupled", "0.25,3,coupled", "0.25,4,coupled",
-#                   "0.25,2,decoupled", "0.25,3,decoupled", "0.25,4,decoupled"]
-
-
-# for_comparison = ["0.25,2,coupled", "0.25,3,coupled", "0.25,4,coupled",
-#                   "0.25,2,decoupled", "0.25,3,decoupled", "0.25,4,decoupled",
-#                   "0.50,2,coupled", "0.50,3,coupled", "0.50,4,coupled",
-#                   "0.50,2,decoupled", "0.50,3,decoupled", "0.50,4,decoupled"
-#                   ]
-#
 for_comparison = [
-    # "1.00,coupled",
-    #     "1.00,decoupled",
-    #     "0.75,coupled",
-    #     "0.75,decoupled",
-    # "0.50,coupled",
-    #     "0.50,decoupled",
-    # "0.375,coupled",
-    #     "0.375,decoupled",
-    # "0.25,coupled",
-    #     "0.25,decoupled",
+    "1.00,coupled",
+    "1.00,decoupled",
+    "0.75,coupled",
+    "0.75,decoupled",
+    "0.50,coupled",
+    "0.50,decoupled",
+    "0.375,coupled",
+    "0.375,decoupled",
+    "0.25,coupled",
+    "0.25,decoupled",
     "0.125,coupled",
-    "0.521,coupled",
     "0.125,decoupled",
-    "0.521,decoupled",
+    "pes,coupled",
 ]
-
-# for_comparison = [
-#     "new,0.125,decoupled",
-#     "new,0.125,coupled",
-#     "new,0.25,decoupled",
-#     "new,0.25,coupled",
-#     "new,0.375,decoupled",
-#     "new,0.375,coupled",
-# ]
 
 for compare in for_comparison:
     print(compare, ": ", np.count_nonzero(np.array(dataype) == compare))
@@ -238,13 +176,13 @@ max_dist = 0
 for i in range(len(datas)):
     if "0.521" not in dataype[i]:
         mse[dataype[i]].append(datas[i]["avg_mse"].values)
-        score[dataype[i]].append(datas[i]["avg_score"].values/0.9848689954375156)  # /0.7413447473233803
-        scores = [datas[i][x].values/0.9848689954375156 for x in datas[i].columns if "score_" in x]
+        score[dataype[i]].append(datas[i]["avg_score"].values / 0.9848689954375156)  # /0.7413447473233803
+        scores = [datas[i][x].values / 0.9848689954375156 for x in datas[i].columns if "score_" in x]
         variance[dataype[i]].append(np.var(scores, axis=0))
     else:
         mse[dataype[i]].append(datas[i]["avg_bic"].values)
-        score[dataype[i]].append(datas[i]["avg_bic"].values/-2264403.472235439)
-        scores = [datas[i][x].values/-2264403.472235439 for x in datas[i].columns if "bic_" in x]
+        score[dataype[i]].append(datas[i]["avg_bic"].values / -2264403.472235439)
+        scores = [datas[i][x].values / -2264403.472235439 for x in datas[i].columns if "bic_" in x]
         variance[dataype[i]].append(np.var(scores, axis=0))
     qty[dataype[i]].append(datas[i]["qty"].values)
     time[dataype[i]].append(datas[i]["time"].values)
