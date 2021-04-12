@@ -9,8 +9,9 @@ from skopt.learning.gaussian_process import gpr, kernels
 from bin.Utils.acquisition_functions import gaussian_sei, maxvalue_entropy_search, gaussian_pi, gaussian_ei, max_std, \
     predictive_entropy_search
 from bin.Utils.voronoi_regions import calc_voronoi, find_vect_pos4region
+
+
 # from src.gpr import gprnew
-from RegscorePy.bic import bic
 
 
 class Coordinator(object):
@@ -268,8 +269,8 @@ class Coordinator(object):
             key = list(self.sensors)[0]
         if self.nans is None:
             self.nans = np.isnan(y_true)
-        # return mse(y_true[~self.nans], self.surrogate(keys=[key])[0][~self.nans])
-        return bic(y_true[~self.nans], self.surrogate(keys=[key])[0], len(self.train_targets))
+        return mse(y_true[~self.nans], self.surrogate(keys=[key])[0][~self.nans])
+        # return bic(y_true[~self.nans], self.surrogate(keys=[key])[0], len(self.train_targets))
 
     def get_score(self, y_true, key=None):
         if key is None:

@@ -64,28 +64,28 @@ class GymEnvironment(object):
                 "{},{},{},{},{},{},{}\n".format(len(self.agents), len(self.sensors), acq_fusion,
                                                 len(self.coordinator.gps), self.coordinator.acquisition,
                                                 self.coordinator.acq_mod, d)))
-            # mses, scores, keys = self.reward()
-            bics, keys = self.reward()
+            mses, scores, keys = self.reward()
+            # bics, keys = self.reward()
             titles = ""
             for sensor in keys:
-                titles += f',bic_{sensor}'
-                # titles += f',mse_{sensor},score_{sensor}'
+                # titles += f',bic_{sensor}'
+                titles += f',mse_{sensor},score_{sensor}'
             results = ""
-            # for mse, score in zip(mses, scores):
-            #     results += f",{mse},{score}"
-            for bic in bics:
-                results += f",{bic}"
+            for mse, score in zip(mses, scores):
+                results += f",{mse},{score}"
+            # for bic in bics:
+            #     results += f",{bic}"
+            self.f.write(
+                "step,qty,time,t_dist,avg_mse,avg_score{}\n".format(titles))
             # self.f.write(
-            #     "step,qty,time,t_dist,avg_mse,avg_score{}\n".format(titles))
-            self.f.write(
-                "step,qty,time,t_dist,avg_bic{}\n".format(titles))
-            # self.f.write("{},{},{},{},{},{}{}\n".format(self.timestep, len(self.coordinator.train_inputs), 0,
-            #                                             sum(c.distance_travelled for c in self.agents) / len(
-            #                                                 self.agents), mean(mses), mean(scores), results))
-            self.f.write(
-                "{},{},{},{},{}{}\n".format(self.timestep, len(self.coordinator.train_inputs), 0,
-                                            sum(c.distance_travelled for c in self.agents) / len(
-                                                self.agents), mean(bics), results))
+            #     "step,qty,time,t_dist,avg_bic{}\n".format(titles))
+            self.f.write("{},{},{},{},{},{}{}\n".format(self.timestep, len(self.coordinator.train_inputs), 0,
+                                                        sum(c.distance_travelled for c in self.agents) / len(
+                                                            self.agents), mean(mses), mean(scores), results))
+            # self.f.write(
+            #     "{},{},{},{},{}{}\n".format(self.timestep, len(self.coordinator.train_inputs), 0,
+            #                                 sum(c.distance_travelled for c in self.agents) / len(
+            #                                     self.agents), mean(bics), results))
             self.t0 = time()
 
         self.render2gui = render2gui
@@ -156,10 +156,14 @@ class GymEnvironment(object):
 
                 results = ""
                 for i in range(len(self.sensors)):
-                    results += ",-1,-1"
-                self.f.write("{},{},{},{},{},{}{}\n".format(self.timestep, len(self.coordinator.train_inputs), 0,
-                                                            sum(c.distance_travelled for c in self.agents) / len(
-                                                                self.agents), -1, -1, results))
+                    results += ",-1"
+                self.f.write("{},{},{},{},{},{}\n".format(self.timestep, len(self.coordinator.train_inputs), 0,
+                                                          sum(c.distance_travelled for c in self.agents) / len(
+                                                              self.agents), -1, results))
+                #     results += ",-1,-1"
+                # self.f.write("{},{},{},{},{},{}{}\n".format(self.timestep, len(self.coordinator.train_inputs), 0,
+                #                                             sum(c.distance_travelled for c in self.agents) / len(
+                #                                                 self.agents), -1, -1, results))
             return -1, -1
         for agent in self.agents:
             if agent.step(dist_left=dist2_simulate):
@@ -177,38 +181,37 @@ class GymEnvironment(object):
                 self.sender.send_new_drone_msg(agent.pose, agent.drone_id)
 
         self.timestep += 1
-        # mses, scores, keys = self.reward()
-        bics, keys = self.reward()
+        mses, scores, keys = self.reward()
+        # bics, keys = self.reward()
         if self.saving:
-            results = ""
-            for bic in bics:
-                results += f",{bic}"
             # results = ""
-            # for mse, score in zip(mses, scores):
-            #     results += f",{mse},{score}"
-            # self.f.write(
-            #     "{},{},{},{},{},{}{}\n".format(self.timestep, len(self.coordinator.train_inputs), time() - self.t0,
-            #                                    sum(c.distance_travelled for c in self.agents) / len(
-            #                                        self.agents), mean(mses), mean(scores), results))
+            # for bic in bics:
+            #     results += f",{bic}"
+            results = ""
+            for mse, score in zip(mses, scores):
+                results += f",{mse},{score}"
             self.f.write(
-                "{},{},{},{},{}{}\n".format(self.timestep, len(self.coordinator.train_inputs), time() - self.t0,
-                                            sum(c.distance_travelled for c in self.agents) / len(
-                                                self.agents), mean(bics), results))
+                "{},{},{},{},{},{}{}\n".format(self.timestep, len(self.coordinator.train_inputs), time() - self.t0,
+                                               sum(c.distance_travelled for c in self.agents) / len(
+                                                   self.agents), mean(mses), mean(scores), results))
+            # self.f.write(
+            #     "{},{},{},{},{}{}\n".format(self.timestep, len(self.coordinator.train_inputs), time() - self.t0,
+            #                                 sum(c.distance_travelled for c in self.agents) / len(
+            #                                     self.agents), mean(bics), results))
             self.t0 = time()
-        return bics
+        return scores
 
     def reward(self):
-        return [self.coordinator.get_mse(self.environment.maps[key].flatten(), key) for key in
-                self.coordinator.gps.keys()], self.coordinator.gps.keys()
-        # TODO!!!!!!
-        # if self.noiseless_maps:
-        #     mses = [self.coordinator.get_mse(self.environment.maps[f"noiseless_{key}"].flatten(), key) for key in
-        #             self.coordinator.gps.keys()]
-        #     scores = [self.coordinator.get_score(self.environment.maps[f"noiseless_{key}"].flatten(), key) for key in
-        #               self.coordinator.gps.keys()]
-        # else:
-        #     mses = [self.coordinator.get_mse(self.environment.maps[key].flatten(), key) for key in
-        #             self.coordinator.gps.keys()]
-        #     scores = [self.coordinator.get_score(self.environment.maps[key].flatten(), key) for key in
-        #               self.coordinator.gps.keys()]
-        # return mses, scores, self.coordinator.gps.keys()
+        # return [self.coordinator.get_mse(self.environment.maps[key].flatten(), key) for key in
+        #         self.coordinator.gps.keys()], self.coordinator.gps.keys()
+        if self.noiseless_maps:
+            mses = [self.coordinator.get_mse(self.environment.maps[f"noiseless_{key}"].flatten(), key) for key in
+                    self.coordinator.gps.keys()]
+            scores = [self.coordinator.get_score(self.environment.maps[f"noiseless_{key}"].flatten(), key) for key in
+                      self.coordinator.gps.keys()]
+        else:
+            mses = [self.coordinator.get_mse(self.environment.maps[key].flatten(), key) for key in
+                    self.coordinator.gps.keys()]
+            scores = [self.coordinator.get_score(self.environment.maps[key].flatten(), key) for key in
+                      self.coordinator.gps.keys()]
+        return mses, scores, self.coordinator.gps.keys()
