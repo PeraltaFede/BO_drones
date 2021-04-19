@@ -15,7 +15,7 @@ class MyProblem(Problem):
     def __init__(self, gps, train_targets, map_data):
         super().__init__(n_var=2,
                          n_obj=len(gps),
-                         n_constr=len(gps),
+                         n_constr=1,
                          xl=np.array([0, 0]),
                          xu=np.array([999, 1499]))
         self.sensors = gps.keys()
@@ -37,7 +37,8 @@ class MyProblem(Problem):
             point = np.round(point).astype(np.int)
             if self.map_data[point[1], point[0]] == 0:
                 constraints[iid] = -1
-        out["G"] = np.column_stack([constraints for key in self.sensors])
+        out["G"] = np.column_stack([constraints])
+        # out["G"] = np.column_stack([constraints for key in self.sensors])
 
 
 class Coordinator(object):
@@ -140,7 +141,7 @@ class Coordinator(object):
             if curr_dist < prev_min_dist:
                 new_pos = np.round(point).astype(np.int)
                 prev_min_dist = curr_dist
-        if False:
+        if True:
             import matplotlib.pyplot as plt
             plt.subplot(131)
             plt.title("S1")

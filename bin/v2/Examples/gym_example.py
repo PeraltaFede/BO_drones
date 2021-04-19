@@ -13,7 +13,7 @@ for acq in ["gaussian_ei", "predictive_entropy_search"]:
     ds = [0.375]
     for d in ds:
         ss = [
-            ["s1", "s2"],
+            # ["s1", "s2"],
             ["s5", "s6"],
             ["s1", "s2", "s3"],
             ["s5", "s6", "s7"],
@@ -33,7 +33,7 @@ for acq in ["gaussian_ei", "predictive_entropy_search"]:
                     np.random.seed(np.round(seed).astype(int))
                     drones = [SimpleAgent(sensores, _id=0)]
                     sim = GymEnvironment(path[-1] + "/data/Map/Ypacarai/map.yaml", agents=drones, id_file=0,
-                                         acq=acq, acq_mod="truncated", render2gui=False, saving=True,
+                                         acq=acq, acq_mod="truncated", render2gui=False, saving=False,
                                          name_file="{}_{}_{}_1A{}S".format(acq, fusion, d, len(sensores)),
                                          acq_fusion=fusion, d=d)
                     try:
