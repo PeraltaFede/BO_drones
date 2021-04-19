@@ -24,7 +24,7 @@ for acq in ["gaussian_ei", "predictive_entropy_search"]:
         ]
         for sensores in ss:
             # fs = ["decoupled", "coupled"] if acq == "gaussian_ei" else ["coupled"]
-            fs = "pareto"
+            fs = ["pareto"]
             for fusion in fs:
                 print(fusion, sensores, acq, d)
                 i = 0
