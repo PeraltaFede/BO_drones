@@ -156,9 +156,9 @@ class GymEnvironment(object):
                 results = ""
                 for i in range(len(self.sensors)):
                     results += ",-1"
-                self.f.write("{},{},{},{},{},{}\n".format(self.timestep, len(self.coordinator.train_inputs), 0,
-                                                          sum(c.distance_travelled for c in self.agents) / len(
-                                                              self.agents), -1, results))
+                self.f.write("{},{},{},{},{}{}\n".format(self.timestep, len(self.coordinator.train_inputs), 0,
+                                                         sum(c.distance_travelled for c in self.agents) / len(
+                                                             self.agents), -1, results))
                 #     results += ",-1,-1"
                 # self.f.write("{},{},{},{},{},{}{}\n".format(self.timestep, len(self.coordinator.train_inputs), 0,
                 #                                             sum(c.distance_travelled for c in self.agents) / len(
