@@ -8,14 +8,14 @@ import numpy as np
 maps = []
 # glob.glob("E:/ETSI/Proyecto/data/Databases/numpy_files/random*")
 
-for namefile in ["E:/ETSI/Proyecto/data/Databases/numpy_files/random_0.npy",
-                 "E:/ETSI/Proyecto/data/Databases/numpy_files/random_1.npy",
+for namefile in [#"E:/ETSI/Proyecto/data/Databases/numpy_files/random_0.npy",
+#                  "E:/ETSI/Proyecto/data/Databases/numpy_files/random_1.npy",
                  "E:/ETSI/Proyecto/data/Databases/numpy_files/random_2.npy",
-                 "E:/ETSI/Proyecto/data/Databases/numpy_files/random_3.npy",
+                 # "E:/ETSI/Proyecto/data/Databases/numpy_files/random_3.npy",
                  "E:/ETSI/Proyecto/data/Databases/numpy_files/random_4.npy",
-                 "E:/ETSI/Proyecto/data/Databases/numpy_files/random_5.npy",
+                 # "E:/ETSI/Proyecto/data/Databases/numpy_files/random_5.npy",
                  "E:/ETSI/Proyecto/data/Databases/numpy_files/random_6.npy",
-                 "E:/ETSI/Proyecto/data/Databases/numpy_files/random_7.npy",
+                 # "E:/ETSI/Proyecto/data/Databases/numpy_files/random_7.npy",
                  ]:
     with open(namefile, 'rb') as g:
         print(namefile)
@@ -25,26 +25,27 @@ current_cmap = copy(cm.get_cmap("pink"))
 current_cmap.set_bad(color="#00000000")
 xticks = np.arange(0, 1000, 200)
 yticks = np.arange(0, 1500, 200)
-xnticks = [str(num * 10) for num in xticks]
-ynticks = [str(num * 10) for num in yticks]
+xnticks = [str(format(num * 10, ',')) for num in xticks]
+ynticks = [str(format(num * 10, ',')) for num in yticks]
+
 i = 0
 
-[print(np.nanmin(mapz), np.nanmax(mapz)) for mapz in maps]
+# [print(np.nanmin(mapz), np.nanmax(mapz)) for mapz in maps]
 
 # for fig, iid in zip(maps, range(4)):
-np.random.seed(76842153)
-for fig, name in zip(maps, ["E:/ETSI/Proyecto/data/Databases/numpy_files/noisy_random_0.npy",
-                            "E:/ETSI/Proyecto/data/Databases/numpy_files/noisy_random_1.npy",
-                            "E:/ETSI/Proyecto/data/Databases/numpy_files/noisy_random_2.npy",
-                            "E:/ETSI/Proyecto/data/Databases/numpy_files/noisy_random_3.npy",
-                            "E:/ETSI/Proyecto/data/Databases/numpy_files/noisy_random_4.npy",
-                            "E:/ETSI/Proyecto/data/Databases/numpy_files/noisy_random_5.npy",
-                            "E:/ETSI/Proyecto/data/Databases/numpy_files/noisy_random_6.npy",
-                            "E:/ETSI/Proyecto/data/Databases/numpy_files/noisy_random_7.npy",
-                            ]):
-    fig += np.random.normal(0, 0.01, fig.shape)
-    with open(name, 'wb') as g:
-        np.save(g, fig)
+# np.random.seed(76842153)
+# for fig, name in zip(maps, ["E:/ETSI/Proyecto/data/Databases/numpy_files/noisy_random_0.npy",
+#                             "E:/ETSI/Proyecto/data/Databases/numpy_files/noisy_random_1.npy",
+#                             "E:/ETSI/Proyecto/data/Databases/numpy_files/noisy_random_2.npy",
+#                             "E:/ETSI/Proyecto/data/Databases/numpy_files/noisy_random_3.npy",
+#                             "E:/ETSI/Proyecto/data/Databases/numpy_files/noisy_random_4.npy",
+#                             "E:/ETSI/Proyecto/data/Databases/numpy_files/noisy_random_5.npy",
+#                             "E:/ETSI/Proyecto/data/Databases/numpy_files/noisy_random_6.npy",
+#                             "E:/ETSI/Proyecto/data/Databases/numpy_files/noisy_random_7.npy",
+#                             ]):
+#     fig += np.random.normal(0, 0.01, fig.shape)
+#     with open(name, 'wb') as g:
+#         np.save(g, fig)
 
 for fig in maps:
     # plt.subplot(141 + iid)
@@ -58,8 +59,8 @@ for fig in maps:
     plt.grid(True, zorder=0, color="white")
     plt.gca().set_facecolor('#eaeaf2')
     plt.clabel(CS, inline=1, fontsize=10)
-    plt.xlabel("x [m]", fontsize=20)
-    plt.ylabel("y [m]", fontsize=20)
+    plt.xlabel("x (m)", fontsize=20)
+    plt.ylabel("y (m)", fontsize=20)
     # plt.xticks(xnticks, fontsize=20)
     # plt.yticks(ynticks, fontsize=20)  # .0052 .0017
     plt.xticks(xticks, labels=xnticks, fontsize=20)

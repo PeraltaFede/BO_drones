@@ -62,9 +62,9 @@ class Simulator(object):
         self.use_cih_as_initial_points = True
         if self.use_cih_as_initial_points:
             reads = [
-                [np.array([785, 757]), self.environment.maps["t"][757, 785]],  # CSNB       (757, 785)
+                [np.array([785, 757]), self.environment.maps["s1"][757, 785]],  # CSNB       (757, 785)
                 # [np.array([492, 443]), self.environment.maps["t"][443, 492]],  # YVY        (443, 492)
-                [np.array([75, 872]), self.environment.maps["t"][872, 75]],  # PMAregua   (872, 75)
+                [np.array([75, 872]), self.environment.maps["s1"][872, 75]],  # PMAregua   (872, 75)
                 self.agents[0].read()
             ]
             self.sender.send_new_sensor_msg(str(reads[0][0][0]) + "," + str(reads[0][0][1]) + "," + str(reads[0][1]))
@@ -132,9 +132,9 @@ class Simulator(object):
         i = 0
 
         while i < imax:
-            # if not self.sender.should_update():
-            #     plt.pause(0.5)
-            #     continue
+            if not self.sender.should_update():
+                plt.pause(0.5)
+                continue
             t0 = time.time()
             if isinstance(self.agents, sa.SimpleAgent):
                 self.agents.next_pose = self.coordinator.generate_new_goal()

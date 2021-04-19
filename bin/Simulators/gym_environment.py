@@ -6,7 +6,7 @@ from numpy import mean
 from numpy.linalg import norm
 
 from bin.Agents.gym_agent_trimmed import SimpleAgent as Ga
-from bin.Coordinators.gym_coordinator import Coordinator
+from bin.Coordinators.gym_moo_coordinator import Coordinator
 from bin.Environment.simple_env import Env
 from bin.Utils.utils import get_init_pos4
 from bin.v2.Communications.simple_sender import Sender

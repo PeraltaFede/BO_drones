@@ -1,7 +1,9 @@
 # v2
 # from bin.Agents.simple_agent import SimpleAgent
 import numpy as np
+from sys import path
 
+path.extend([path[0][:path[0].rindex("bin") - 1]])
 from bin.Agents.pathplanning_agent import SimpleAgent
 from bin.Simulators.single_drone_simulator import Simulator
 
@@ -17,9 +19,9 @@ i = 0
 for seed in seeds:
     i += 1
     np.random.seed(np.round(seed).astype(int))
-    drones = [SimpleAgent(["t"])]
-    sim = Simulator("E:/ETSI/Proyecto/data/Map/Ypacarai/map.yaml", drones, "t", test_name="test_EI_S", saving=False,
-                    acq="gaussian_ei", acq_mod="split_path")
+    drones = [SimpleAgent(["s1"])]
+    sim = Simulator("E:/ETSI/Proyecto/data/Map/Ypacarai/map.yaml", drones, "s1", test_name="test_EI_S", saving=False,
+                    acq="gaussian_ei", acq_mod="normal")
     sim.run_simulation()
     print(i)
     if i >= 50:

@@ -59,7 +59,14 @@ if __name__ == "__main__":
     # ejemplo de posicion
     pos = {"lat": -25.316577, "lon": -57.316350}
     # ejemplo de un elemento de la lista de datos obtenidos
+
+    # pH = 7.2
+    # media_esperada_ph = 7.0
+    # desviacion_estandar_esperada_ph = 1.5
+    # pH_gp = (ph-media_esperada_ph)/desviacion_estandar_esperada_ph
+
     una_lectura = dict()
+    # una_lectura["pH"] = np.random.rand()
     for sensor in sensores:
         una_lectura[sensor] = np.random.rand() - 0.5
     una_lectura["pos"] = {"lat": pos["lat"] + 0.001 * np.random.rand() - 0.0005,
@@ -68,9 +75,9 @@ if __name__ == "__main__":
     datos = []
     for i in range(10):
         datos.append(una_lectura)
-
         # Funcion de obtencion de sgte posicion!
         final_pos = ypa_bo.obtener_siguiente_posicion(datos, pos)
+        print(final_pos)
 
         # generación de informacion de ejemplo
         for sensor in sensores:

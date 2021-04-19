@@ -5,20 +5,21 @@ import numpy as np
 import pandas as pd
 
 plt.style.use("seaborn")
-show = "dist,score,var,time"
-for_comparison = [",decoupled", ",coupled"]
+show = "dist"
+for_comparison = [",noisycoupled"]
+# for_comparison = [",decoupled", ",coupled"]
 
 datas = []
 dataype = []
 
-name_files = glob.glob("E:/ETSI/Proyecto/results/SAMS/*.csv")
+name_files = glob.glob("E:/ETSI/Proyecto/results/noisi/*.csv")
 
 for name_file in name_files:
     with open(name_file, 'r') as f:
         f.readline()
         rl = f.readline()  # RBF,gaussian_sei,masked
-        if "predictive_entropy_search" in rl:
-            continue
+        # if "predictive_entropy_search" in rl:
+        #     continue
         rest_all_lines = f.readlines()
         flag = False
         for line in rest_all_lines:
@@ -34,7 +35,7 @@ for name_file in name_files:
                     # continue
                     dataype.append(f"0.50,{compare[1:]}")
                 elif "0.75" in rl:
-                    # continue
+                    continue
                     dataype.append(f"0.75,{compare[1:]}")
                 elif "0.25" in rl:
                     # continue
@@ -43,22 +44,19 @@ for name_file in name_files:
                     # continue
                     dataype.append(f"0.375,{compare[1:]}")
                 elif "0.125" in rl:
-                    # continue
+                    continue
                     dataype.append(f"0.125,{compare[1:]}")
                 else:
-                    # continue
+                    continue
                     dataype.append(f"1.00,{compare[1:]}")
                 datas.append(pd.read_csv(name_file, skiprows=2))
                 break
 
-# name_files = glob.glob("E:/ETSI/Proyecto/results/SAMS/*.csv")
-
+name_files = glob.glob("E:/ETSI/Proyecto/results/SAMS/pes/*.csv")
 for name_file in name_files:
     with open(name_file, 'r') as f:
         f.readline()
         rl = f.readline()  # RBF,gaussian_sei,masked
-        if "gaussian_ei" in rl:
-            continue
         rest_all_lines = f.readlines()
         flag = False
         for line in rest_all_lines:
@@ -70,46 +68,47 @@ for name_file in name_files:
         for compare in for_comparison:
             if compare in rl:
                 # dataype.append(f"0.521,{compare[1:]}")
-                dataype.append(f"pes,{compare}")
+                dataype.append(f"pes,{compare[1:]}")
                 datas.append(pd.read_csv(name_file, skiprows=2))
                 break
-# name_files = glob.glob("E:/ETSI/Proyecto/results/SAMS/ga/*.csv")
-# for_comparison = [",0.375"]
-#
-# for name_file in name_files:
-#     with open(name_file, 'r') as f:
-#         f.readline()
-#         rl = f.readline()  # RBF,gaussian_sei,masked
-#         rest_all_lines = f.readlines()
-#         flag = False
-#         for line in rest_all_lines:
-#             if "pos:" in line:
-#                 flag = True
-#                 print(name_file)
-#                 break
-#         if flag:
-#             continue
-#         for compare in for_comparison:
-#             if compare in rl:
-#                 dataype.append(f"ga,{compare[1:]}")
-#                 # dataype.append(f"ga,noisy")
-#                 datas.append(pd.read_csv(name_file, skiprows=2))
-#                 break
+name_files = glob.glob("E:/ETSI/Proyecto/results/SAMS/ga/noisy/*.csv")
+for_comparison = [",0.375"]
+
+for name_file in name_files:
+    with open(name_file, 'r') as f:
+        f.readline()
+        rl = f.readline()  # RBF,gaussian_sei,masked
+        rest_all_lines = f.readlines()
+        flag = False
+        for line in rest_all_lines:
+            if "pos:" in line:
+                flag = True
+                print(name_file)
+                break
+        if flag:
+            continue
+        for compare in for_comparison:
+            if compare in rl:
+                dataype.append(f"ga,noisycoupled")
+                # dataype.append(f"ga,noisy")
+                datas.append(pd.read_csv(name_file, skiprows=2))
+                break
 
 for_comparison = [
-    "1.00,coupled",
-    "1.00,decoupled",
-    "0.75,coupled",
-    "0.75,decoupled",
-    "0.50,coupled",
-    "0.50,decoupled",
-    "0.375,coupled",
-    "0.375,decoupled",
-    "0.25,coupled",
-    "0.25,decoupled",
-    "0.125,coupled",
-    "0.125,decoupled",
-    "pes,coupled",
+    # "1.00,coupled",
+    # "1.00,decoupled",
+    # "0.75,coupled",
+    # "0.75,decoupled",
+    # "0.50,coupled",
+    # "0.50,decoupled",
+    "0.375,noisycoupled",
+    # "0.375,decoupled",
+    # "0.25,coupled",
+    # "0.25,decoupled",
+    # "0.125,coupled",
+    # "0.125,decoupled",
+    "pes,noisycoupled",
+    "ga,noisycoupled"
 ]
 
 for compare in for_comparison:
@@ -282,18 +281,19 @@ for compare in for_comparison:
 legends = []
 for key in for_comparison:
     legends.append(key)
-
+#
 # colors = ["#A6CEE3", "#1F78B4", "#B2DF8A", "#33A02C", "#FB9A99", "#E31A1C",
 #           "#FDBF6F", "#FF7F00", "#CAB2D6", "#6A3D9A", "#FFFF99", "#B15928"]
-
+#
 # colors = ["#A6CEE3", "#1F78B4", "#33A02C",
 #           "#FF7F00", "#6A3D9A", "#B15928"]
 colors = ["#1F78B4", "#B15928", "#33A02C",
           "#FF7F00", "#6A3D9A", "#A6CEE3"]
+# titles = ["coupled", "decoupled"]
 titles = ["Proposed", "PESMOC", "GA"]
 # titles = ["$\\lambda=0.50$, coupled", "$\\lambda=0.375$, coupled", "$\\lambda=0.250$, coupled"]
 if "dist" in show:
-    x = np.linspace(0, 1501, 1501)
+    x = np.linspace(0, 1500, 1501)
     # print(np.nanmax(t_dist_mean["0.125,coupled"]))
     # print(np.nanmax(t_dist["0.125,coupled"]))
     # print(np.nanmax(t_dist_mean["0.125,decoupled"]))
@@ -353,8 +353,8 @@ if "dist" in show:
         i += 1
 
     plt.ylabel('$R^2(x)$', fontsize=30)
-    # plt.xticks(selected, [str(d * 10) for d in selected], fontsize=30)
-    plt.xlabel("Distance [m]", fontsize=30)
+    plt.xticks(selected, [str(format(d * 10, ',')) for d in selected], fontsize=30)
+    plt.xlabel("Distance (m)", fontsize=30)
     plt.yticks(fontsize=30)
     plt.title("$R^2(x)$ Score vs Distance", fontsize=30)
     plt.legend(titles, loc='upper left', prop={'size': 25}, fancybox=True, shadow=True,
@@ -380,15 +380,15 @@ if "mse" in show:
     for key in for_comparison:
         # print(key)
         # print(np.mean(score_mean[key][1:] / t_dist_mean[key][1:]))
-        # if "decoupled" in key:
+        if "decoupled" in key:
         #     # d_proportion_of_l_s.append(1 / float(key[:4]))
-        #     d_proportion_of_l_s.append(float(key[:-10]))
-        #     d_ratio_score_t_d.append(mse_interp_mean[key][-1])
+            d_proportion_of_l_s.append(float(key[:-10]))
+            d_ratio_score_t_d.append(mse_interp_mean[key][-1])
         #     # d_ratio_score_t_d.append(np.mean(mse_mean[key][1:] / t_dist_mean[key][1:]))
-        # else:
-        #     # c_proportion_of_l_s.append(1 / float(key[:4]))
-        c_proportion_of_l_s.append(float(key[:-8]))
-        c_ratio_score_t_d.append(mse_interp_mean[key][-1])
+        else:
+            # c_proportion_of_l_s.append(1 / float(key[:4]))
+            c_proportion_of_l_s.append(float(key[:-8]))
+            c_ratio_score_t_d.append(mse_interp_mean[key][-1])
         #     # c_ratio_score_t_d.append(np.mean(mse_mean[key][1:] / t_dist_mean[key][1:]))
         # print(np.mean(variance_mean[key][1:] / t_dist_mean[key][1:]))
         # print(mse_mean[key][-1]/t_dist_mean[key][-1])
@@ -411,22 +411,24 @@ if "mse" in show:
         #     plt.plot(labels + (i - len(for_comparison) / 2 + 0.5), mse_mean[key])
         # i += 1
 
-    for key, xi, yi in zip(for_comparison, c_proportion_of_l_s,
+    numeros = np.flip([51, 32, 22, 17, 12, 10])
+    for key, xi, yi in zip(numeros, c_proportion_of_l_s,
                            c_ratio_score_t_d):
-        plt.text(xi, yi, f"$n = {1 + np.round(mean4key[key]).astype(int)}$", fontsize=20)
-        print(key, yi ** 2 / (1 + np.round(mean4key[key]).astype(int)))
+        plt.text(xi, yi, f"$n = {key}$", fontsize=20)
+        # print(key, yi ** 2 / (1 + np.round(mean4key[key]).astype(int)))
         # plt.text(xi, yi + 0.05, f"$m = {np.round(max4key[key]).astype(int)}$", fontsize=20)
 
     plt.bar(c_proportion_of_l_s[0] - 0.0125, c_ratio_score_t_d[0], 0.025, label="coupled", color=colors[i + 1])
-    #
-    # plt.bar(d_proportion_of_l_s[0] + 0.0125, d_ratio_score_t_d[0], 0.025, label="decoupled", color=colors[i])
-    # for xi, yi in zip(d_proportion_of_l_s,
-    #                   d_ratio_score_t_d):
-    #     plt.bar(xi + 0.0125, yi, 0.025, color=colors[i])
+
+    plt.bar(d_proportion_of_l_s[0] + 0.0125, d_ratio_score_t_d[0], 0.025, label="decoupled", color=colors[i])
+    for xi, yi in zip(d_proportion_of_l_s,
+                      d_ratio_score_t_d):
+        plt.bar(xi + 0.0125, yi, 0.025, color=colors[i])
     for xi, yi in zip(c_proportion_of_l_s,
                       c_ratio_score_t_d):
         plt.bar(xi - 0.0125, yi, 0.025, color=colors[i + 1])
-
+    print(d_ratio_score_t_d)
+    print(c_ratio_score_t_d)
     # plt.plot(d_proportion_of_l_s, d_ratio_score_t_d, 'og')
     # plt.plot(c_proportion_of_l_s, c_ratio_score_t_d, 'or')
     # Add some text for labels, title and custom x-axis tick labels, etc.
@@ -437,7 +439,7 @@ if "mse" in show:
     # plt.gca().set_xscale('log', base=2)
     # plt.xlabel("$\\frac{1}{\\lambda}$", fontsize=30)
     plt.yticks(fontsize=30)
-    plt.title("$R^2(x) \\mid d=15.000 [m]$", fontsize=30)
+    plt.title("$R^2(x) \\mid d=15,000 (m)$", fontsize=30)
     # plt.legend(["realnew", "old", "new"], prop={'size': 23})
     plt.legend(titles, prop={'size': 25}, fancybox=True, shadow=True, frameon=True)
     # plt.tight_layout()
@@ -496,7 +498,7 @@ if "time" in show:
         i += 1
     # print('yes')
     # Add some text for labels, title and custom x-axis tick labels, etc.
-    plt.ylabel('Time [s]', fontsize=30)
+    plt.ylabel('Time (s)', fontsize=30)
     plt.xticks(np.arange(0, max4key[key] + qty_clean[key][0][0]), fontsize=30)
     # plt.xticks(fontsize=30)
     plt.xlabel("Measurements", fontsize=30)

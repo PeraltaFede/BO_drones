@@ -4,7 +4,7 @@ import numpy as np
 length_scale = 1
 # lam = np.array([0.67])
 
-d = np.arange(-2, 2.01, 0.0001)
+d = np.arange(-20, 20.01, 0.0001)
 # y = (np.sqrt(np.pi) * length_scale) * np.exp(-(d ** 2) / (4 * length_scale ** 2))
 # y = np.exp(-(d ** 2) / (2 * length_scale ** 2))
 y = (2 * np.pi * length_scale ** 2) ** (1 / 2) * np.exp(-2 * (np.pi * length_scale) ** 2 * d ** 2)
