@@ -13,7 +13,7 @@ for acq in ["gaussian_ei", "predictive_entropy_search"]:
     ds = [0.375]
     for d in ds:
         ss = [
-            # ["s1", "s2"],
+            ["s1", "s2"],
             ["s5", "s6"],
             ["s1", "s2", "s3"],
             ["s5", "s6", "s7"],
