@@ -141,7 +141,7 @@ class Coordinator(object):
             if curr_dist < prev_min_dist:
                 new_pos = np.round(point).astype(np.int)
                 prev_min_dist = curr_dist
-        if True:
+        if False:
             import matplotlib.pyplot as plt
             plt.subplot(131)
             plt.title("S1")
