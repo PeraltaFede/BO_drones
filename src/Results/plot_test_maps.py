@@ -4,29 +4,29 @@ import matplotlib.cm as cm
 import matplotlib.pyplot as plt
 import numpy as np
 
-# plt.style.use("seaborn")
+plt.style.use("seaborn")
 maps = []
 # glob.glob("E:/ETSI/Proyecto/data/Databases/numpy_files/random*")
 
-for namefile in [#"E:/ETSI/Proyecto/data/Databases/numpy_files/random_0.npy",
-#                  "E:/ETSI/Proyecto/data/Databases/numpy_files/random_1.npy",
-                 "E:/ETSI/Proyecto/data/Databases/numpy_files/random_2.npy",
-                 # "E:/ETSI/Proyecto/data/Databases/numpy_files/random_3.npy",
-                 "E:/ETSI/Proyecto/data/Databases/numpy_files/random_4.npy",
-                 # "E:/ETSI/Proyecto/data/Databases/numpy_files/random_5.npy",
-                 "E:/ETSI/Proyecto/data/Databases/numpy_files/random_6.npy",
-                 # "E:/ETSI/Proyecto/data/Databases/numpy_files/random_7.npy",
-                 ]:
+for namefile in [  # "E:/ETSI/Proyecto/data/Databases/numpy_files/random_0.npy",
+                     # "E:/ETSI/Proyecto/data/Databases/numpy_files/random_1.npy",
+    "E:/ETSI/Proyecto/data/Databases/numpy_files/noise_random_99.npy",
+    # "E:/ETSI/Proyecto/data/Databases/numpy_files/random_3.npy",
+    # "E:/ETSI/Proyecto/data/Databases/numpy_files/random_4.npy",
+    # "E:/ETSI/Proyecto/data/Databases/numpy_files/random_5.npy",
+    # "E:/ETSI/Proyecto/data/Databases/numpy_files/random_6.npy",
+    # "E:/ETSI/Proyecto/data/Databases/numpy_files/random_7.npy",
+]:
     with open(namefile, 'rb') as g:
         print(namefile)
         maps.append(np.load(g))
 
-current_cmap = copy(cm.get_cmap("pink"))
+current_cmap = copy(cm.get_cmap("BuGn_r"))
 current_cmap.set_bad(color="#00000000")
-xticks = np.arange(0, 1000, 200)
-yticks = np.arange(0, 1500, 200)
-xnticks = [str(format(num * 10, ',')) for num in xticks]
-ynticks = [str(format(num * 10, ',')) for num in yticks]
+# xticks = np.arange(0, 1000, 200)
+# yticks = np.arange(0, 1500, 200)
+# xnticks = [str(format(num * 10, ',')) for num in xticks]
+# ynticks = [str(format(num * 10, ',')) for num in yticks]
 
 i = 0
 
@@ -56,6 +56,7 @@ for fig in maps:
     #     cbar.ax.tick_params(labelsize=20)
     CS = plt.contour(fig, colors='k',
                      alpha=0.6, linewidths=1.0, zorder=10)
+    plt.title("Real Model $f(x)$", fontsize=20)
     plt.grid(True, zorder=0, color="white")
     plt.gca().set_facecolor('#eaeaf2')
     plt.clabel(CS, inline=1, fontsize=10)
@@ -63,8 +64,8 @@ for fig in maps:
     plt.ylabel("y (m)", fontsize=20)
     # plt.xticks(xnticks, fontsize=20)
     # plt.yticks(ynticks, fontsize=20)  # .0052 .0017
-    plt.xticks(xticks, labels=xnticks, fontsize=20)
-    plt.yticks(yticks, labels=ynticks, fontsize=20)  # .0052 .0017
+    # plt.xticks(xticks, labels=xnticks, fontsize=20)
+    # plt.yticks(yticks, labels=ynticks, fontsize=20)  # .0052 .0017
     plt.tight_layout()
     plt.show(block=False)
     i += 1

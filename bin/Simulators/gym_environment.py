@@ -6,14 +6,14 @@ from numpy import mean
 from numpy.linalg import norm
 
 from bin.Agents.gym_agent_trimmed import SimpleAgent as Ga
-from bin.Coordinators.gym_moo_coordinator import Coordinator
+from bin.Coordinators.gym_coordinator import Coordinator
 from bin.Environment.simple_env import Env
 from bin.Utils.utils import get_init_pos4
 from bin.v2.Communications.simple_sender import Sender
 
 
 class GymEnvironment(object):
-    def __init__(self, map_path2yaml, agents: list, acq="gaussian_ei", saving=False, acq_fusion="max_sum",
+    def __init__(self, map_path2yaml, agents: list, acq="gaussian_ei", saving=False, acq_fusion="coupled",
                  acq_mod="normal", id_file=0, render2gui=True, initial_pos="circle", name_file="", d=1.0):
         """
 
@@ -28,8 +28,8 @@ class GymEnvironment(object):
         self.environment = Env(map_path2yaml=map_path2yaml)
         self.noiseless_maps = False
         self.agents = agents
-        for agent in self.agents:
-            assert isinstance(agent, Ga), "All agents should be instances of gym.SimpleAgent"
+        # for agent in self.agents:
+        #     assert isinstance(agent, Ga), "All agents should be instances of gym.SimpleAgent"
         self.file_no = id_file
         self.sensors = set()
         self._init_maps()
@@ -40,7 +40,7 @@ class GymEnvironment(object):
         # initializing environment
         self._load_envs_into_agents()
         # initialize drone positions
-        initial_positions = get_init_pos4(n=len(agents), map_data=self.environment.grid, expand=True)
+        # initial_positions = get_init_pos4(n=len(agents), map_data=self.environment.grid, expand=True)
         for agent in self.agents:
             aux_f = agent.position_flag
             agent.position_flag = False
@@ -169,6 +169,7 @@ class GymEnvironment(object):
                 if agent.reached_pose():
                     read = agent.read()
                     self.coordinator.add_data(read)
+
                     if self.render2gui:
                         for sensor in agent.sensors:
                             self.sender.send_new_sensor_msg(

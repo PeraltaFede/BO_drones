@@ -59,8 +59,8 @@ def create_map(grid, resolution, obstacles_on=False, randomize_shekel=True, sens
             file = 5
         elif sensor == "s7":
             file = 6
-        # elif sensor == "s8":
-        else:
+        elif sensor == "s8":
+        # else:
             file = 7
 
         if noiseless:
@@ -89,7 +89,8 @@ def create_map(grid, resolution, obstacles_on=False, randomize_shekel=True, sens
         ymax = 10
         # _z = []
         if randomize_shekel:
-            no_maxima = np.random.randint(2, 6)
+            # no_maxima = np.random.randint(2, 6)
+            no_maxima = 6
             xmin = 0
             xmax = 10
             ymin = 0
@@ -98,10 +99,11 @@ def create_map(grid, resolution, obstacles_on=False, randomize_shekel=True, sens
             c = []
             for i in range(no_maxima):
                 # a.append([2 + np.random.rand() * 6, 2 + np.random.rand() * 6])
-                a.append([1.2 + np.random.rand() * 8.8, 1.2 + np.random.rand() * 8.8])
-                c.append(5)
-            # print(a)
-            # print(c)
+                # a.append([1.2 + np.random.rand() * 8.8, 1.2 + np.random.rand() * 8.8])
+                a.append([np.random.rand()*9, np.random.rand()*9])
+                c.append(5)  # +np.random.uniform(0.0, 5.0))
+            print(a)
+            print(c)
             a = np.array(a)
             c = np.array(c).T
         else:

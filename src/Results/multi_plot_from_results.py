@@ -173,16 +173,16 @@ for compare in for_comparison:
 
 max_dist = 0
 for i in range(len(datas)):
-    if "0.521" not in dataype[i]:
-        mse[dataype[i]].append(datas[i]["avg_mse"].values)
-        score[dataype[i]].append(datas[i]["avg_score"].values / 0.9848689954375156)  # /0.7413447473233803
-        scores = [datas[i][x].values / 0.9848689954375156 for x in datas[i].columns if "score_" in x]
-        variance[dataype[i]].append(np.var(scores, axis=0))
-    else:
-        mse[dataype[i]].append(datas[i]["avg_bic"].values)
-        score[dataype[i]].append(datas[i]["avg_bic"].values / -2264403.472235439)
-        scores = [datas[i][x].values / -2264403.472235439 for x in datas[i].columns if "bic_" in x]
-        variance[dataype[i]].append(np.var(scores, axis=0))
+    # if "0.521" not in dataype[i]:
+    mse[dataype[i]].append(datas[i]["avg_mse"].values)
+    score[dataype[i]].append(datas[i]["avg_score"].values)  # /0.7413447473233803
+    scores = [datas[i][x].values for x in datas[i].columns if "score_" in x]
+    variance[dataype[i]].append(np.var(scores, axis=0))
+    # else:
+    #     mse[dataype[i]].append(datas[i]["avg_bic"].values)
+    #     score[dataype[i]].append(datas[i]["avg_bic"].values / -2264403.472235439)
+    #     scores = [datas[i][x].values / -2264403.472235439 for x in datas[i].columns if "bic_" in x]
+    #     variance[dataype[i]].append(np.var(scores, axis=0))
     qty[dataype[i]].append(datas[i]["qty"].values)
     time[dataype[i]].append(datas[i]["time"].values)
     t_dist[dataype[i]].append(datas[i]["t_dist"].values)

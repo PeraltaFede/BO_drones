@@ -18,7 +18,7 @@ for acq in ["gaussian_ei"]:
             # ["s1", "s2", "s3"],
             # ["s5", "s6", "s7"],
             ["s1", "s2", "s3", "s4"],
-            ["s5", "s6", "s7", "s8"],
+            # ["s5", "s6", "s7", "s8"],
             # ["s1", "s2", "s3", "s4", "s5"],
             # ["s5", "s6", "s7", "s8", "s1"],
         ]
@@ -30,10 +30,10 @@ for acq in ["gaussian_ei"]:
                 i = 0
                 for seed in seeds:
                     i += 1
-                    np.random.seed(np.round(seed).astype(int))
+                    np.random.seed(np.round(seeds[34]).astype(int))
                     drones = [SimpleAgent(sensores, _id=0)]
                     sim = GymEnvironment(path[-1] + "/data/Map/Ypacarai/map.yaml", agents=drones, id_file=0,
-                                         acq=acq, acq_mod="truncated", render2gui=False, saving=True,
+                                         acq=acq, acq_mod="truncated", render2gui=False, saving=False,
                                          name_file="{}_{}_{}_1A{}S".format(acq, fusion, d, len(sensores)),
                                          acq_fusion=fusion, d=d)
                     try:
@@ -57,7 +57,7 @@ for acq in ["gaussian_ei"]:
                                         sim.sender.send_new_goal_msg(agent.next_pose, agent.drone_id)
                                 else:
                                     next_poses.append([])
-                            print(k, sim.step(next_poses))
+                            print(k, np.mean(sim.step(next_poses)))
                     except Exception as e:
                         raise e
                         # sim.f.write(f"pos: {sim.agents[0].pose} " + str(e))
@@ -65,5 +65,6 @@ for acq in ["gaussian_ei"]:
                         if sim.saving:
                             sim.f.close()
                     print(i)
-                    if i >= 50:
-                        break
+                    break
+                    # if i >= 50:
+                    #     break

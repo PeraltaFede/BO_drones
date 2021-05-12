@@ -7,7 +7,7 @@ from bin.Utils.path_planners import rrt_star
 
 class SimpleAgent(object):
 
-    def __init__(self, sensors, pose=np.zeros((3, 1)), ignore_obstacles=False, _id=0):
+    def __init__(self, sensors, pose=np.zeros((3, 1)), ignore_obstacles=False, _id=0, limited_distance=True):
         """
         SimpleAgent(sensors)
 
@@ -30,8 +30,9 @@ class SimpleAgent(object):
         """
         self.sensors = sensors
         self.pose = pose
+        self.limited_distance = limited_distance
         self.ignore_obstacles = ignore_obstacles
-        self.position_flag = True
+        self.position_flag = False
         self.position_error = np.round(5 * (np.random.rand(3) - 0.5)).astype(np.int)
         self.agent_env = None
         self.path = None
@@ -56,9 +57,17 @@ class SimpleAgent(object):
                 self.position_error = np.round(5 * (np.random.rand(3) - 0.5)).astype(np.int)
                 val = value + self.position_error
             self._next_pose = val
-            self.path_plan()
         else:
             self._next_pose = value
+        self.path_plan()
+
+    @property
+    def distance_travelled(self):
+        return self._distance_travelled
+
+    @distance_travelled.setter
+    def distance_travelled(self, value):
+        self._distance_travelled = value
 
     def set_agent_env(self, env):
         self.agent_env = env
@@ -145,10 +154,6 @@ class SimpleAgent(object):
             if 0 <= self.next_pose[0] <= self.agent_env.grid.shape[1] and \
                     0 <= self.next_pose[1] <= self.agent_env.grid.shape[0] and (
                     self.agent_env.grid[self.next_pose[1], self.next_pose[0]] == 0 or self.ignore_obstacles):
-                if self.distance_travelled > 1500:
-                    print('limited distance')
-                    self.battery_left = 0.0
-                    return True
                 i2remove = 0
                 for goal in self.path:
                     d = np.linalg.norm(self.pose[:2] - goal[:2])
@@ -192,6 +197,4 @@ class SimpleAgent(object):
         aux = {sensor: self.agent_env.maps[sensor][self.pose[1], self.pose[0]] for sensor in
                self.sensors}
         aux["pos"] = self.pose[:2]
-        if self.distance_travelled > 1500:
-            self.battery_left = 0.0
         return aux

@@ -16,14 +16,14 @@ from bin.Environment.simple_env import Env
 
 
 EXPERIMENTS = 1
-SIZE = 25
+SIZE = 500
 seeds = np.linspace(76842153, 1123581321, 100)
 
 sensors = ["t"]
 
 drones = [SimpleAgent(sensors)]
-env = Env(map_path2yaml="E:/ETSI/Proyecto/data/Map/Ypacarai/map.yaml")
-env.add_new_map(sensors, file=1)
+env = Env(map_path2yaml="E:/ETSI/Proyecto/data/Map/Simple/map.yaml")
+env.add_new_map(sensors, file=99)
 
 plt.style.use("seaborn")
 
@@ -71,36 +71,34 @@ for k in range(EXPERIMENTS):
     d = []
     x = []
     while len(d) < SIZE:
-        candidate = np.round(np.random.uniform([0, 0], [999, 1499]).astype(int))
+        candidate = np.round(np.random.uniform([0, 0], [999, 999]).astype(int))
         # candidate = candidates[0]
         # candidates = candidates[1:]
         if env.grid[candidate[1], candidate[0]] == 0:
             x.append(candidate)
             d.append([candidate, env.maps["t"][candidate[1], candidate[0]]])
     coords = [
-        Coordinator(env.grid, "t", "RQ"),
+        # Coordinator(env.grid, "t", "RQ"),
         Coordinator(env.grid, "t", "RBF"),
-        Coordinator(env.grid, "t", "RBF_N")
+        # Coordinator(env.grid, "t", "RBF_N")
     ]
     mu = dict()
     sd = dict()
     for coord in coords:
         coord.initialize_data_gpr(d)
-        mses[coord.k_name].append(coord.get_mse(env.maps['t'].T.flatten()))
+        # mses[coord.k_name].append(coord.get_mse(env.maps['t'].T.flatten()))
         cmu, csd = coord.surrogate(return_std=True, return_sensor=False)
-        mu[coord.k_name] = cmu.reshape((1000, 1500)).T
-        sd[coord.k_name] = csd.reshape((1000, 1500)).T
+        mu[coord.k_name] = cmu.reshape((1000, 1000)).T
+        sd[coord.k_name] = csd.reshape((1000, 1000)).T
 
-        for nnan in nans:
-            mu[coord.k_name][nnan[0], nnan[1]] = -1
+        # for nnan in nans:
+        #     mu[coord.k_name][nnan[0], nnan[1]] = -1
         mu[coord.k_name] = np.ma.array(mu[coord.k_name], mask=(mu[coord.k_name] == -1))
-        for nnan in nans:
-            sd[coord.k_name][nnan[0], nnan[1]] = -1
+        # for nnan in nans:
+        #     sd[coord.k_name][nnan[0], nnan[1]] = -1
         sd[coord.k_name] = np.ma.array(sd[coord.k_name], mask=(sd[coord.k_name] == -1))
         # print(np.exp(coord.gp.kernel_.theta))
-        print(coord.gp.noise_)
-        print(coord.gp.noise)
-        print(coord.gp.get_params())
+        print(coord.gp.kernel_)
 # plt.style.use("seaborn")
 # legends = []
 # for key in mses:
@@ -133,7 +131,7 @@ for key in mu.keys():
                      alpha=0.6, linewidths=1.0)
 
     plt.clabel(CS, inline=1, fontsize=10)
-    plt.title("{} has MSE: {}".format(key, coords[i - 2].get_mse(env.maps['t'].T.flatten())))
+    # plt.title("{} has MSE: {}".format(key, coords[i - 2].get_mse(env.maps['t'].T.flatten())))
     plt.subplot(240 + i + 4)
     plt.imshow(sd[key], origin='lower', cmap='viridis')
     plt.plot(x[:, 0], x[:, 1], 'ob')

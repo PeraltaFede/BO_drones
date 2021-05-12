@@ -7,7 +7,7 @@ from bin.Utils.path_planners import rrt_star
 
 class SimpleAgent(object):
 
-    def __init__(self, sensors, pose=np.zeros((3, 1)), ignore_obstacles=False, _id=0):
+    def __init__(self, sensors, pose=np.zeros((3, 1)), ignore_obstacles=False, _id=0, limited_distance=True):
         """
         SimpleAgent(sensors)
 
@@ -30,8 +30,9 @@ class SimpleAgent(object):
         """
         self.sensors = sensors
         self.pose = pose
+        self.limited_distance = limited_distance
         self.ignore_obstacles = ignore_obstacles
-        self.position_flag = True
+        self.position_flag = False
         self.position_error = np.round(5 * (np.random.rand(3) - 0.5)).astype(np.int)
         self.agent_env = None
         self.path = None
@@ -56,9 +57,9 @@ class SimpleAgent(object):
                 self.position_error = np.round(5 * (np.random.rand(3) - 0.5)).astype(np.int)
                 val = value + self.position_error
             self._next_pose = val
-            self.path_plan()
         else:
             self._next_pose = value
+        self.path_plan()
 
     @property
     def distance_travelled(self):
@@ -66,7 +67,7 @@ class SimpleAgent(object):
 
     @distance_travelled.setter
     def distance_travelled(self, value):
-        if value >= 1500:
+        if self.limited_distance and value >= 1500:
             self._distance_travelled = 1500.01
         else:
             self._distance_travelled = value
@@ -156,7 +157,7 @@ class SimpleAgent(object):
             if 0 <= self.next_pose[0] <= self.agent_env.grid.shape[1] and \
                     0 <= self.next_pose[1] <= self.agent_env.grid.shape[0] and (
                     self.agent_env.grid[self.next_pose[1], self.next_pose[0]] == 0 or self.ignore_obstacles):
-                if self.distance_travelled > 1500:
+                if self.limited_distance and self.distance_travelled > 1500:
                     print('limited distance')
                     self.battery_left = 0.0
                     return True
@@ -168,7 +169,7 @@ class SimpleAgent(object):
                         self.pose = deepcopy(goal)
                         dist_left -= d
                     else:
-                        if self.distance_travelled + d > 1500.0:
+                        if self.limited_distance and self.distance_travelled + d > 1500.0:
                             dist_left = 1501 - self.distance_travelled
                         diff = np.subtract(goal[:2], self.pose[:2])
                         angle = np.arctan2(diff[1], diff[0])
@@ -183,7 +184,7 @@ class SimpleAgent(object):
                                 self.next_pose = self.pose
                                 break
 
-                        if self.distance_travelled > 1500:
+                        if self.limited_distance and self.distance_travelled > 1500:
                             self.path = []
                             print('breaking')
                             break

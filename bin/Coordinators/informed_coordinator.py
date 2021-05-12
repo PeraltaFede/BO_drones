@@ -27,12 +27,12 @@ class Coordinator(object):
         self.acq_mod = acq_mod  # 'masked' 'split_path' 'truncated', 'normal'
         self.k_name = k_name  # "RBF" Matern" "RQ"
         if k_name == "RBF_N":
-            self.gp = gpr.GaussianProcessRegressor(kernel=kernels.RBF(100), alpha=1e-7, noise=0.02)
+            self.gp = gpr.GaussianProcessRegressor(kernel=kernels.RBF(100), alpha=1e-7)
         elif k_name == "RBF":
-            self.gp = gpr.GaussianProcessRegressor(kernel=kernels.RBF(100), alpha=1e-7, noise=0.005)
+            self.gp = gpr.GaussianProcessRegressor(kernel=kernels.RBF(100.0), alpha=1e-7)
             # self.gp = gpr.GaussianProcessRegressor(kernel=kernels.Matern(100, nu=3.5), alpha=1e-7)
         elif k_name == "RQ":
-            self.gp = gpr.GaussianProcessRegressor(kernel=kernels.RBF(100), alpha=1e-7, noise=0.01)
+            self.gp = gpr.GaussianProcessRegressor(kernel=kernels.RBF(100), alpha=1e-7)
             # self.gp = gpr.GaussianProcessRegressor(kernel=kernels.RationalQuadratic(100, 0.1), alpha=1e-7)
 
         self.data = [np.array([[], []]), np.array([])]

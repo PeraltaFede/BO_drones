@@ -1,3 +1,4 @@
+import matplotlib.pyplot as plt
 import numpy as np
 from pymoo.algorithms.nsga2 import NSGA2
 from pymoo.model.problem import Problem
@@ -141,46 +142,86 @@ class Coordinator(object):
             if curr_dist < prev_min_dist:
                 new_pos = np.round(point).astype(np.int)
                 prev_min_dist = curr_dist
-        if False:
-            import matplotlib.pyplot as plt
-            plt.subplot(131)
-            plt.title("S1")
-            plt.imshow(gaussian_ei(self.all_vector_pos,
-                                   self.gps["s5"],
-                                   np.min(self.train_targets["s5"]),
-                                   ).reshape((1000, 1500)).T, origin='lower')
-            for pareto in res.X:
-                plt.plot(pareto[0], pareto[1], 'xk')
-            plt.plot(new_pos[0], new_pos[1], 'Xg')
-            plt.plot(pose[0], pose[1], 'ro')
-            plt.contour(self.map_data)
-            plt.subplot(132)
-            plt.title("NSGA-II")
-            plt.imshow(self.map_data, origin='lower')
-            for pareto in res.X:
-                pareto = np.round(pareto).astype(np.int)
-                if self.map_data[pareto[1], pareto[0]] == 0:
-                    plt.plot(pareto[0], pareto[1], 'xb')
-                else:
-                    plt.plot(pareto[0], pareto[1], 'xk')
-            plt.plot(pose[0], pose[1], 'ro')
-            plt.plot(new_pos[0], new_pos[1], 'Xg')
-            plt.subplot(133)
-            plt.title("S2")
-            plt.imshow(gaussian_ei(self.all_vector_pos,
-                                   self.gps["s6"],
-                                   np.min(self.train_targets["s6"]),
-                                   ).reshape((1000, 1500)).T, origin='lower')
-            plt.contour(self.map_data)
-            for pareto in res.X:
-                pareto = np.round(pareto).astype(np.int)
-                if self.map_data[pareto[1], pareto[0]] == 0:
-                    plt.plot(pareto[0], pareto[1], 'xb')
-                else:
-                    plt.plot(pareto[0], pareto[1], 'xk')
-            plt.plot(pose[0], pose[1], 'ro')
-            plt.plot(new_pos[0], new_pos[1], 'Xg')
+
+        if True and len(self.train_inputs) > 17:
+            # from pymoo.visualization.scatter import Scatter
+            # plot = Scatter()
+            # plot.add(res.F, color="red")
+            # plot.show()
+
+            plt.style.use("seaborn")
+            results = res.F
+            img_gen = [
+                [0, 1],
+                [0, 2],
+                [0, 3],
+
+                [1, 0],
+                [1, 2],
+                [1, 3],
+
+                [2, 0],
+                [2, 1],
+                [2, 3],
+
+                [3, 0],
+                [3, 1],
+                [3, 2],
+            ]
+            for s in img_gen:
+                f1 = results[:, s[0]]
+                f4 = results[:, s[1]]
+                plt.figure()
+                plt.title("Objective Space", fontsize=20)
+                plt.plot(f1, f4, 'ob', label=f"Pareto Set: $\\alpha_{s[0]+1}(x) \\;,\\; \\alpha_{s[1]+1}(x)$")
+                plt.xlabel(f"$\\alpha_{s[0]+1}(x)$", fontsize=20)
+                plt.ylabel(f"$\\alpha_{s[1]+1}(x)$", fontsize=20)
+                plt.xticks(fontsize=20)
+                plt.yticks(fontsize=20)
+                plt.legend(loc='lower left', prop={'size': 17}, fancybox=True, shadow=True, frameon=True)
+
             plt.show(block=True)
+
+            # xticks = np.arange(0, 1000, 200)
+            # yticks = np.arange(0, 1500, 200)
+            # xnticks = [str(format(num * 10, ',')) for num in xticks]
+            # ynticks = [str(format(num * 10, ',')) for num in yticks]
+            # surr = self.surrogate(keys=["s3"])[0]
+            # mapz = np.full_like(self.map_data, np.nan)
+            # for pos in enumerate(self.vector_pos):
+            #     mapz[pos[1][1], pos[1][0]] = surr[pos[0]]
+            #
+            # # mapz = np.power(np.subtract(mapz, lol), 2)
+            # plt.imshow(mapz, cmap="BuGn_r",
+            #            origin='lower', zorder=8)
+            # CS = plt.contour(mapz, colors='k',
+            #                  alpha=0.6, linewidths=1.0, zorder=9)
+            # plt.grid(True, zorder=0, color="white")
+            # plt.gca().set_facecolor('#eaeaf2')
+            # plt.clabel(CS, inline=1, fontsize=10)
+            # plt.xlabel("x (m)", fontsize=20)
+            # plt.ylabel("y (m)", fontsize=20)
+            # plt.xticks(xticks, labels=xnticks, fontsize=20)
+            # plt.yticks(yticks, labels=ynticks, fontsize=20)
+            #
+            # k = True
+            # for point in self.train_inputs:
+            #     if k:
+            #         plt.plot(point[0], point[1], 'yo', zorder=10, label='Previous Locations')
+            #         k = False
+            #     else:
+            #         plt.plot(point[0], point[1], 'yo', zorder=10)
+            # plt.plot(pose[0], pose[1], 'ro', zorder=10, label='Current Location')
+            # k = True
+            # for pareto in res.X:
+            #     pareto = np.round(pareto).astype(np.int)
+            #     if self.map_data[pareto[1], pareto[0]] == 0:
+            #         if k:
+            #             plt.plot(pareto[0], pareto[1], 'Xb', zorder=10, label="Pareto Points")
+            #             k = False
+            #         else:
+            #             plt.plot(pareto[0], pareto[1], 'Xb', zorder=10)
+            # plt.plot(new_pos[0], new_pos[1], 'Xg', zorder=10, label='Closest Pareto Point')
 
         if self.acq_mod == "split_path" or self.acq_mod == "truncated":
             beacons_splitted = []
@@ -196,6 +237,12 @@ class Coordinator(object):
             new_pos = self.splitted_goals[0, :]
 
             self.splitted_goals = self.splitted_goals[1:, :]
+
+        # if len(self.train_inputs) > 1:
+        # plt.plot(new_pos[0], new_pos[1], 'Xk', zorder=10, label='Next Meas. Location')
+        # plt.legend(loc='lower left', prop={'size': 17}, fancybox=True, shadow=True,
+        #            frameon=True)
+        # plt.show(block=True)
         new_pos = np.append(new_pos, 0)
 
         return new_pos

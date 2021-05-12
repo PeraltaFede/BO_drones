@@ -31,9 +31,9 @@ for name_file in name_files:
                 dataype.append(compare)
                 datas.append(pd.read_csv(name_file, skiprows=2))
                 break
-for_comparison = ["coupled"]
+for_comparison = ["predictive_entropy_search"]
 
-name_files = glob.glob("E:/ETSI/Proyecto/results/oldSAMS/*.csv")
+name_files = glob.glob("E:/ETSI/Proyecto/results/pes/*.csv")
 for name_file in name_files:
     with open(name_file, 'r') as f:
         f.readline()
@@ -52,8 +52,28 @@ for name_file in name_files:
                 # dataype.append(f"old,{compare[1:]}")
                 datas.append(pd.read_csv(name_file, skiprows=2))
                 break
+for_comparison = ["max_sum"]
 
-for_comparison = ["pareto", "coupled"]
+name_files = glob.glob("E:/ETSI/Proyecto/results/ga/*.csv")
+for name_file in name_files:
+    with open(name_file, 'r') as f:
+        f.readline()
+        rl = f.readline()  # RBF,gaussian_sei,masked
+        rest_all_lines = f.readlines()
+        flag = False
+        for line in rest_all_lines:
+            if "pos:" in line:
+                flag = True
+                break
+        if flag:
+            continue
+        for compare in for_comparison:
+            if compare in rl:
+                dataype.append("ga")
+                # dataype.append(f"old,{compare[1:]}")
+                datas.append(pd.read_csv(name_file, skiprows=2))
+                break
+for_comparison = ["pareto", "predictive_entropy_search","ga"]
 
 for compare in for_comparison:
     print(compare, ": ", np.count_nonzero(np.array(dataype) == compare))
@@ -109,8 +129,8 @@ for compare in for_comparison:
 
 max_dist = 0
 for i in range(len(datas)):
-    score[dataype[i]].append(datas[i]["avg_score"].values / 0.9848689954375156)  # /0.7413447473233803
-    scores = [datas[i][x].values / 0.9848689954375156 for x in datas[i].columns if "score_" in x]
+    score[dataype[i]].append(datas[i]["avg_score"].values)  # /0.7413447473233803
+    scores = [datas[i][x].values for x in datas[i].columns if "score_" in x]
     variance[dataype[i]].append(np.var(scores, axis=0))
     qty[dataype[i]].append(datas[i]["qty"].values)
     time[dataype[i]].append(datas[i]["time"].values)
@@ -163,9 +183,10 @@ for key in for_comparison:
 #           "#FDBF6F", "#FF7F00", "#CAB2D6", "#6A3D9A", "#FFFF99", "#B15928"]
 # colors = ["#A6CEE3", "#1F78B4", "#33A02C",
 #           "#FF7F00", "#6A3D9A", "#B15928"]
-colors = ["#1F78B4", "#B15928", "#33A02C",
-          "#FF7F00", "#6A3D9A", "#A6CEE3"]
-titles = for_comparison
+# colors = ["#1F78B4", "#B15928", "#33A02C",
+#           "#FF7F00", "#6A3D9A", "#A6CEE3"]
+colors = ["#EC9B2E", "#24AAE2", "#73934B"]
+titles = ["Proposed", "PESMOC", "GA"]
 if "dist" in show:
     x = np.linspace(0, 1500, 1501)
 
@@ -173,26 +194,26 @@ if "dist" in show:
     width = 90 / len(for_comparison)  # the width of the ba
     i = 0
     for key in for_comparison:
-        # max_r2s = -1
-        # fmo4mr2s = -1
+        max_r2s = -1
+        fmo4mr2s = -1
         for tdistrun, mserun, idx in zip(t_dist[key], score[key], enumerate(score[key])):
             fmo = np.where(mserun == -1)[0]
             if len(fmo) > 0:
                 mse_interp[key].append(np.interp(x, tdistrun[:fmo[0]], mserun[:fmo[0]]))
-                # if max_r2s == -1 or mserun[fmo[0] - 1] < score[key][max_r2s][fmo4mr2s - 1]:
-                # if 49 < idx[0] < 100 and (max_r2s == -1 or mserun[fmo[0] - 1] > score[key][max_r2s][fmo4mr2s - 1]):
-                #     max_r2s = idx[0]
-                #     fmo4mr2s = fmo[0]
+                if (max_r2s == -1 or mserun[fmo[0] - 1] > score[key][max_r2s][fmo4mr2s - 1]):
+                    max_r2s = idx[0]
+                    fmo4mr2s = fmo[0]
+                    # print(max_r2s)
+                    # print(fmo4mr2s)
                 # plt.plot(tdistrun[:fmo[0]], mserun[:fmo[0]], color=colors[i], alpha=0.1)
                 # plt.plot(tdistrun[fmo[0] - 1], mserun[fmo[0] - 1], '.', color=colors[i])
-            else:
-                mse_interp[key].append(np.interp(x, tdistrun, mserun))
-                # if max_r2s == -1 or mserun[- 1] > score[key][max_r2s]:
-                #     max_r2s = np.where(score[key] == mserun)
+            # else:
+            #     mse_interp[key].append(np.interp(x, tdistrun, mserun))
+            #     if max_r2s == -1 or mserun[- 1] > score[key][max_r2s][-1]:
+            #         max_r2s = np.where(score[key] == mserun)
                 # plt.plot(tdistrun, mserun, color=colors[i], alpha=0.1)
-        # 15 ei 22, 9 pes 18, 27 ga 28
-        # print(key, max_r2s, fmo4mr2s, score[key][max_r2s][fmo4mr2s - 1])
-        # print(score[key][max_r2s])
+        print(key, max_r2s, fmo4mr2s, score[key][max_r2s][fmo4mr2s - 1])
+        print(score[key][max_r2s])
         mse_interp[key] = np.array(mse_interp[key]).T.reshape(len(x), -1)
         mse_interp_mean[key] = np.mean(mse_interp[key], axis=1)
         mse_interp_std[key] = np.std(mse_interp[key], axis=1)

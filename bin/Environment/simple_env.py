@@ -15,8 +15,7 @@ class Env(BaseEnv):
                                                  noiseless=True)
             if clone4noiseless:
                 self.maps[f"noiseless_{sensor}"] = utils.create_map(self.grid, self.resolution, True, sensor=sensor,
-                                                                    file=file
-                                                                    , noiseless=True)
+                                                                    file=file, noiseless=True)
 
     def render_maps(self, sensors=None):
         data = {}
