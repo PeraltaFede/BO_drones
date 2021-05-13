@@ -70,6 +70,7 @@ def create_map(grid, resolution, obstacles_on=False, randomize_shekel=True, sens
             name = path[-1] + '/data/Databases/numpy_files/noisy_random_{}.npy'.format(file)
 
         if not os.path.isfile(name):
+            global w_obstacles, a, c
             no_maxima = 6
             xmin = 0
             xmax = 10
