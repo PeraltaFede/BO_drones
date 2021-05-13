@@ -16,7 +16,7 @@ for d in ds:
         np.random.seed(np.round(seed).astype(int))
         drones = [SimpleAgent("t", _id=0, limited_distance=False)]
         sim = GymEnvironment(path[-1] + "/data/Map/Simple/map.yaml", agents=drones, id_file=99,
-                             acq="gaussian_ei", acq_mod="truncated", render2gui=False, saving=False,
+                             acq="gaussian_ei", acq_mod="truncated", render2gui=False, saving=True,
                              name_file="gausian_ei_coupled_{}_1A1S".format(d), d=d, initial_pos="random")
         try:
             for k in range(25):

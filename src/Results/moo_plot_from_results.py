@@ -6,7 +6,7 @@ import pandas as pd
 
 plt.style.use("seaborn")
 show = "dist"
-for_comparison = ["0.38466", "0.40466", "0.42466", "0.44466", "0.46466"]
+for_comparison = ["0.38466", "0.40466", "0.42466", "0.44466"]
 
 datas = []
 dataype = []
@@ -211,11 +211,11 @@ if "dist" in show:
                 # plt.plot(tdistrun[fmo[0] - 1], mserun[fmo[0] - 1], '.', color=colors[i])
             else:
                 mse_interp[key].append(np.interp(x, tdistrun, mserun))
-            #     if max_r2s == -1 or mserun[- 1] > score[key][max_r2s][-1]:
-            #         max_r2s = np.where(score[key] == mserun)
+                if max_r2s == -1 or mserun[- 1] > score[key][max_r2s][-1]:
+                    max_r2s = np.where(score[key] == mserun)
                 # plt.plot(tdistrun, mserun, color=colors[i], alpha=0.1)
-        # print(key, max_r2s, fmo4mr2s, score[key][max_r2s][fmo4mr2s - 1])
-        # print(score[key][max_r2s])
+        print(key, max_r2s, fmo4mr2s, score[key][max_r2s][fmo4mr2s - 1])
+        print(score[key][max_r2s])
         mse_interp[key] = np.array(mse_interp[key]).T.reshape(len(x), -1)
         mse_interp_mean[key] = np.mean(mse_interp[key], axis=1)
         mse_interp_std[key] = np.std(mse_interp[key], axis=1)
