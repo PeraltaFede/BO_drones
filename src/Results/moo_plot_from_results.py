@@ -5,8 +5,8 @@ import numpy as np
 import pandas as pd
 
 plt.style.use("seaborn")
-show = "dist, var, mse, score, time"
-for_comparison = ["pareto"]
+show = "dist"
+for_comparison = ["0.38466", "0.40466", "0.42466", "0.44466", "0.46466"]
 
 datas = []
 dataype = []
@@ -31,49 +31,49 @@ for name_file in name_files:
                 dataype.append(compare)
                 datas.append(pd.read_csv(name_file, skiprows=2))
                 break
-for_comparison = ["predictive_entropy_search"]
-
-name_files = glob.glob("E:/ETSI/Proyecto/results/pes/*.csv")
-for name_file in name_files:
-    with open(name_file, 'r') as f:
-        f.readline()
-        rl = f.readline()  # RBF,gaussian_sei,masked
-        rest_all_lines = f.readlines()
-        flag = False
-        for line in rest_all_lines:
-            if "pos:" in line:
-                flag = True
-                break
-        if flag:
-            continue
-        for compare in for_comparison:
-            if compare in rl:
-                dataype.append(compare)
-                # dataype.append(f"old,{compare[1:]}")
-                datas.append(pd.read_csv(name_file, skiprows=2))
-                break
-for_comparison = ["max_sum"]
-
-name_files = glob.glob("E:/ETSI/Proyecto/results/ga/*.csv")
-for name_file in name_files:
-    with open(name_file, 'r') as f:
-        f.readline()
-        rl = f.readline()  # RBF,gaussian_sei,masked
-        rest_all_lines = f.readlines()
-        flag = False
-        for line in rest_all_lines:
-            if "pos:" in line:
-                flag = True
-                break
-        if flag:
-            continue
-        for compare in for_comparison:
-            if compare in rl:
-                dataype.append("ga")
-                # dataype.append(f"old,{compare[1:]}")
-                datas.append(pd.read_csv(name_file, skiprows=2))
-                break
-for_comparison = ["pareto", "predictive_entropy_search","ga"]
+# for_comparison = ["predictive_entropy_search"]
+#
+# name_files = glob.glob("E:/ETSI/Proyecto/results/pes/*.csv")
+# for name_file in name_files:
+#     with open(name_file, 'r') as f:
+#         f.readline()
+#         rl = f.readline()  # RBF,gaussian_sei,masked
+#         rest_all_lines = f.readlines()
+#         flag = False
+#         for line in rest_all_lines:
+#             if "pos:" in line:
+#                 flag = True
+#                 break
+#         if flag:
+#             continue
+#         for compare in for_comparison:
+#             if compare in rl:
+#                 dataype.append(compare)
+#                 # dataype.append(f"old,{compare[1:]}")
+#                 datas.append(pd.read_csv(name_file, skiprows=2))
+#                 break
+# for_comparison = ["max_sum"]
+#
+# name_files = glob.glob("E:/ETSI/Proyecto/results/ga/*.csv")
+# for name_file in name_files:
+#     with open(name_file, 'r') as f:
+#         f.readline()
+#         rl = f.readline()  # RBF,gaussian_sei,masked
+#         rest_all_lines = f.readlines()
+#         flag = False
+#         for line in rest_all_lines:
+#             if "pos:" in line:
+#                 flag = True
+#                 break
+#         if flag:
+#             continue
+#         for compare in for_comparison:
+#             if compare in rl:
+#                 dataype.append("ga")
+#                 # dataype.append(f"old,{compare[1:]}")
+#                 datas.append(pd.read_csv(name_file, skiprows=2))
+#                 break
+# for_comparison = ["pareto", "predictive_entropy_search","ga"]
 
 for compare in for_comparison:
     print(compare, ": ", np.count_nonzero(np.array(dataype) == compare))
@@ -138,6 +138,7 @@ for i in range(len(datas)):
     if t_dist[dataype[i]][-1][-1] > max_dist:
         max_dist = t_dist[dataype[i]][-1][-1]
 
+max_dist = np.round(max_dist).astype(np.int)
 for key in for_comparison:
     for meas, tim, sco, var, dis in zip(qty[key], time[key], score[key], variance[key], t_dist[key]):
         muestra, indice = np.unique(meas, return_index=True)
@@ -186,11 +187,12 @@ for key in for_comparison:
 # colors = ["#1F78B4", "#B15928", "#33A02C",
 #           "#FF7F00", "#6A3D9A", "#A6CEE3"]
 colors = ["#EC9B2E", "#24AAE2", "#73934B"]
-titles = ["Proposed", "PESMOC", "GA"]
+titles = for_comparison
+# titles = ["Proposed", "PESMOC", "GA"]
 if "dist" in show:
-    x = np.linspace(0, 1500, 1501)
+    x = np.linspace(0, max_dist, max_dist+1)
 
-    selected = np.arange(250, 1740, 250).astype(np.int)
+    selected = np.arange(250, max_dist+130, 250).astype(np.int)
     width = 90 / len(for_comparison)  # the width of the ba
     i = 0
     for key in for_comparison:
@@ -200,31 +202,31 @@ if "dist" in show:
             fmo = np.where(mserun == -1)[0]
             if len(fmo) > 0:
                 mse_interp[key].append(np.interp(x, tdistrun[:fmo[0]], mserun[:fmo[0]]))
-                if (max_r2s == -1 or mserun[fmo[0] - 1] > score[key][max_r2s][fmo4mr2s - 1]):
-                    max_r2s = idx[0]
-                    fmo4mr2s = fmo[0]
+                # if (max_r2s == -1 or mserun[fmo[0] - 1] > score[key][max_r2s][fmo4mr2s - 1]):
+                #     max_r2s = idx[0]
+                #     fmo4mr2s = fmo[0]
                     # print(max_r2s)
                     # print(fmo4mr2s)
                 # plt.plot(tdistrun[:fmo[0]], mserun[:fmo[0]], color=colors[i], alpha=0.1)
                 # plt.plot(tdistrun[fmo[0] - 1], mserun[fmo[0] - 1], '.', color=colors[i])
-            # else:
-            #     mse_interp[key].append(np.interp(x, tdistrun, mserun))
+            else:
+                mse_interp[key].append(np.interp(x, tdistrun, mserun))
             #     if max_r2s == -1 or mserun[- 1] > score[key][max_r2s][-1]:
             #         max_r2s = np.where(score[key] == mserun)
                 # plt.plot(tdistrun, mserun, color=colors[i], alpha=0.1)
-        print(key, max_r2s, fmo4mr2s, score[key][max_r2s][fmo4mr2s - 1])
-        print(score[key][max_r2s])
+        # print(key, max_r2s, fmo4mr2s, score[key][max_r2s][fmo4mr2s - 1])
+        # print(score[key][max_r2s])
         mse_interp[key] = np.array(mse_interp[key]).T.reshape(len(x), -1)
         mse_interp_mean[key] = np.mean(mse_interp[key], axis=1)
         mse_interp_std[key] = np.std(mse_interp[key], axis=1)
-        # plt.plot(x, mse_interp_mean[key], label=key, color=colors[i])
-        # plt.fill_between(x, mse_interp_mean[key] - mse_interp_std[key],
-        #                  mse_interp_mean[key] + mse_interp_std[key], alpha=0.2, color=colors[i])
-        plt.bar(selected + (i - len(for_comparison) / 2 + 0.5) * width,
-                mse_interp_mean[key][selected],
-                width,
-                yerr=mse_interp_std[key][selected],
-                label=key, color=colors[i])
+        plt.plot(x, mse_interp_mean[key], label=key, color=colors[i])
+        plt.fill_between(x, mse_interp_mean[key] - mse_interp_std[key],
+                         mse_interp_mean[key] + mse_interp_std[key], alpha=0.2, color=colors[i])
+        # plt.bar(selected + (i - len(for_comparison) / 2 + 0.5) * width,
+        #         mse_interp_mean[key][selected],
+        #         width,
+        #         yerr=mse_interp_std[key][selected],
+        #         label=key, color=colors[i])
         # print(key, mse_interp_mean[key][-1])
         i += 1
 
@@ -245,7 +247,7 @@ if "score" in show:
     plt.figure()
     for key in for_comparison:
         labels = np.arange(qty_clean[key][0][0], max4key[key] + qty_clean[key][0][0])
-        print(key, np.max(score_mean[key]))
+        # print(key, np.max(score_mean[key]))
         plt.bar(labels + (i - len(for_comparison) / 2 + 0.5) * width,
                 score_mean[key],
                 width,
@@ -285,7 +287,7 @@ if "time" in show:
         labels = np.arange(qty_clean[key][0][0], max4key[key] + qty_clean[key][0][0])
         # print(labels + (i - len(for_comparison) / 2 + 0.5) * width)
         # print(mse_mean[key])
-        print(key, np.mean(time_mean[key]))
+        # print(key, np.mean(time_mean[key]))
         plt.bar(labels + (i - len(for_comparison) / 2 + 0.5) * width, time_mean[key], width,
                 yerr=time_std[key], color=colors[i],
                 label=key)

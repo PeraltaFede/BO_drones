@@ -16,7 +16,7 @@ from bin.Environment.simple_env import Env
 
 
 EXPERIMENTS = 1
-SIZE = 500
+SIZE = 25
 seeds = np.linspace(76842153, 1123581321, 100)
 
 sensors = ["t"]
@@ -39,41 +39,72 @@ plt.pause(0.01)
 mses = {"RBF": [], "RBF_N": [], "RQ": []}
 with open('E:/ETSI/Proyecto/data/Databases/numpy_files/nans.npy', 'rb') as g:
     nans = np.load(g)
-# nans = []
-# for k in range(np.shape(env.grid)[0]):
-#     for j in range(np.shape(env.grid)[1]):
-#         if env.grid[k, j] == 1.0:
-#             nans.append([k, j])
-# with open('E:/ETSI/Proyecto/data/Databases/numpy_files/nans.npy', 'wb') as g:
-#     np.save(g, nans)
 
-# candidates = np.array([
-#     [671, 906],
-#     [625, 899],
-#     [577, 900],
-#     [538, 923],
-#     [519, 950],
-#     [504, 932],
-#     [493, 892],
-#     [487, 850],
-#     [476, 809],
-#     [501, 521],
-#     [517, 481],
-#     [551, 451],
-#     [591, 429],
-#     [630, 397],
-#     [669, 365]
-# ])
+candidates = [[474, 963],
+              [502, 937],
+              [468, 874],
+              [516, 794],
+              [464, 714],
+              [527, 630],
+              [476, 569],
+              [527, 513],
+              [468, 455],
+              [532, 399],
+              [462, 346],
+              [528, 303],
+              [458, 262],
+              [526, 228],
+              [591, 196],
+              [624, 261],
+              [657, 326],
+              [690, 391],
+              [722, 455],
+              [754, 519],
+              [694, 477],
+              [634, 435],
+              [573, 393],
+              [522, 446],
+              [472, 499],
+              [421, 552]]
 
+candidates = [[474, 963],
+              [510, 950],
+              [417, 933],
+              [324, 948],
+              [282, 826],
+              [235, 688],
+              [189, 564],
+              [139, 455],
+              [215, 370],
+              [316, 322],
+              [416, 274],
+              [512, 228],
+              [592, 189],
+              [544, 253],
+              [496, 317],
+              [448, 381],
+              [387, 433],
+              [342, 498],
+              [297, 563],
+              [364, 605],
+              [432, 647],
+              [497, 692],
+              [563, 736],
+              [490, 769],
+              [417, 803],
+              [344, 837]]
+
+# candidate = np.round(np.random.uniform([0, 0], [999, 999]).astype(int))
 for k in range(EXPERIMENTS):
     print('current experiment is: ', k)
     np.random.seed(np.round(seeds[k]).astype(int))
     d = []
     x = []
     while len(d) < SIZE:
-        candidate = np.round(np.random.uniform([0, 0], [999, 999]).astype(int))
-        # candidate = candidates[0]
-        # candidates = candidates[1:]
+        # candidate = candidate + np.round(0.4266*153 * np.random.uniform([-1, -1], [1, 1])).astype(int)
+        # candidate = np.clip(candidate, [0, 0], [999, 999])
+        candidate = candidates[0]
+        candidates = candidates[1:]
         if env.grid[candidate[1], candidate[0]] == 0:
             x.append(candidate)
             d.append([candidate, env.maps["t"][candidate[1], candidate[0]]])
@@ -131,7 +162,7 @@ for key in mu.keys():
                      alpha=0.6, linewidths=1.0)
 
     plt.clabel(CS, inline=1, fontsize=10)
-    # plt.title("{} has MSE: {}".format(key, coords[i - 2].get_mse(env.maps['t'].T.flatten())))
+    plt.title("{} has R2s: {}".format(key, coords[i - 2].get_score(env.maps['t'].T.flatten())))
     plt.subplot(240 + i + 4)
     plt.imshow(sd[key], origin='lower', cmap='viridis')
     plt.plot(x[:, 0], x[:, 1], 'ob')

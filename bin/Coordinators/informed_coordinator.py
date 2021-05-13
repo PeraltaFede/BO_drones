@@ -3,6 +3,7 @@ from warnings import simplefilter
 
 import numpy as np
 from sklearn.metrics import mean_squared_error as mse
+from sklearn.metrics import r2_score
 # from skopt.acquisition import gaussian_ei
 from skopt.learning.gaussian_process import gpr, kernels
 
@@ -186,6 +187,9 @@ class Coordinator(object):
     def get_mse(self, y_true):
         nan = np.isnan(y_true)
         return mse(y_true[~nan], self.surrogate()[~nan])
+
+    def get_score(self, y_true):
+        return r2_score(y_true, self.surrogate())
 
     def get_acq(self, pose=np.zeros((1, 2)), acq_func="gaussian_sei"):
         if acq_func == "gaussian_sei":

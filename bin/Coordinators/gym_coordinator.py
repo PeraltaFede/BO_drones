@@ -166,8 +166,7 @@ class Coordinator(object):
                                           xi=xi,
                                           masked=self.acq_mod == "masked")
                 elif self.acquisition == "max_std":
-                    all_acq = max_std(self.vector_pos, self.gps[key], np.min(self.train_targets[key]),
-                                      masked=self.acq_mod == "masked")
+                    all_acq = max_std(self.vector_pos, self.gps[key])
                 if self.acq_fusion == "decoupled":
                     arr1inds = all_acq.argsort()
                     sorted_arr1 = self.vector_pos[arr1inds[::-1]]
