@@ -183,7 +183,7 @@ class GymEnvironment(object):
         self.timestep += 1
         # mses, scores, keys = self.reward()
         scores, keys = self.reward()
-        # print(self.coordinator.train_inputs)
+        print(self.coordinator.train_inputs)
         if self.saving:
             results = ""
             for score in scores:

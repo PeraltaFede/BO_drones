@@ -27,72 +27,72 @@ env.add_new_map(sensors, file=99)
 
 plt.style.use("seaborn")
 
-plt.subplot(241)
+# plt.subplot(241)
+plt.subplot(131)
 plt.imshow(env.render_maps()["t"], origin='lower', cmap='inferno')
 CS = plt.contour(env.render_maps()["t"], colors=('gray', 'gray', 'gray', 'k', 'k', 'k', 'k'),
                  alpha=0.6, linewidths=1.0)
 plt.clabel(CS, inline=1, fontsize=10)
 plt.title("Ground Truth")
-plt.show(block=False)
-plt.pause(0.01)
+# plt.show(block=False)
+# plt.pause(0.01)
 
 mses = {"RBF": [], "RBF_N": [], "RQ": []}
 with open('E:/ETSI/Proyecto/data/Databases/numpy_files/nans.npy', 'rb') as g:
     nans = np.load(g)
 
-candidates = [[474, 963],
-              [502, 937],
-              [468, 874],
-              [516, 794],
-              [464, 714],
-              [527, 630],
-              [476, 569],
-              [527, 513],
-              [468, 455],
-              [532, 399],
-              [462, 346],
-              [528, 303],
-              [458, 262],
-              [526, 228],
-              [591, 196],
-              [624, 261],
-              [657, 326],
-              [690, 391],
-              [722, 455],
-              [754, 519],
-              [694, 477],
-              [634, 435],
-              [573, 393],
-              [522, 446],
-              [472, 499],
-              [421, 552]]
-
-candidates = [[474, 963],
-              [510, 950],
-              [417, 933],
-              [324, 948],
-              [282, 826],
-              [235, 688],
-              [189, 564],
-              [139, 455],
-              [215, 370],
-              [316, 322],
-              [416, 274],
-              [512, 228],
-              [592, 189],
-              [544, 253],
-              [496, 317],
-              [448, 381],
-              [387, 433],
-              [342, 498],
-              [297, 563],
-              [364, 605],
-              [432, 647],
-              [497, 692],
-              [563, 736],
-              [490, 769],
-              [417, 803],
-              [344, 837]]
+# candidates = [[263, 923],
+#               [287, 888],
+#               [176, 930],
+#               [301, 943],
+#               [410, 795],
+#               [563, 848],
+#               [483, 750],
+#               [433, 673],
+#               [377, 596],
+#               [318, 517],
+#               [263, 428],
+#               [316, 335],
+#               [243, 257],
+#               [168, 178],
+#               [94, 99],
+#               [201, 87],
+#               [309, 75],
+#               [416, 61],
+#               [524, 48],
+#               [634, 37],
+#               [722, 103],
+#               [623, 153],
+#               [668, 254],
+#               [713, 356],
+#               [759, 459],
+#               [811, 547]]
+candidates = [[489, 796],
+              [508, 753],
+              [487, 799],
+              [511, 876],
+              [419, 887],
+              [304, 888],
+              [264, 771],
+              [221, 647],
+              [154, 563],
+              [160, 453],
+              [122, 346],
+              [84, 239],
+              [147, 142],
+              [63, 61],
+              [185, 53],
+              [307, 45],
+              [430, 36],
+              [552, 27],
+              [676, 19],
+              [715, 139],
+              [754, 259],
+              [794, 380],
+              [834, 502],
+              [880, 604],
+              [899, 503],
+              [919, 402], ]
 
 # candidate = np.round(np.random.uniform([0, 0], [999, 999]).astype(int))
 for k in range(EXPERIMENTS):
@@ -153,17 +153,20 @@ x = np.array(x)
 #
 i = 2
 for key in mu.keys():
-    # plt.subplot(130 + i)
+    plt.subplot(130 + i)
     # plt.subplot(122)
-    plt.subplot(240 + i)
+    # plt.subplot(240 + i)
     plt.imshow(mu[key], origin='lower', cmap='inferno')
+    for p in enumerate(x):
+        plt.text(p[1][0], p[1][1], p[0])
     plt.plot(x[:, 0], x[:, 1], 'ob')
     CS = plt.contour(mu[key], colors=('gray', 'gray', 'gray', 'k', 'k', 'k', 'k'),
                      alpha=0.6, linewidths=1.0)
 
     plt.clabel(CS, inline=1, fontsize=10)
     plt.title("{} has R2s: {}".format(key, coords[i - 2].get_score(env.maps['t'].T.flatten())))
-    plt.subplot(240 + i + 4)
+    # plt.subplot(240 + i + 4)
+    plt.subplot(130 + i + 1)
     plt.imshow(sd[key], origin='lower', cmap='viridis')
     plt.plot(x[:, 0], x[:, 1], 'ob')
     plt.title("95% conf. std")

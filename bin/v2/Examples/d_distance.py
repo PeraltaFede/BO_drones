@@ -6,9 +6,9 @@ path.extend([path[0][:path[0].rindex("bin") - 1]])
 from bin.Agents.gym_agent import SimpleAgent
 from bin.Simulators.gym_environment import GymEnvironment
 
-seeds = np.linspace(978462, 87549927, 50)
+seeds = np.linspace(978462, 87549927, 100)
 # optimal lengthscale is probably 153
-ds = [0.46466]
+ds = [0.38466, 0.40466, 0.42466, 0.44466, 0.48466]
 for d in ds:
     i = 0
     for seed in seeds:

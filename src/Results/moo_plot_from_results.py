@@ -6,7 +6,8 @@ import pandas as pd
 
 plt.style.use("seaborn")
 show = "dist"
-for_comparison = ["0.38466", "0.40466", "0.42466", "0.44466"]
+# for_comparison = ["0.38466", "0.40466", "0.42466", "0.44466", "0.46466"]
+for_comparison = ["0.42466", "0.46466"]
 
 datas = []
 dataype = []
@@ -186,13 +187,12 @@ for key in for_comparison:
 #           "#FF7F00", "#6A3D9A", "#B15928"]
 # colors = ["#1F78B4", "#B15928", "#33A02C",
 #           "#FF7F00", "#6A3D9A", "#A6CEE3"]
-colors = ["#EC9B2E", "#24AAE2", "#73934B"]
+colors = ["#EC9B2E", "#24AAE2", "#73934B", "#A6CEE3", "#1F78B4"]
 titles = for_comparison
 # titles = ["Proposed", "PESMOC", "GA"]
 if "dist" in show:
     x = np.linspace(0, max_dist, max_dist+1)
-
-    selected = np.arange(250, max_dist+130, 250).astype(np.int)
+    selected = np.arange(250, max_dist, 250).astype(np.int)
     width = 90 / len(for_comparison)  # the width of the ba
     i = 0
     for key in for_comparison:
@@ -212,7 +212,7 @@ if "dist" in show:
             else:
                 mse_interp[key].append(np.interp(x, tdistrun, mserun))
                 if max_r2s == -1 or mserun[- 1] > score[key][max_r2s][-1]:
-                    max_r2s = np.where(score[key] == mserun)
+                    max_r2s = idx[0]
                 # plt.plot(tdistrun, mserun, color=colors[i], alpha=0.1)
         print(key, max_r2s, fmo4mr2s, score[key][max_r2s][fmo4mr2s - 1])
         print(score[key][max_r2s])
@@ -220,13 +220,13 @@ if "dist" in show:
         mse_interp_mean[key] = np.mean(mse_interp[key], axis=1)
         mse_interp_std[key] = np.std(mse_interp[key], axis=1)
         plt.plot(x, mse_interp_mean[key], label=key, color=colors[i])
-        plt.fill_between(x, mse_interp_mean[key] - mse_interp_std[key],
-                         mse_interp_mean[key] + mse_interp_std[key], alpha=0.2, color=colors[i])
-        # plt.bar(selected + (i - len(for_comparison) / 2 + 0.5) * width,
-        #         mse_interp_mean[key][selected],
-        #         width,
-        #         yerr=mse_interp_std[key][selected],
-        #         label=key, color=colors[i])
+        # plt.fill_between(x, mse_interp_mean[key] - mse_interp_std[key],
+        #                  mse_interp_mean[key] + mse_interp_std[key], alpha=0.2, color=colors[i])
+        plt.bar(selected + (i - len(for_comparison) / 2 + 0.5) * width,
+                mse_interp_mean[key][selected],
+                width,
+                yerr=mse_interp_std[key][selected],
+                label=key, color=colors[i])
         # print(key, mse_interp_mean[key][-1])
         i += 1
 
