@@ -9,6 +9,7 @@ w_obstacles = False
 a = []
 c = []
 
+import os.path
 
 # maxz = 0
 # meanz = 0
@@ -67,6 +68,33 @@ def create_map(grid, resolution, obstacles_on=False, randomize_shekel=True, sens
             name = path[-1] + '/data/Databases/numpy_files/random_{}.npy'.format(file)
         else:
             name = path[-1] + '/data/Databases/numpy_files/noisy_random_{}.npy'.format(file)
+
+        if not os.path.isfile(name):
+            no_maxima = 6
+            xmin = 0
+            xmax = 10
+            ymin = 0
+            ymax = 10
+            a = []
+            c = []
+            for i in range(no_maxima):
+                a.append([np.random.rand() * 9, np.random.rand() * 9])
+                c.append(5 + np.random.uniform(0.0, 1.0))
+            a = np.array(a)
+            c = np.array(c).T
+            _x = np.arange(xmin, xmax, resolution * (xmax - xmin) / (grid.shape[1]))
+            _y = np.arange(xmin, xmax, resolution * (ymax - ymin) / (grid.shape[0]))
+            _x, _y = np.meshgrid(_x, _y)
+            _z = np.fromiter(map(shekel_arg0, zip(_x.flat, _y.flat, grid.flat)), dtype=np.float,
+                             count=_x.shape[0] * _x.shape[1]).reshape(_x.shape)
+
+            meanz = np.nanmean(_z)
+            stdz = np.nanstd(_z)
+            _z = (_z - meanz) / stdz
+
+            with open(f'E:/ETSI/Proyecto/data/Databases/numpy_files/noise_random_{file}.npy', 'wb') as g:
+                np.save(g, _z)
+
         with open(name, 'rb') as g:
             # with open('E:/ETSI/Proyecto/data/Databases/numpy_files/ground_truth_norm.npy', 'rb') as g:
             # _z = np.load(g)
