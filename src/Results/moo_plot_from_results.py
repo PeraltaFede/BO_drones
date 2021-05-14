@@ -6,8 +6,8 @@ import pandas as pd
 
 plt.style.use("seaborn")
 show = "dist"
-# for_comparison = ["0.38466", "0.40466", "0.42466", "0.44466", "0.46466"]
-for_comparison = ["0.42466", "0.46466"]
+for_comparison = ["0.38466", "0.40466", "0.42466", "0.44466", "0.46466"]
+# for_comparison = ["0.42466", "0.46466"]
 
 datas = []
 dataype = []
@@ -220,13 +220,13 @@ if "dist" in show:
         mse_interp_mean[key] = np.mean(mse_interp[key], axis=1)
         mse_interp_std[key] = np.std(mse_interp[key], axis=1)
         plt.plot(x, mse_interp_mean[key], label=key, color=colors[i])
-        # plt.fill_between(x, mse_interp_mean[key] - mse_interp_std[key],
-        #                  mse_interp_mean[key] + mse_interp_std[key], alpha=0.2, color=colors[i])
-        plt.bar(selected + (i - len(for_comparison) / 2 + 0.5) * width,
-                mse_interp_mean[key][selected],
-                width,
-                yerr=mse_interp_std[key][selected],
-                label=key, color=colors[i])
+        plt.fill_between(x, mse_interp_mean[key] - mse_interp_std[key],
+                         mse_interp_mean[key] + mse_interp_std[key], alpha=0.2, color=colors[i])
+        # plt.bar(selected + (i - len(for_comparison) / 2 + 0.5) * width,
+        #         mse_interp_mean[key][selected],
+        #         width,
+        #         yerr=mse_interp_std[key][selected],
+        #         label=key, color=colors[i])
         # print(key, mse_interp_mean[key][-1])
         i += 1
 

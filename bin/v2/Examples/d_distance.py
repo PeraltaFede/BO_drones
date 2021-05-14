@@ -8,7 +8,8 @@ from bin.Simulators.gym_environment import GymEnvironment
 
 seeds = np.linspace(978462, 87549927, 50)
 # optimal lengthscale is probably 153
-ds = [0.38466, 0.40466, 0.42466, 0.44466, 0.46466]
+# ds = [0.38466, 0.40466, 0.42466, 0.44466, 0.46466]
+ds = [0.275, 0.375, 0.475, 0.575]
 for file in [97, 98, 99]:
     for d in ds:
         i = 0
