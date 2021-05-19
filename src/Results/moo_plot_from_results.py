@@ -6,8 +6,9 @@ import pandas as pd
 
 plt.style.use("seaborn")
 show = "dist"
-for_comparison = ["0.38466", "0.40466", "0.42466", "0.44466", "0.46466"]
-# for_comparison = ["0.42466", "0.46466"]
+# for_comparison = ["0.38466", "0.40466", "0.42466", "0.44466", "0.46466"]
+# for_comparison = ["0.575", "0.46466"]
+for_comparison = ["0.38466", "0.40466", "0.42466", "0.44466", "0.46466", "0.375", "0.475", "0.575"]
 
 datas = []
 dataype = []
@@ -181,17 +182,18 @@ for compare in for_comparison:
 legends = []
 for key in for_comparison:
     legends.append(key)
-# colors = ["#A6CEE3", "#1F78B4", "#B2DF8A", "#33A02C", "#FB9A99", "#E31A1C",
-#           "#FDBF6F", "#FF7F00", "#CAB2D6", "#6A3D9A", "#FFFF99", "#B15928"]
+colors = ["#A6CEE3", "#1F78B4", "#B2DF8A", "#33A02C", "#FB9A99", "#E31A1C",
+          "#FDBF6F", "#FF7F00", "#CAB2D6", "#6A3D9A", "#FFFF99", "#B15928"]
 # colors = ["#A6CEE3", "#1F78B4", "#33A02C",
 #           "#FF7F00", "#6A3D9A", "#B15928"]
 # colors = ["#1F78B4", "#B15928", "#33A02C",
 #           "#FF7F00", "#6A3D9A", "#A6CEE3"]
-colors = ["#EC9B2E", "#24AAE2", "#73934B", "#A6CEE3", "#1F78B4"]
+# colors = ["#EC9B2E", "#24AAE2", "#73934B", "#A6CEE3", "#1F78B4"]
 titles = for_comparison
+# max_dist = 1500
 # titles = ["Proposed", "PESMOC", "GA"]
 if "dist" in show:
-    x = np.linspace(0, max_dist, max_dist+1)
+    x = np.linspace(0, max_dist, max_dist + 1)
     selected = np.arange(250, max_dist, 250).astype(np.int)
     width = 90 / len(for_comparison)  # the width of the ba
     i = 0
@@ -205,8 +207,8 @@ if "dist" in show:
                 # if (max_r2s == -1 or mserun[fmo[0] - 1] > score[key][max_r2s][fmo4mr2s - 1]):
                 #     max_r2s = idx[0]
                 #     fmo4mr2s = fmo[0]
-                    # print(max_r2s)
-                    # print(fmo4mr2s)
+                # print(max_r2s)
+                # print(fmo4mr2s)
                 # plt.plot(tdistrun[:fmo[0]], mserun[:fmo[0]], color=colors[i], alpha=0.1)
                 # plt.plot(tdistrun[fmo[0] - 1], mserun[fmo[0] - 1], '.', color=colors[i])
             else:
@@ -214,28 +216,43 @@ if "dist" in show:
                 if max_r2s == -1 or mserun[- 1] > score[key][max_r2s][-1]:
                     max_r2s = idx[0]
                 # plt.plot(tdistrun, mserun, color=colors[i], alpha=0.1)
-        print(key, max_r2s, fmo4mr2s, score[key][max_r2s][fmo4mr2s - 1])
-        print(score[key][max_r2s])
+        print(key, np.nanmax(t_dist_clean[key]), score[key][max_r2s][-1])
+        # plt.axvline(np.nanmax(t_dist_clean[key]), color=colors[i])
+        # print(key, max_r2s, fmo4mr2s, score[key][max_r2s][fmo4mr2s - 1])
         mse_interp[key] = np.array(mse_interp[key]).T.reshape(len(x), -1)
         mse_interp_mean[key] = np.mean(mse_interp[key], axis=1)
         mse_interp_std[key] = np.std(mse_interp[key], axis=1)
-        plt.plot(x, mse_interp_mean[key], label=key, color=colors[i])
-        plt.fill_between(x, mse_interp_mean[key] - mse_interp_std[key],
-                         mse_interp_mean[key] + mse_interp_std[key], alpha=0.2, color=colors[i])
-        # plt.bar(selected + (i - len(for_comparison) / 2 + 0.5) * width,
-        #         mse_interp_mean[key][selected],
-        #         width,
-        #         yerr=mse_interp_std[key][selected],
-        #         label=key, color=colors[i])
+        # plt.plot(x, mse_interp_mean[key], label=key, color=colors[i])
+        # plt.fill_between(x, mse_interp_mean[key] - mse_interp_std[key],
+        #                  mse_interp_mean[key] + mse_interp_std[key], alpha=0.2, color=colors[i])
+        plt.bar(selected + (i - len(for_comparison) / 2 + 0.5) * width,
+                mse_interp_mean[key][selected],
+                width,
+                yerr=mse_interp_std[key][selected],
+                label=key, color=colors[i])
         # print(key, mse_interp_mean[key][-1])
         i += 1
 
     plt.ylabel('$R^2(x)$', fontsize=30)
-    plt.xticks(selected, [str(format(d * 10, ',')) for d in selected], fontsize=30)
+    plt.xticks(selected, [str(format(d, ',')) for d in selected], fontsize=30)
     plt.xlabel("Distance (m)", fontsize=30)
     plt.yticks(fontsize=30)
     plt.title("$R^2(x)$ Score vs Distance", fontsize=30)
-    plt.legend(titles, loc='upper left', prop={'size': 25}, fancybox=True, shadow=True,
+    plt.legend(titles, loc='upper left', prop={'size': 15}, fancybox=True, shadow=True,
+               frameon=True)
+    i=0
+    plt.figure()
+    for key in for_comparison:
+        plt.plot(x, mse_interp_mean[key], label=key, color=colors[i])
+        # plt.fill_between(x, mse_interp_mean[key] - mse_interp_std[key],
+        #                  mse_interp_mean[key] + mse_interp_std[key], alpha=0.2, color=colors[i])
+        i += 1
+    plt.ylabel('$R^2(x)$', fontsize=30)
+    plt.xticks(selected, [str(format(d, ',')) for d in selected], fontsize=30)
+    plt.xlabel("Distance (m)", fontsize=30)
+    plt.yticks(fontsize=30)
+    plt.title("$R^2(x)$ Score vs Distance", fontsize=30)
+    plt.legend(titles, loc='upper left', prop={'size': 15}, fancybox=True, shadow=True,
                frameon=True)
 
 # colors = ["#FFD100", "#FFD100AA"]
@@ -262,19 +279,21 @@ if "score" in show:
     plt.xlabel("Measurements", fontsize=30)
     plt.yticks(fontsize=30)
     plt.title("$R^2(x)$ Score vs Measurements", fontsize=30)
-    plt.legend(titles, prop={'size': 25}, fancybox=True, shadow=True, frameon=True)
+    plt.legend(titles, prop={'size': 15}, fancybox=True, shadow=True, frameon=True)
 i = 0
 if "var" in show:
     plt.figure()
     for key in for_comparison:
         labels = np.arange(qty_clean[key][0][0], max4key[key] + qty_clean[key][0][0])
+        print(max4key[key], qty_clean[key][0][0])
+        print(variance_mean[key])
         plt.bar(labels + (i - len(for_comparison) / 2 + 0.5) * width, variance_mean[key], width, color=colors[i],
                 label=key)
         # label="n_sensors: {1}, fusion: {0}, acq: {2}".format(*key.split(',')))
         # label="n_sensors: {0}, fusion: {1}, acq: {3}".format(*key.split(',')), color=colors[i])
         i += 1
     plt.ylabel('$var(x)$', fontsize=30)
-    plt.xticks(np.arange(0, max4key[key] + qty_clean[key][0][0]), fontsize=30)
+    # plt.xticks(np.arange(0, max4key[key] + qty_clean[key][0][0]), fontsize=30)
     plt.xlabel("Measurements", fontsize=30)
     plt.yticks(fontsize=30)
     plt.title("Variance of different $R^2(x)$ Scores", fontsize=30)

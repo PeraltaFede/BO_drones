@@ -7,7 +7,7 @@ from bin.Utils.path_planners import rrt_star
 
 class SimpleAgent(object):
 
-    def __init__(self, sensors, pose=np.zeros((3, 1)), ignore_obstacles=False, _id=0, limited_distance=True):
+    def __init__(self, sensors, pose=np.zeros((3, 1)), ignore_obstacles=False, _id=0):
         """
         SimpleAgent(sensors)
 
@@ -30,7 +30,6 @@ class SimpleAgent(object):
         """
         self.sensors = sensors
         self.pose = pose
-        self.limited_distance = limited_distance
         self.ignore_obstacles = ignore_obstacles
         self.position_flag = False
         self.position_error = np.round(5 * (np.random.rand(3) - 0.5)).astype(np.int)
@@ -67,7 +66,7 @@ class SimpleAgent(object):
 
     @distance_travelled.setter
     def distance_travelled(self, value):
-        if self.limited_distance and value >= 1500:
+        if value >= 1500:
             self._distance_travelled = 1500.01
         else:
             self._distance_travelled = value
@@ -157,7 +156,7 @@ class SimpleAgent(object):
             if 0 <= self.next_pose[0] <= self.agent_env.grid.shape[1] and \
                     0 <= self.next_pose[1] <= self.agent_env.grid.shape[0] and (
                     self.agent_env.grid[self.next_pose[1], self.next_pose[0]] == 0 or self.ignore_obstacles):
-                if self.limited_distance and self.distance_travelled > 1500:
+                if self.distance_travelled > 1500:
                     print('limited distance')
                     self.battery_left = 0.0
                     return True
@@ -169,7 +168,7 @@ class SimpleAgent(object):
                         self.pose = deepcopy(goal)
                         dist_left -= d
                     else:
-                        if self.limited_distance and self.distance_travelled + d > 1500.0:
+                        if self.distance_travelled + d > 1500.0:
                             dist_left = 1501 - self.distance_travelled
                         diff = np.subtract(goal[:2], self.pose[:2])
                         angle = np.arctan2(diff[1], diff[0])
@@ -184,7 +183,7 @@ class SimpleAgent(object):
                                 self.next_pose = self.pose
                                 break
 
-                        if self.limited_distance and self.distance_travelled > 1500:
+                        if self.distance_travelled > 1500:
                             self.path = []
                             print('breaking')
                             break

@@ -7,7 +7,7 @@ from bin.Utils.path_planners import rrt_star
 
 class SimpleAgent(object):
 
-    def __init__(self, sensors, pose=np.zeros((3, 1)), ignore_obstacles=False, _id=0, limited_distance=True):
+    def __init__(self, sensors, pose=np.zeros((3, 1)), ignore_obstacles=False, _id=0):
         """
         SimpleAgent(sensors)
 
@@ -30,7 +30,6 @@ class SimpleAgent(object):
         """
         self.sensors = sensors
         self.pose = pose
-        self.limited_distance = limited_distance
         self.ignore_obstacles = ignore_obstacles
         self.position_flag = False
         self.position_error = np.round(5 * (np.random.rand(3) - 0.5)).astype(np.int)

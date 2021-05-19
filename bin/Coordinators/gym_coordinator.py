@@ -1,7 +1,5 @@
-# import gpytorch
-
+# import matplotlib.pyplot as plt
 import numpy as np
-# import torch as to
 from sklearn.metrics import mean_squared_error as mse
 from sklearn.metrics import r2_score
 from skopt.learning.gaussian_process import gpr, kernels
@@ -9,9 +7,6 @@ from skopt.learning.gaussian_process import gpr, kernels
 from bin.Utils.acquisition_functions import gaussian_sei, maxvalue_entropy_search, gaussian_pi, gaussian_ei, max_std, \
     predictive_entropy_search
 from bin.Utils.voronoi_regions import calc_voronoi, find_vect_pos4region
-
-
-# from src.gpr import gprnew
 
 
 class Coordinator(object):
@@ -106,8 +101,6 @@ class Coordinator(object):
     def generate_new_goal(self, pose=np.zeros((1, 3)), other_poses=np.zeros((1, 3))):
         # nans = np.load(open('E:/ETSI/Proyecto/data/Databases/numpy_files/nans.npy', 'rb'))
         # smapz = np.zeros((1500, 1000))
-        # max_mapz = None
-        # c_max = 0.0
 
         if self.acq_mod == "split_path":
             if len(self.splitted_goals) > 0:
@@ -176,8 +169,9 @@ class Coordinator(object):
                         c_max = all_acq[arr1inds[::-1][idx]]
                 elif self.acq_fusion == "coupled":
                     sum_all_acq = sum_all_acq + all_acq if sum_all_acq is not None else all_acq
+
                 # mapz = gaussian_ei(self.all_vector_pos, self.gps[key], np.min(self.train_targets[key]),
-                # c_point=pose[:2],
+                #                    c_point=pose[:2],
                 #                    xi=xi,
                 #                    masked=self.acq_mod == "masked").reshape((1000, 1500)).T
                 # smapz += mapz
@@ -185,65 +179,31 @@ class Coordinator(object):
                 #     mapz[nnan[0], nnan[1]] = -1
                 # mapz = np.ma.array(mapz, mask=(mapz == -1))
                 # if key == "s1":
-                #     plt.subplot(231)
+                #     plt.subplot(131)
                 # elif key == "s2":
-                #     plt.subplot(232)
-                # else:
-                #     plt.subplot(233)
-                # plt.imshow(mapz, origin='lower', cmap=cmo.cm.matter_r)
+                #     plt.subplot(132)
+                # plt.imshow(mapz, origin='lower')
+                # plt.plot(np.append(reg[:, 0], reg[0, 0]), np.append(reg[:, 1], reg[0, 1]), '-b')
                 # plt.title("$AF_{}(x)$".format(str("{" + key + "}")))
                 # plt.plot(new_pos[0], new_pos[1], 'r.')
                 # for pm in self.train_inputs:
                 #     plt.plot(pm[0], pm[1], 'y^')
                 # plt.plot(pose[0], pose[1], 'b^')
                 # plt.colorbar()
-                # if max_mapz is None or all_acq[arr1inds[::-1][idx]] > c_max:
-                #     max_mapz = mapz
-                #     c_max = all_acq[arr1inds[::-1][idx]]
-        # plt.subplot(235)
-        # for nnan in nans:
-        #     smapz[nnan[0], nnan[1]] = -1
-        # smapz = np.ma.array(smapz, mask=(smapz == -1))
-        # plt.imshow(smapz, origin='lower', cmap=cmo.cm.matter_r)
-        # plt.title("$\sum AF_i(x)$")
-        # maxx = np.where(smapz == np.max(smapz))
-        # plt.plot(maxx[1][0], maxx[0][0], 'r.')
-        # plt.plot(pose[0], pose[1], 'b^', zorder=9)
-        # for pm in self.train_inputs:
-        #     plt.plot(pm[0], pm[1], 'y^')
-        # plt.colorbar()
-
-        # plt.legend(["best_next", "c_pose", "prev. measurements"], bbox_to_anchor=(3.5, 1.0), fancybox=True,
-        # shadow=True)
-
-        # plt.subplot(234)
-        # plt.imshow(max_mapz, origin='lower', cmap=cmo.cm.matter_r)
-        # for pm in self.train_inputs:
-        #     plt.plot(pm[0], pm[1], 'y^')
-        # plt.plot(pose[0], pose[1], 'b^')
-        # plt.title("$max(AF_i(x))$")
-        # maxx = np.where(max_mapz == np.max(max_mapz))
-        # plt.plot(maxx[1][0], maxx[0][0], 'r.')
-        # plt.colorbar()
-        # plt.show(block=True)
-
-        # if self.acq_fusion == "maxcoupled":
-        #     for best_pos in new_poses:
-        #         suma = 0
-        #         for key in self.sensors:
-        #             this_acq = gaussian_ei(best_pos[0],
-        #                                    self.surrogate(best_pos[0].reshape(1, -1), return_std=True, keys=[key])[0],
-        #                                    np.min(self.train_targets[key]),
-        #                                    c_point=pose[:2], xi=xi, masked=self.acq_mod == "masked")
-        #             suma += this_acq
-        #         if suma > c_max:
-        #             new_pos = best_pos[0]
-        #             c_max = suma
         if self.acq_fusion == "coupled":
             arr1inds = sum_all_acq.argsort()
             sorted_arr1 = self.vector_pos[arr1inds[::-1]]
             best_pos = find_vect_pos4region(sorted_arr1, reg, return_idx=False)
             new_pos = best_pos
+        # plt.subplot(133)
+        # for nnan in nans:
+        #     smapz[nnan[0], nnan[1]] = -1
+        # smapz = np.ma.array(smapz, mask=(smapz == -1))
+        # plt.imshow(smapz, origin='lower')
+        # plt.plot(np.append(reg[:, 0], reg[0, 0]), np.append(reg[:, 1], reg[0, 1]), '-b')
+        # plt.title("$\\sum AF_i(x)$")
+        # plt.plot(new_pos[0], new_pos[1], 'rx')
+
         if self.acq_mod == "split_path" or self.acq_mod == "truncated":
             beacons_splitted = []
             vect_dist = np.subtract(new_pos, pose[:2])
@@ -260,6 +220,28 @@ class Coordinator(object):
 
             self.splitted_goals = self.splitted_goals[1:, :]
         new_pos = np.append(new_pos, 0)
+        # plt.plot(new_pos[0], new_pos[1], 'rX')
+        # plt.plot(pose[0], pose[1], 'b^', zorder=9)
+        # for pm in self.train_inputs:
+        #     plt.plot(pm[0], pm[1], 'y^')
+        # plt.colorbar()
+        #
+        # plt.legend(["best_next", "c_pose", "prev. measurements"], bbox_to_anchor=(3.5, 1.0), fancybox=True,
+        #            shadow=True)
+        # plt.show(block=True)
+
+        # if self.acq_fusion == "maxcoupled":
+        #     for best_pos in new_poses:
+        #         suma = 0
+        #         for key in self.sensors:
+        #             this_acq = gaussian_ei(best_pos[0],
+        #                                    self.surrogate(best_pos[0].reshape(1, -1), return_std=True, keys=[key])[0],
+        #                                    np.min(self.train_targets[key]),
+        #                                    c_point=pose[:2], xi=xi, masked=self.acq_mod == "masked")
+        #             suma += this_acq
+        #         if suma > c_max:
+        #             new_pos = best_pos[0]
+        #             c_max = suma
 
         return new_pos
 
@@ -293,9 +275,9 @@ class Coordinator(object):
             return gaussian_ei(self.all_vector_pos, self.gps[key], np.min(self.train_targets[key]),
                                c_point=pose[:2],
                                masked=False, xi=1.0)
-        elif acq_func == "max_std":
-            return max_std(self.all_vector_pos, self.gps[key], np.min(self.train_targets[key]),
-                           masked=acq_mod == "masked")
+        # elif acq_func == "max_std":
+        #     return max_std(self.all_vector_pos, self.gps[key], np.min(self.train_targets[key]),
+        #                    masked=acq_mod == "masked")
 
 # class ExactGPModel(gpytorch.models.ExactGP):
 #     def __init__(self, train_inputs, train_targets, likelihood):
@@ -410,7 +392,8 @@ class Coordinator(object):
 #             y_preds = [self.likelihoods[name](self.gps[name](_x)) for name in key]
 #
 #         return [y_pred.mean.numpy() for y_pred in y_preds], [y_pred.stddev.detach().numpy() for y_pred in
-#                                                              y_preds] if return_std else [y_pred.mean.numpy() for y_pred
+#                                                              y_preds]
+#                                                              if return_std else [y_pred.mean.numpy() for y_pred
 #                                                                                           in y_preds]
 #
 #     def generate_new_goal(self, pose=np.zeros((1, 3)), other_poses=np.zeros((1, 3))):

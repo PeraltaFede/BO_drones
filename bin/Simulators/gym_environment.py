@@ -40,7 +40,7 @@ class GymEnvironment(object):
         # initializing environment
         self._load_envs_into_agents()
         # initialize drone positions
-        # initial_positions = get_init_pos4(n=len(agents), map_data=self.environment.grid, expand=True)
+        initial_positions = get_init_pos4(n=len(agents), map_data=self.environment.grid, expand=True)
         for agent in self.agents:
             aux_f = agent.position_flag
             agent.position_flag = False
@@ -58,7 +58,7 @@ class GymEnvironment(object):
         self.saving = saving
         if self.saving:
             self.f = open(
-                path[-1] + "/results/SAMS/{}_{}_{}.csv".format(name_file, int(time()), self.file_no), "a")
+                path[-1] + "/results/MAMS/{}_{}_{}.csv".format(name_file, int(time()), self.file_no), "a")
             self.f.write("n_agent,n_sensors,acq_fusion,kernels,acq,acq_mod,prop\n")
             self.f.write(str(
                 "{},{},{},{},{},{},{}\n".format(len(self.agents), len(self.sensors), acq_fusion,
@@ -183,7 +183,8 @@ class GymEnvironment(object):
         self.timestep += 1
         # mses, scores, keys = self.reward()
         scores, keys = self.reward()
-        print(self.coordinator.train_inputs)
+        # print(self.coordinator.train_inputs)
+        # print([agent.distance_travelled for agent in self.agents])
         if self.saving:
             results = ""
             for score in scores:

@@ -9,7 +9,6 @@ w_obstacles = False
 a = []
 c = []
 
-import os.path
 
 # maxz = 0
 # meanz = 0
@@ -61,7 +60,7 @@ def create_map(grid, resolution, obstacles_on=False, randomize_shekel=True, sens
         elif sensor == "s7":
             file = 6
         elif sensor == "s8":
-        # else:
+            # else:
             file = 7
 
         if noiseless:
@@ -102,7 +101,7 @@ def create_map(grid, resolution, obstacles_on=False, randomize_shekel=True, sens
             for i in range(no_maxima):
                 # a.append([2 + np.random.rand() * 6, 2 + np.random.rand() * 6])
                 # a.append([1.2 + np.random.rand() * 8.8, 1.2 + np.random.rand() * 8.8])
-                a.append([np.random.rand()*9, np.random.rand()*9])
+                a.append([np.random.rand() * 9, np.random.rand() * 9])
                 c.append(5)  # +np.random.uniform(0.0, 5.0))
             print(a)
             print(c)
