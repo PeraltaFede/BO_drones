@@ -30,6 +30,8 @@ for sensores in ss:
         i = 0
         for seed in seeds:
             i += 1
+            if i <= 6:
+                continue
             np.random.seed(np.round(seed).astype(int))
             drones = [SimpleAgent(sensores, _id=k) for k in range(cant_drones)]
             sim = GymEnvironment(path[-1] + "/data/Map/Ypacarai/map.yaml", agents=drones, id_file=0,
@@ -60,8 +62,8 @@ for sensores in ss:
                             next_poses.append([])
                     print(k, np.mean(sim.step(next_poses)))
             except Exception as e:
-                raise e
-                # sim.f.write(f"pos: {sim.agents[0].pose} " + str(e))
+                # raise e
+                sim.f.write(f"pos: {sim.agents[0].pose} " + str(e))
             finally:
                 if sim.saving:
                     sim.f.close()
