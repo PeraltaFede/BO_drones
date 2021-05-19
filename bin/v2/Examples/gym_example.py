@@ -30,8 +30,6 @@ for sensores in ss:
         i = 0
         for seed in seeds:
             i += 1
-            if i <= 6:
-                continue
             np.random.seed(np.round(seed).astype(int))
             drones = [SimpleAgent(sensores, _id=k) for k in range(cant_drones)]
             sim = GymEnvironment(path[-1] + "/data/Map/Ypacarai/map.yaml", agents=drones, id_file=0,
