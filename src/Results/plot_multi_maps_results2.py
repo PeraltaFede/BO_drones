@@ -13,7 +13,7 @@ fig, ax = plt.subplots()
 # cmap.set_bad(color="#00000000")
 # , vmin=np.nanmin(_z),                 vmax=np.nanmin(_z)
 
-with open('E:/ETSI/Proyecto/data/Databases/numpy_files/nans.npy', 'rb') as g:
+with open('/data/Databases/CSV/nans.npy', 'rb') as g:
     nans = np.load(g)
 
 

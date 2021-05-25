@@ -12,7 +12,7 @@ path.extend([path[0][:path[0].rindex("src") - 1]])
 from bin.Coordinators.gym_coordinator import Coordinator
 from bin.Environment.simple_env import Env
 
-with open('E:/ETSI/Proyecto/data/Databases/numpy_files/nans.npy', 'rb') as g:
+with open('/data/Databases/CSV/nans.npy', 'rb') as g:
     nans = np.load(g)
 
 

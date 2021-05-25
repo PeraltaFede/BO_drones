@@ -20,7 +20,7 @@ def gps2pix(strlatlng):
     return np.round(screen_x).astype(np.int64), np.round(screen_y).astype(np.int64)
 
 
-with open('E:/ETSI/Proyecto/data/Databases/numpy_files/nans.npy', 'rb') as g:
+with open('/data/Databases/CSV/nans.npy', 'rb') as g:
     nans = np.load(g)
 
 

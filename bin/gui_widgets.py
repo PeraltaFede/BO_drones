@@ -126,7 +126,7 @@ class GUI(QMainWindow):
         self.image = []
         self.data = []
         self.titles = []
-        self.nans = np.load(open('E:/ETSI/Proyecto/data/Databases/numpy_files/nans.npy', 'rb'))
+        self.nans = np.load(open('/data/Databases/CSV/nans.npy', 'rb'))
         self.shape = None
         self.axes = []
         self.drone_pos_ax = []

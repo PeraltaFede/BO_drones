@@ -1,4 +1,4 @@
-import matplotlib.pyplot as plt
+# import matplotlib.pyplot as plt
 import numpy as np
 from sklearn.metrics import mean_squared_error as mse
 from sklearn.metrics import r2_score
@@ -99,8 +99,8 @@ class Coordinator(object):
         #     return [self.gps[key].predict(_x, return_std) for key in keys]
 
     def generate_new_goal(self, pose=np.zeros((1, 3)), other_poses=np.zeros((1, 3))):
-        nans = np.load(open('E:/ETSI/Proyecto/data/Databases/numpy_files/nans.npy', 'rb'))
-        smapz = np.zeros((1500, 1000))
+        # nans = np.load(open('E:/ETSI/Proyecto/data/Databases/numpy_files/nans.npy', 'rb'))
+        # smapz = np.zeros((1500, 1000))
 
         if self.acq_mod == "split_path":
             if len(self.splitted_goals) > 0:
@@ -174,45 +174,45 @@ class Coordinator(object):
                 # guardar errores
                 # lsitp
 
-                mapz = gaussian_ei(self.all_vector_pos, self.gps[key], np.min(self.train_targets[key]),
-                                   c_point=pose[:2],
-                                   xi=xi,
-                                   masked=self.acq_mod == "masked").reshape((1000, 1500)).T
-                smapz += mapz
-
-                values_mapz = self.surrogate(self.vector_pos, keys=[key])[0]
-                mapz = np.full((1500, 1000), np.nan)
-                for vect in enumerate(self.vector_pos):
-                    mapz[vect[1][1], vect[1][0]] = values_mapz[vect[0]]
-                # for nnan in nans:
-                #     mapz[nnan[0], nnan[1]] = -1
-                # mapz = np.ma.array(mapz, mask=(mapz == -1))
-                if key == "s5":
-                    plt.subplot(221)
-                elif key == "s6":
-                    plt.subplot(222)
-                elif key == "s7":
-                    plt.subplot(223)
-                plt.imshow(mapz, origin='lower')
-                plt.plot(np.append(reg[:, 0], reg[0, 0]), np.append(reg[:, 1], reg[0, 1]), '-b')
-                plt.title("$AF_{}(x)$".format(str("{" + key + "}")))
-                for pm in self.train_inputs:
-                    plt.plot(pm[0], pm[1], 'y^')
-                plt.plot(pose[0], pose[1], 'b^')
-                plt.colorbar()
+                # mapz = gaussian_ei(self.all_vector_pos, self.gps[key], np.min(self.train_targets[key]),
+                #                    c_point=pose[:2],
+                #                    xi=xi,
+                #                    masked=self.acq_mod == "masked").reshape((1000, 1500)).T
+                # smapz += mapz
+                #
+                # values_mapz = self.surrogate(self.vector_pos, keys=[key])[0]
+                # mapz = np.full((1500, 1000), np.nan)
+                # for vect in enumerate(self.vector_pos):
+                #     mapz[vect[1][1], vect[1][0]] = values_mapz[vect[0]]
+                # # for nnan in nans:
+                # #     mapz[nnan[0], nnan[1]] = -1
+                # # mapz = np.ma.array(mapz, mask=(mapz == -1))
+                # if key == "s5":
+                #     plt.subplot(221)
+                # elif key == "s6":
+                #     plt.subplot(222)
+                # elif key == "s7":
+                #     plt.subplot(223)
+                # plt.imshow(mapz, origin='lower')
+                # plt.plot(np.append(reg[:, 0], reg[0, 0]), np.append(reg[:, 1], reg[0, 1]), '-b')
+                # plt.title("$AF_{}(x)$".format(str("{" + key + "}")))
+                # for pm in self.train_inputs:
+                #     plt.plot(pm[0], pm[1], 'y^')
+                # plt.plot(pose[0], pose[1], 'b^')
+                # plt.colorbar()
         if self.acq_fusion == "coupled":
             arr1inds = sum_all_acq.argsort()
             sorted_arr1 = self.vector_pos[arr1inds[::-1]]
             best_pos = find_vect_pos4region(sorted_arr1, reg, return_idx=False)
             new_pos = best_pos
-        plt.subplot(224)
-        for nnan in nans:
-            smapz[nnan[0], nnan[1]] = -1
-        smapz = np.ma.array(smapz, mask=(smapz == -1))
-        plt.imshow(smapz, origin='lower')
-        plt.plot(np.append(reg[:, 0], reg[0, 0]), np.append(reg[:, 1], reg[0, 1]), '-b')
-        plt.title("$\\sum AF_i(x)$")
-        plt.plot(new_pos[0], new_pos[1], 'rx')
+        # plt.subplot(224)
+        # for nnan in nans:
+        #     smapz[nnan[0], nnan[1]] = -1
+        # smapz = np.ma.array(smapz, mask=(smapz == -1))
+        # plt.imshow(smapz, origin='lower')
+        # plt.plot(np.append(reg[:, 0], reg[0, 0]), np.append(reg[:, 1], reg[0, 1]), '-b')
+        # plt.title("$\\sum AF_i(x)$")
+        # plt.plot(new_pos[0], new_pos[1], 'rx')
 
         if self.acq_mod == "split_path" or self.acq_mod == "truncated":
             beacons_splitted = []
@@ -230,16 +230,16 @@ class Coordinator(object):
 
             self.splitted_goals = self.splitted_goals[1:, :]
         new_pos = np.append(new_pos, 0)
-        plt.plot(new_pos[0], new_pos[1], 'rX')
-        plt.plot(pose[0], pose[1], 'b^', zorder=9)
-        for pm in self.train_inputs:
-            plt.plot(pm[0], pm[1], 'y^')
-        plt.colorbar()
-
-        plt.legend(["best_next", "c_pose", "prev. measurements"], bbox_to_anchor=(3.5, 1.0), fancybox=True,
-                   shadow=True)
-        plt.savefig(f'E:/ETSI/Proyecto/results/img{len(self.train_inputs)}.png', dpi=300)
-        plt.clf()
+        # plt.plot(new_pos[0], new_pos[1], 'rX')
+        # plt.plot(pose[0], pose[1], 'b^', zorder=9)
+        # for pm in self.train_inputs:
+        #     plt.plot(pm[0], pm[1], 'y^')
+        # plt.colorbar()
+        #
+        # plt.legend(["best_next", "c_pose", "prev. measurements"], bbox_to_anchor=(3.5, 1.0), fancybox=True,
+        #            shadow=True)
+        # plt.savefig(f'E:/ETSI/Proyecto/results/img{len(self.train_inputs)}.png', dpi=300)
+        # plt.clf()
 
         # if self.acq_fusion == "maxcoupled":
         #     for best_pos in new_poses:

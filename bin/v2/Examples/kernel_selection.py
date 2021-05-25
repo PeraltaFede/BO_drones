@@ -38,7 +38,7 @@ plt.title("Ground Truth")
 # plt.pause(0.01)
 
 mses = {"RBF": [], "RBF_N": [], "RQ": []}
-with open('E:/ETSI/Proyecto/data/Databases/numpy_files/nans.npy', 'rb') as g:
+with open('/data/Databases/CSV/nans.npy', 'rb') as g:
     nans = np.load(g)
 
 candidates = [[133, 832],

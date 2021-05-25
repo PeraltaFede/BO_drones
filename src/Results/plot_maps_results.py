@@ -14,7 +14,7 @@ fig, ax = plt.subplots()
 # , vmin=np.nanmin(_z),                 vmax=np.nanmin(_z)
 import matplotlib.image as image
 
-with open('E:/ETSI/Proyecto/data/Databases/numpy_files/nans.npy', 'rb') as g:
+with open('/data/Databases/CSV/nans.npy', 'rb') as g:
     nans = np.load(g)
 
 
