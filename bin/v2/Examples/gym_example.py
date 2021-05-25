@@ -19,12 +19,7 @@ ss = [
     # ["s5", "s6", "s7", "s8", "s1"],
 ]
 for sensores in ss:
-    drones_available = [[SimpleAgent(sensores, _id=0), SimpleAgent(sensores, _id=1)],
-                        [SimpleAgent(sensores, _id=0), SimpleAgent(sensores, _id=1), SimpleAgent(sensores, _id=2)],
-                        [SimpleAgent(sensores, _id=0), SimpleAgent(sensores, _id=1), SimpleAgent(sensores, _id=2),
-                         SimpleAgent(sensores, _id=3)]]
-    nro_drones = [2, 3, 4]
-    # fs = ["pareto"]
+    nro_drones = [1]
     for cant_drones in nro_drones:
         print(cant_drones, sensores, "gaussian_ei", 0.375)
         i = 0

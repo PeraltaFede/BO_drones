@@ -5,7 +5,7 @@ from time import time
 from numpy import mean
 from numpy.linalg import norm
 
-from bin.Agents.gym_agent_trimmed import SimpleAgent as Ga
+# from bin.Agents.gym_agent_trimmed import SimpleAgent as Ga
 from bin.Coordinators.gym_coordinator import Coordinator
 from bin.Environment.simple_env import Env
 from bin.Utils.utils import get_init_pos4
