@@ -14,7 +14,7 @@ from bin.v2.Communications.simple_sender import Sender
 
 class GymEnvironment(object):
     def __init__(self, map_path2yaml, agents: list, acq="gaussian_ei", saving=False, acq_fusion="coupled",
-                 acq_mod="normal", id_file=0, render2gui=True, initial_pos="asdf", name_file="", d=1.0):
+                 acq_mod="normal", id_file=0, render2gui=True, initial_pos="circle", name_file="", d=1.0):
         """
 
         :param map_path2yaml: file path to mapyaml

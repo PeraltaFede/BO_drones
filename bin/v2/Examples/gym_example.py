@@ -28,8 +28,8 @@ for sensores in ss:
             np.random.seed(np.round(seed).astype(int))
             drones = [SimpleAgent(sensores, _id=k) for k in range(cant_drones)]
             sim = GymEnvironment(path[-1] + "/data/Map/Ypacarai/map.yaml", agents=drones, id_file=0,
-                                 acq="pareto", acq_mod="truncated", render2gui=False, saving=True,
-                                 name_file="{}_{}_{}_{}A{}S".format("gaussian_ei", "coupled", 0.375, cant_drones,
+                                 acq="pareto", acq_mod="truncated", render2gui=False, saving=False,
+                                 name_file="{}_{}_{}_{}A{}S".format("pareto", "coupled", 0.375, cant_drones,
                                                                     len(sensores)),
                                  acq_fusion="coupled", d=0.375)
             try:
@@ -55,8 +55,8 @@ for sensores in ss:
                             next_poses.append([])
                     print(k, np.mean(sim.step(next_poses)))
             except Exception as e:
-                # raise e
-                sim.f.write(f"pos: {sim.agents[0].pose} " + str(e))
+                raise e
+                # sim.f.write(f"pos: {sim.agents[0].pose} " + str(e))
             finally:
                 if sim.saving:
                     sim.f.close()

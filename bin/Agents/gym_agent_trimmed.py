@@ -78,15 +78,15 @@ class SimpleAgent(object):
         return self.pose[0] == self.next_pose[0] and self.pose[1] == self.next_pose[1] and self.battery_left > 0.0
 
     def randomize_pos(self, near=False, maxv=10):
-        prevflag = self.position_flag
-        self.position_flag = False
-        self.pose = self.pose.T[0]
-        self.pose[0] = 800
-        self.pose[1] = 242
-        self.pose = np.round(self.pose).astype(int)
-        self.next_pose = deepcopy(self.pose)
-        self.position_flag = prevflag
-        return
+        # prevflag = self.position_flag
+        # self.position_flag = False
+        # self.pose = self.pose.T[0]
+        # self.pose[0] = 800
+        # self.pose[1] = 242
+        # self.pose = np.round(self.pose).astype(int)
+        # self.next_pose = deepcopy(self.pose)
+        # self.position_flag = prevflag
+        # return
 
         if near:
             max_x = maxv
