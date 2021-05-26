@@ -6,9 +6,11 @@ import pandas as pd
 
 plt.style.use("seaborn")
 show = "dist,score,var"
-for_comparison = ["2,2", "3,2", "4,2",
-                  "2,3", "3,3", "4,3",
-                  "2,4", "3,4", "4,4"]
+for_comparison = [
+    # "1,2", "1,3", "1,4",
+                  # "2,2", "2,3", "2,4",
+                  # "3,2", "3,3", "3,4",
+                  "4,2", "4,3", "4,4"]
 
 datas = []
 dataype = []
@@ -218,13 +220,13 @@ if "dist" in show:
                 # plt.plot(tdistrun, mserun, color=colors[i], alpha=0.1)
         # print(key, np.nanmax(t_dist_clean[key]), score[key][max_r2s][-1])
         # plt.axvline(np.nanmax(t_dist_clean[key]), color=colors[i])
-        print(key, max_r2s, fmo4mr2s, score[key][max_r2s][fmo4mr2s - 1])
+        # print(key, max_r2s, fmo4mr2s, score[key][max_r2s][fmo4mr2s - 1])
         mse_interp[key] = np.array(mse_interp[key]).T.reshape(len(x), -1)
         mse_interp_mean[key] = np.mean(mse_interp[key], axis=1)
         mse_interp_std[key] = np.std(mse_interp[key], axis=1)
-        plt.plot(x, mse_interp_mean[key], label=key, color=colors[i])
-        plt.fill_between(x, mse_interp_mean[key] - mse_interp_std[key],
-                         mse_interp_mean[key] + mse_interp_std[key], alpha=0.2, color=colors[i])
+        # plt.plot(x, mse_interp_mean[key], label=key, color=colors[i])
+        # plt.fill_between(x, mse_interp_mean[key] - mse_interp_std[key],
+        #                  mse_interp_mean[key] + mse_interp_std[key], alpha=0.2, color=colors[i])
         plt.bar(selected + (i - len(for_comparison) / 2 + 0.5) * width,
                 mse_interp_mean[key][selected],
                 width,
@@ -240,20 +242,20 @@ if "dist" in show:
     plt.title("$R^2(x)$ Score vs Distance", fontsize=30)
     plt.legend(titles, loc='upper left', prop={'size': 15}, fancybox=True, shadow=True,
                frameon=True)
-    i=0
-    plt.figure()
-    for key in for_comparison:
-        plt.plot(x, mse_interp_mean[key], label=key, color=colors[i])
-        # plt.fill_between(x, mse_interp_mean[key] - mse_interp_std[key],
-        #                  mse_interp_mean[key] + mse_interp_std[key], alpha=0.2, color=colors[i])
-        i += 1
-    plt.ylabel('$R^2(x)$', fontsize=30)
-    plt.xticks(selected, [str(format(d, ',')) for d in selected], fontsize=30)
-    plt.xlabel("Distance (m)", fontsize=30)
-    plt.yticks(fontsize=30)
-    plt.title("$R^2(x)$ Score vs Distance", fontsize=30)
-    plt.legend(titles, loc='upper left', prop={'size': 15}, fancybox=True, shadow=True,
-               frameon=True)
+    # i = 0
+    # plt.figure()
+    # for key in for_comparison:
+    #     plt.plot(x, mse_interp_mean[key], label=key, color=colors[i])
+    #     # plt.fill_between(x, mse_interp_mean[key] - mse_interp_std[key],
+    #     #                  mse_interp_mean[key] + mse_interp_std[key], alpha=0.2, color=colors[i])
+    #     i += 1
+    # plt.ylabel('$R^2(x)$', fontsize=30)
+    # plt.xticks(selected, [str(format(d, ',')) for d in selected], fontsize=30)
+    # plt.xlabel("Distance (m)", fontsize=30)
+    # plt.yticks(fontsize=30)
+    # plt.title("$R^2(x)$ Score vs Distance", fontsize=30)
+    # plt.legend(titles, loc='upper left', prop={'size': 15}, fancybox=True, shadow=True,
+    #            frameon=True)
 
 # colors = ["#FFD100", "#FFD100AA"]
 # colors = ["#00629B", "#009CA6", "#78BE20", "#FFD100"]

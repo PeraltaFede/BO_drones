@@ -133,7 +133,7 @@ class Coordinator(object):
 
         res = minimize(self.problem,
                        self.algorithm,
-                       ("n_gen", 200),
+                       ("n_gen", 150),
                        verbose=False)
         prev_min_dist = 10000
         new_pos = pose[:2]
@@ -143,7 +143,7 @@ class Coordinator(object):
                 new_pos = np.round(point).astype(np.int)
                 prev_min_dist = curr_dist
 
-        if True and len(self.train_inputs) > 17:
+        if False and len(self.train_inputs) > 17:
             # from pymoo.visualization.scatter import Scatter
             # plot = Scatter()
             # plot.add(res.F, color="red")
