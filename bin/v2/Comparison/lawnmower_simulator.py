@@ -5,7 +5,6 @@ import matplotlib.pyplot as plt
 from bin.Agents import pathplanning_agent as ppa
 from bin.Agents import simple_agent as sa
 from bin.Environment.simple_env import Env
-from bin.v2.Communications.simple_sender import Sender
 from bin.v2.Comparison.lawmower_coordinator import Coordinator
 
 
@@ -51,8 +50,6 @@ class Simulator(object):
             # agent.randomize_pos()
             # agent.randomize_pos()
 
-        self.sender = Sender()
-
         if acq == 1:
             acq = "LD"
         elif acq == 2:
@@ -66,13 +63,11 @@ class Simulator(object):
 
         self.coordinator = Coordinator(self.agents, self.environment.grid, self.main_sensor, acq)
         # self.coordinator.acquisition = "maxvalue_entropy_search"
-        self.sender.send_new_acq_msg(self.coordinator.acquisition)
 
         for agent in self.agents:
             agent.next_pose = self.coordinator.generate_new_goal(pose=agent.pose)
             agent.step()
             agent.distance_travelled = 0
-            self.sender.send_new_drone_msg(agent.pose)
 
         self.use_cih_as_initial_points = True
         if self.use_cih_as_initial_points:
@@ -84,9 +79,6 @@ class Simulator(object):
                 self.agents[0].read()
             ]
             print(reads)
-            self.sender.send_new_sensor_msg(str(reads[0][0][0]) + "," + str(reads[0][0][1]) + "," + str(reads[0][1]))
-            self.sender.send_new_sensor_msg(str(reads[1][0][0]) + "," + str(reads[1][0][1]) + "," + str(reads[1][1]))
-            self.sender.send_new_sensor_msg(str(reads[2][0][0]) + "," + str(reads[2][0][1]) + "," + str(reads[2][1]))
 
         else:
             reads = [agent.read() for agent in self.agents]
@@ -94,9 +86,6 @@ class Simulator(object):
             for i in range(2):
                 self.agents[0].randomize_pos()
                 reads.append(self.agents[0].read())
-            self.sender.send_new_sensor_msg(str(reads[0][0][0]) + "," + str(reads[0][0][1]) + "," + str(reads[0][1]))
-            self.sender.send_new_sensor_msg(str(reads[1][0][0]) + "," + str(reads[1][0][1]) + "," + str(reads[1][1]))
-            self.sender.send_new_sensor_msg(str(reads[2][0][0]) + "," + str(reads[2][0][1]) + "," + str(reads[2][1]))
 
         self.coordinator.initialize_data_gpr(reads)
 
@@ -128,7 +117,7 @@ class Simulator(object):
                 isinstance(self.agents, list) and isinstance(self.agents[0], ppa.SimpleAgent):
             for agent in self.agents:
                 [self.sensors.add(sensor) for sensor in agent.sensors]
-        self.environment.add_new_map(self.sensors)
+        self.environment.add_new_map(self.sensors, file=0)
 
     def load_envs_into_agents(self):
         for agent in self.agents:
@@ -157,9 +146,6 @@ class Simulator(object):
                             read = agent.read()
                             self.coordinator.add_data(read)
 
-                            self.sender.send_new_sensor_msg(
-                                str(read[0][0]) + "," + str(read[0][1]) + "," + str(read[1]))
-                            self.sender.send_new_drone_msg(agent.pose)
                             self.coordinator.fit_data()
 
                             # dataaa = np.exp(-cdist([agent.pose[:2]],
@@ -187,6 +173,5 @@ class Simulator(object):
             if self.saving:
                 self.f.write("{},{},{}\n".format(i, mse, self.agents[0].distance_travelled))
         print("done")
-        self.sender.client.disconnect()
         if self.saving:
             self.f.close()

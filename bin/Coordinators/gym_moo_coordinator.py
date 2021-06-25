@@ -147,7 +147,7 @@ class Coordinator(object):
                 new_pos = np.round(point).astype(np.int)
                 prev_min_dist = curr_dist
 
-        if False and len(self.train_inputs) > 1:
+        if True and len(self.train_inputs) > 1:
             # from pymoo.visualization.scatter import Scatter
             # plot = Scatter()
             # plot.add(res.F, color="red")
@@ -176,41 +176,41 @@ class Coordinator(object):
             xnticks = [str(format(num * 10, ',')) for num in xticks]
             ynticks = [str(format(num * 10, ',')) for num in yticks]
             surr = self.surrogate(keys=["s1"])[0]
-            mapz = np.full_like(self.map_data, np.nan)
-            for pos in enumerate(self.vector_pos):
-                mapz[pos[1][1], pos[1][0]] = surr[pos[0]]
+            # mapz = np.full_like(self.map_data, np.nan)
+            # for pos in enumerate(self.vector_pos):
+            #     mapz[pos[1][1], pos[1][0]] = surr[pos[0]]
 
             # mapz = np.power(np.subtract(mapz, lol), 2)
-            plt.imshow(mapz, cmap="BuGn_r",
+            plt.imshow(self.map_data, cmap="BuGn_r",
                        origin='lower', zorder=8)
-            CS = plt.contour(mapz, colors='k',
-                             alpha=0.6, linewidths=1.0, zorder=9)
+            # CS = plt.contour(mapz, colors='k',
+            #                  alpha=0.6, linewidths=1.0, zorder=9)
             plt.grid(True, zorder=0, color="white")
             plt.gca().set_facecolor('#eaeaf2')
-            plt.clabel(CS, inline=1, fontsize=10)
+            # plt.clabel(CS, inline=1, fontsize=10)
             plt.xlabel("x (m)", fontsize=20)
             plt.ylabel("y (m)", fontsize=20)
             plt.xticks(xticks, labels=xnticks, fontsize=20)
             plt.yticks(yticks, labels=ynticks, fontsize=20)
 
             k = True
-            for point in self.train_inputs:
-                if k:
-                    plt.plot(point[0], point[1], 'yo', zorder=10, label='Previous Locations')
-                    k = False
-                else:
-                    plt.plot(point[0], point[1], 'yo', zorder=10)
+            # for point in self.train_inputs:
+            #     if k:
+            #         plt.plot(point[0], point[1], 'yo', zorder=10, label='Previous Locations')
+            #         k = False
+            #     else:
+            #         plt.plot(point[0], point[1], 'yo', zorder=10)
             plt.plot(pose[0], pose[1], 'ro', zorder=10, label='Current Location')
-            k = True
-            for pareto in res.X:
-                pareto = np.round(pareto).astype(np.int)
-                if self.map_data[pareto[1], pareto[0]] == 0:
-                    if k:
-                        plt.plot(pareto[0], pareto[1], 'Xb', zorder=10, label="Pareto Points")
-                        k = False
-                    else:
-                        plt.plot(pareto[0], pareto[1], 'Xb', zorder=10)
-            plt.plot(new_pos[0], new_pos[1], 'Xg', zorder=10, label='Closest Pareto Point')
+            # k = True
+            # for pareto in res.X:
+            #     pareto = np.round(pareto).astype(np.int)
+            #     if self.map_data[pareto[1], pareto[0]] == 0:
+            #         if k:
+            #             plt.plot(pareto[0], pareto[1], 'Xb', zorder=10, label="Pareto Points")
+            #             k = False
+            #         else:
+            #             plt.plot(pareto[0], pareto[1], 'Xb', zorder=10)
+            # plt.plot(new_pos[0], new_pos[1], 'Xg', zorder=10, label='Closest Pareto Point')
             plt.plot(np.append(reg[:, 0], reg[0, 0]), np.append(reg[:, 1], reg[0, 1]), '-b', zorder=10)
             # plt.show(block=True)
 
@@ -229,11 +229,11 @@ class Coordinator(object):
 
             self.splitted_goals = self.splitted_goals[1:, :]
 
-        # if len(self.train_inputs) > 1:
-        #     plt.plot(new_pos[0], new_pos[1], 'Xk', zorder=10, label='Next Meas. Location')
-        #     plt.legend(loc='lower left', prop={'size': 17}, fancybox=True, shadow=True,
-        #                frameon=True)
-        #     plt.show(block=True)
+        if len(self.train_inputs) > 1:
+            # plt.plot(new_pos[0], new_pos[1], 'Xk', zorder=10, label='Next Meas. Location')
+            plt.legend(loc='lower left', prop={'size': 17}, fancybox=True, shadow=True,
+                       frameon=True)
+            plt.show(block=True)
         new_pos = np.append(new_pos, 0)
 
         return new_pos

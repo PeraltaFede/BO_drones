@@ -14,7 +14,7 @@ fig, ax = plt.subplots()
 # , vmin=np.nanmin(_z),                 vmax=np.nanmin(_z)
 import matplotlib.image as image
 
-with open('/data/Databases/CSV/nans.npy', 'rb') as g:
+with open('E:/ETSI/Proyecto/data/Databases/CSV/nans.npy', 'rb') as g:
     nans = np.load(g)
 
 
@@ -32,20 +32,20 @@ img = plt.imshow(_z[:, :, 0], cmap=cm.coolwarm, zorder=5, origin='lower')
 # CS = plt.contour(_z, colors=('gray', 'gray', 'gray', 'k', 'k', 'k', 'k'),
 #                  alpha=0.6, linewidths=1.0, zorder=10)
 
-plt.grid(True, zorder=0, color="white")
-ax.set_facecolor('#eaeaf2')
-# cbar.ax.set_xlabel(r'$\mu (x)$', fontsize=30)
-# plt.clabel(CS, inline=1, fontsize=10)
-plt.xlabel("x [m]", fontsize=20)
-plt.ylabel("y [m]", fontsize=20)
+# plt.grid(True, zorder=0, color="white")
+# ax.set_facecolor('#eaeaf2')
+# # cbar.ax.set_xlabel(r'$\mu (x)$', fontsize=30)
+# # plt.clabel(CS, inline=1, fontsize=10)
+# plt.xlabel("x [m]", fontsize=20)
+# plt.ylabel("y [m]", fontsize=20)
 xticks = np.arange(0, 1000, 200)
 yticks = np.arange(0, 1500, 200)
 xnticks = [str(num * 10) for num in xticks]
 ynticks = [str(num * 10) for num in yticks]
-plt.xticks(xticks, xnticks, fontsize=20)
-plt.yticks(yticks, ynticks, fontsize=20)  # .0052 .0017
-
-plt.show(block=True)
+# plt.xticks(xticks, xnticks, fontsize=20)
+# plt.yticks(yticks, ynticks, fontsize=20)  # .0052 .0017
+#
+# plt.show(block=True)
 
 with open('E:/ETSI/Proyecto/data/Databases/numpy_files/best_bo.npy', 'rb') as g:
     _bo = get_clean(np.load(g))
@@ -89,13 +89,13 @@ with open('E:/ETSI/Proyecto/data/Databases/numpy_files/best_lm.npy', 'rb') as g:
 
 i = 0
 plt.figure()
-for fig, xs in zip([_bo, _ga, _lm], [_bo_xs, _ga_xs, _lm_xs]):
+for fig, xs in zip([_z, _z, _z], [_bo_xs, _ga_xs, _lm_xs]):
     ax = plt.subplot(131 + i)
-    plt.imshow(fig, origin='lower', cmap=current_cmap, vmin=np.nanmin(_z), vmax=np.nanmax(_z), zorder=5)
+    plt.imshow(fig, origin='lower', cmap=cmap, zorder=5)
     plt.plot(xs[0, :], xs[1, :], '^y', markersize=12, alpha=0.5, label="Observations", zorder=6)
-    CS = plt.contour(fig, colors='k',
-                     alpha=0.6, linewidths=1.0, zorder=10)
-    plt.clabel(CS, inline=1, fontsize=10)
+    # CS = plt.contour(fig, colors='k',
+    #                  alpha=0.6, linewidths=1.0, zorder=10)
+    # plt.clabel(CS, inline=1, fontsize=10)
     if i == 0:
         plt.ylabel("y [m]", fontsize=20)
     plt.grid(True, zorder=0, color="white")
@@ -113,9 +113,9 @@ i = 0
 plt.figure()
 for fig, xs in zip([_bo, _ga, _lm], [_bo_xs, _ga_xs, _lm_xs]):
     ax = plt.subplot(131 + i)
-    plt.imshow(np.power(_z - fig, 2), origin='lower', cmap=current_cmap, vmin=0, vmax=6.35767, zorder=5)
+    plt.imshow(fig, origin='lower', cmap=current_cmap, zorder=5)
     plt.plot(xs[0, :], xs[1, :], '^y', markersize=12, alpha=0.5, label="Observations", zorder=6)
-    CS = plt.contour(np.power(_z - fig, 2), colors='k',
+    CS = plt.contour(fig, colors='k',
                      alpha=0.6, linewidths=1.0, zorder=10)
     plt.clabel(CS, inline=1, fontsize=10)
     if i == 0:

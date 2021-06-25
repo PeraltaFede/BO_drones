@@ -6,11 +6,22 @@ import pandas as pd
 
 plt.style.use("seaborn")
 show = "dist,score,var"
+# for_comparison = [
+#     "1,2", "1,3", "1,4",
+#     "2,2", "2,3", "2,4",
+#     "3,2", "3,3", "3,4",
+#     "4,2", "4,3", "4,4"]
+
+# for_comparison = [
+#     "1,2,coupled,2,pareto", "1,3,coupled,3,pareto", "1,4,coupled,4,pareto",
+#     "2,2,coupled,2,pareto", "2,3,coupled,3,pareto", "2,4,coupled,4,pareto",
+#     "3,2,coupled,2,pareto", "3,3,coupled,3,pareto", "3,4,coupled,4,pareto",
+#     "4,2,coupled,2,pareto", "4,3,coupled,3,pareto", "4,4,coupled,4,pareto"]
+
+
 for_comparison = [
-    # "1,2", "1,3", "1,4",
-                  # "2,2", "2,3", "2,4",
-                  # "3,2", "3,3", "3,4",
-                  "4,2", "4,3", "4,4"]
+    "4,2,coupled,2,gaussian_ei", "4,3,coupled,3,gaussian_ei", "4,4,coupled,4,gaussian_ei",
+    "4,2,coupled,2,pareto", "4,3,coupled,3,pareto", "4,4,coupled,4,pareto"]
 
 datas = []
 dataype = []
@@ -224,14 +235,14 @@ if "dist" in show:
         mse_interp[key] = np.array(mse_interp[key]).T.reshape(len(x), -1)
         mse_interp_mean[key] = np.mean(mse_interp[key], axis=1)
         mse_interp_std[key] = np.std(mse_interp[key], axis=1)
-        # plt.plot(x, mse_interp_mean[key], label=key, color=colors[i])
-        # plt.fill_between(x, mse_interp_mean[key] - mse_interp_std[key],
-        #                  mse_interp_mean[key] + mse_interp_std[key], alpha=0.2, color=colors[i])
-        plt.bar(selected + (i - len(for_comparison) / 2 + 0.5) * width,
-                mse_interp_mean[key][selected],
-                width,
-                yerr=mse_interp_std[key][selected],
-                label=key, color=colors[i])
+        plt.plot(x, mse_interp_mean[key], label=key, color=colors[i])
+        plt.fill_between(x, mse_interp_mean[key] - mse_interp_std[key],
+                         mse_interp_mean[key] + mse_interp_std[key], alpha=0.2, color=colors[i])
+        # plt.bar(selected + (i - len(for_comparison) / 2 + 0.5) * width,
+        #         mse_interp_mean[key][selected],
+        #         width,
+        #         yerr=mse_interp_std[key][selected],
+        #         label=key, color=colors[i])
         # print(key, mse_interp_mean[key][-1])
         i += 1
 

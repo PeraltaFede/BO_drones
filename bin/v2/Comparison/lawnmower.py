@@ -1,7 +1,11 @@
 # v2
 # from bin.Agents.simple_agent import SimpleAgent
-import numpy as np
+from sys import path
 
+import numpy as np
+from bin.v2.Comparison.grid_based_sweep_coverage_path_planner import planning, SweepSearcher
+
+path.extend([path[0][:path[0].rindex("bin") - 1]])
 from bin.Agents.pathplanning_agent import SimpleAgent
 from bin.v2.Comparison.lawnmower_simulator import Simulator
 
