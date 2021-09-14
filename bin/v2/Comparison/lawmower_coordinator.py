@@ -110,16 +110,16 @@ class Coordinator(object):
 
     def obtain_points(self, x, y):
         if self.acq_method == "LD":
-            bx, by = planning(x.tolist(), y.tolist(), 250 / 3, moving_direction=SweepSearcher.MovingDirection.LEFT,
+            bx, by = planning(x.tolist(), y.tolist(), 120, moving_direction=SweepSearcher.MovingDirection.LEFT,
                               sweeping_direction=SweepSearcher.SweepDirection.DOWN)
         if self.acq_method == "LU":
-            bx, by = planning(x.tolist(), y.tolist(), 250 / 3, moving_direction=SweepSearcher.MovingDirection.LEFT,
+            bx, by = planning(x.tolist(), y.tolist(), 120, moving_direction=SweepSearcher.MovingDirection.LEFT,
                               sweeping_direction=SweepSearcher.SweepDirection.UP)
         if self.acq_method == "RD":
-            bx, by = planning(x.tolist(), y.tolist(), 250 / 3, moving_direction=SweepSearcher.MovingDirection.RIGHT,
+            bx, by = planning(x.tolist(), y.tolist(), 120, moving_direction=SweepSearcher.MovingDirection.RIGHT,
                               sweeping_direction=SweepSearcher.SweepDirection.DOWN)
         if self.acq_method == "RU":
-            bx, by = planning(x.tolist(), y.tolist(), 250 / 3, moving_direction=SweepSearcher.MovingDirection.RIGHT,
+            bx, by = planning(x.tolist(), y.tolist(), 120, moving_direction=SweepSearcher.MovingDirection.RIGHT,
                               sweeping_direction=SweepSearcher.SweepDirection.UP)
         px = []
         py = []

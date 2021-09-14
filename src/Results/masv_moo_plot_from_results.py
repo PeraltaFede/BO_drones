@@ -5,23 +5,21 @@ import numpy as np
 import pandas as pd
 
 plt.style.use("seaborn")
-show = "dist,score,var"
-# for_comparison = [
-#     "1,2", "1,3", "1,4",
-#     "2,2", "2,3", "2,4",
-#     "3,2", "3,3", "3,4",
-#     "4,2", "4,3", "4,4"]
-
-# for_comparison = [
-#     "1,2,coupled,2,pareto", "1,3,coupled,3,pareto", "1,4,coupled,4,pareto",
-#     "2,2,coupled,2,pareto", "2,3,coupled,3,pareto", "2,4,coupled,4,pareto",
-#     "3,2,coupled,2,pareto", "3,3,coupled,3,pareto", "3,4,coupled,4,pareto",
-#     "4,2,coupled,2,pareto", "4,3,coupled,3,pareto", "4,4,coupled,4,pareto"]
-
+show = "dist"
 
 for_comparison = [
-    "4,2,coupled,2,gaussian_ei", "4,3,coupled,3,gaussian_ei", "4,4,coupled,4,gaussian_ei",
-    "4,2,coupled,2,pareto", "4,3,coupled,3,pareto", "4,4,coupled,4,pareto"]
+    # "1,2,coupled,2,pareto", "1,3,coupled,3,pareto", "1,4,coupled,4,pareto",
+    # "2,2,coupled,2,pareto", "2,3,coupled,3,pareto", "2,4,coupled,4,pareto",
+    # "3,2,coupled,2,pareto", "3,3,coupled,3,pareto", "3,4,coupled,4,pareto",
+    "4,2,coupled,2,pareto", "4,3,coupled,3,pareto", "4,4,coupled,4,pareto",
+    # "2,2,coupled,2,gaussian_ei", "2,3,coupled,3,gaussian_ei", "2,4,coupled,4,gaussian_ei",
+    # "3,2,coupled,2,gaussian_ei", "3,3,coupled,3,gaussian_ei", "3,4,coupled,4,gaussian_ei",
+    "4,2,coupled,2,gaussian_ei", "4,3,coupled,3,gaussian_ei", "4,4,coupled,4,gaussian_ei"
+]
+
+# for_comparison = [
+#     "4,2,coupled,2,gaussian_ei", "4,3,coupled,3,gaussian_ei", "4,4,coupled,4,gaussian_ei",
+#     "4,2,coupled,2,pareto", "4,3,coupled,3,pareto", "4,4,coupled,4,pareto"]
 
 datas = []
 dataype = []
@@ -100,6 +98,7 @@ qty_clean = dict()
 score_clean = dict()
 variance_clean = dict()
 max4key = dict()
+# min4key = dict()
 mean4key = dict()
 variance_mean = dict()
 score_mean = dict()
@@ -125,6 +124,7 @@ for compare in for_comparison:
     score_mean[compare] = []
     score_std[compare] = []
     max4key[compare] = -1
+    # min4key[compare] = 55
     mean4key[compare] = 0
     time[compare] = []
     time_clean[compare] = []
@@ -144,7 +144,7 @@ for compare in for_comparison:
 
 max_dist = 0
 for i in range(len(datas)):
-    score[dataype[i]].append(datas[i]["avg_score"].values)  # /0.7413447473233803
+    score[dataype[i]].append(datas[i]["avg_score"].values)
     scores = [datas[i][x].values for x in datas[i].columns if "score_" in x]
     variance[dataype[i]].append(np.var(scores, axis=0))
     qty[dataype[i]].append(datas[i]["qty"].values)
@@ -166,7 +166,6 @@ for key in for_comparison:
 
         if max4key[key] < len(indice):
             max4key[key] = len(indice)
-
     for i in range(len(qty_clean[key])):
         if max4key[key] > len(qty_clean[key][i]):
             score_clean[key][i].extend(list(np.full(max4key[key] - len(score_clean[key][i]), np.nan)))
@@ -174,6 +173,18 @@ for key in for_comparison:
             qty_clean[key][i].extend(list(np.full(max4key[key] - len(qty_clean[key][i]), np.nan)))
             time_clean[key][i].extend(list(np.full(max4key[key] - len(time_clean[key][i]), np.nan)))
             t_dist_clean[key][i].extend(list(np.full(max4key[key] - len(t_dist_clean[key][i]), np.nan)))
+
+    #     if min4key[key] > len(indice):
+    #         min4key[key] = len(indice)
+    # for i in range(len(qty_clean[key])):
+    #     if min4key[key] > 26:
+    #         min4key[key] = 26
+    #     if min4key[key] < len(qty_clean[key][i]):
+    #         score_clean[key][i] = score_clean[key][i][:min4key[key]]
+    #         variance_clean[key][i] = variance_clean[key][i][:min4key[key]]
+    #         qty_clean[key][i] = qty_clean[key][i][:min4key[key]]
+    #         time_clean[key][i] = time_clean[key][i][:min4key[key]]
+    #         t_dist_clean[key][i] = t_dist_clean[key][i][:min4key[key]]
     mean4key[key] /= len(qty_clean[key])
 
 for key in for_comparison:
@@ -182,6 +193,11 @@ for key in for_comparison:
     qty_clean[key] = np.array(qty_clean[key]).T.reshape(max4key[key], -1)
     time_clean[key] = np.array(time_clean[key]).T.reshape(max4key[key], -1)
     t_dist_clean[key] = np.array(t_dist_clean[key]).T.reshape(max4key[key], -1)
+    # score_clean[key] = np.array(score_clean[key]).T.reshape(min4key[key], -1)
+    # variance_clean[key] = np.array(variance_clean[key]).T.reshape(min4key[key], -1)
+    # qty_clean[key] = np.array(qty_clean[key]).T.reshape(min4key[key], -1)
+    # time_clean[key] = np.array(time_clean[key]).T.reshape(min4key[key], -1)
+    # t_dist_clean[key] = np.array(t_dist_clean[key]).T.reshape(min4key[key], -1)
 
 for compare in for_comparison:
     score_mean[compare] = np.nanmean(score_clean[compare], axis=1)
@@ -196,7 +212,9 @@ legends = []
 for key in for_comparison:
     legends.append(key)
 colors = ["#A6CEE3", "#1F78B4", "#B2DF8A", "#33A02C", "#FB9A99", "#E31A1C",
-          "#FDBF6F", "#FF7F00", "#CAB2D6", "#6A3D9A", "#FFFF99", "#B15928"]
+          "#FDBF6F", "#FF7F00", "#CAB2D6", "#6A3D9A", "#FFFF99", "#B15928",
+          "#B6CEE3", "#BF78B4", "#F2DF8A", "#F3A02C", "#AB9A99", "#C31A1C",
+          "#BDBF6F", "#BF7F00", "#FAB2D6", "#FA3D9A", "#AFFF99", "#C15928"]
 # colors = ["#A6CEE3", "#1F78B4", "#33A02C",
 #           "#FF7F00", "#6A3D9A", "#B15928"]
 # colors = ["#1F78B4", "#B15928", "#33A02C",
@@ -217,7 +235,7 @@ if "dist" in show:
             fmo = np.where(mserun == -1)[0]
             if len(fmo) > 0:
                 mse_interp[key].append(np.interp(x, tdistrun[:fmo[0]], mserun[:fmo[0]]))
-                if (max_r2s == -1 or mserun[fmo[0] - 1] > score[key][max_r2s][fmo4mr2s - 1]):
+                if max_r2s == -1 or mserun[fmo[0] - 1] > score[key][max_r2s][fmo4mr2s - 1]:
                     max_r2s = idx[0]
                     fmo4mr2s = fmo[0]
                 # print(max_r2s)
@@ -243,7 +261,7 @@ if "dist" in show:
         #         width,
         #         yerr=mse_interp_std[key][selected],
         #         label=key, color=colors[i])
-        # print(key, mse_interp_mean[key][-1])
+        print(np.round(mse_interp_mean[key][-1], 6), ' & ')
         i += 1
 
     plt.ylabel('$R^2(x)$', fontsize=30)
@@ -277,7 +295,9 @@ if "score" in show:
     plt.figure()
     for key in for_comparison:
         labels = np.arange(qty_clean[key][0][0], max4key[key] + qty_clean[key][0][0])
-        # print(key, np.max(score_mean[key]))
+        # labels = np.arange(qty_clean[key][0][0], min4key[key] + qty_clean[key][0][0])
+        # print(key, score_mean[key])
+        # print(key, score_mean[key][-1])
         plt.bar(labels + (i - len(for_comparison) / 2 + 0.5) * width,
                 score_mean[key],
                 width,
@@ -289,6 +309,7 @@ if "score" in show:
         i += 1
     plt.ylabel('$R^2(x)$', fontsize=30)
     plt.xticks(np.arange(0, max4key[key] + qty_clean[key][0][0]), fontsize=30)
+    # plt.xticks(np.arange(0, min4key[key] + qty_clean[key][0][0]), fontsize=30)
     plt.xlabel("Measurements", fontsize=30)
     plt.yticks(fontsize=30)
     plt.title("$R^2(x)$ Score vs Measurements", fontsize=30)

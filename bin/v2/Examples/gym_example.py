@@ -19,7 +19,7 @@ ss = [
     # ["s5", "s6", "s7", "s8", "s1"],
 ]
 for sensores in ss:
-    nro_drones = [4, 3, 2, 1]
+    nro_drones = [4, 3, 2]
     for cant_drones in nro_drones:
         print(cant_drones, sensores, "gaussian_ei", 0.375)
         i = 0

@@ -2,7 +2,6 @@ import matplotlib.pyplot as plt
 import numpy as np
 
 from bin.Environment.simple_env import Env
-from bin.Utils.voronoi_regions import calc_voronoi
 
 plt.style.use("tableau-colorblind10")
 maps = []
@@ -21,7 +20,8 @@ maps = []
 #     with open(namefile, 'rb') as g:
 #         #         print(namefile)
 #         maps.append(np.load(g))
-env = Env("C:/Docs/ETSI/BO_drones/data/Map/Ypacarai/map.yaml")
+# env = Env("C:/Docs/ETSI/BO_drones/data/Map/Ypacarai/map.yaml")
+env = Env("E:/ETSI/Proyecto/data/Map/Ypacarai/map.yaml")
 fig_map = np.full_like(env.grid, np.nan)
 for i in range(env.grid.shape[0]):
     for k in range(env.grid.shape[1]):
@@ -43,6 +43,10 @@ poses = np.array([[563, 375],
                   [647, 327],
                   [671, 504]])
 
+paretox = np.linspace(180, 755, 30)
+paretoy = np.linspace(740, 770, 30)
+for i in range(len(paretoy)):
+    paretoy[i] += 70 * (1 - np.cos(np.pi/3 + i/12)) + np.random.rand()*10
 # [print(np.nanmin(mapz), np.nanmax(mapz)) for mapz in maps]
 
 # for fig, iid in zip(maps, range(4)):
@@ -73,6 +77,7 @@ for fig in maps:
     #     _, reg = calc_voronoi(poses[lim], np.vstack([poses[0:lim], poses[lim + 1:-1]]), env.grid)
     #     plt.plot(np.append(reg[:, 0], reg[0, 0]), np.append(reg[:, 1], reg[0, 1]), '-y', zorder=10)
     plt.plot(poses[:, 0], poses[:, 1], '^y', zorder=10)
+    plt.plot(paretox[:-2], paretoy[:-2], 'Xk', zorder=10)
 
     # _, reg = calc_voronoi(poses[0], poses[1:-1], env.grid)
     # plt.plot(np.append(reg[:, 0], reg[0, 0]), np.append(reg[:, 1], reg[0, 1]), '-r', zorder=10)
@@ -81,7 +86,7 @@ for fig in maps:
     plt.grid(True, zorder=0, color="white")
     plt.gca().set_facecolor('#eceff1')
     plt.clabel(CS, inline=1, fontsize=10)
-    plt.title("Real Model $f(x)$")
+    # plt.title("Real Model $f(x)$")
     plt.xlabel("x (m)", fontsize=20)
     plt.ylabel("y (m)", fontsize=20)
     plt.xticks(xticks, labels=xnticks, fontsize=20)
