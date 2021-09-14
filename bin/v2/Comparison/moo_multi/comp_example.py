@@ -16,7 +16,7 @@ ss = [
     ["s1", "s2", "s3"],
     ["s5", "s6", "s7"]
 ]
-comp = ["lm", "lm"]
+comp = ["ga", "lm"]
 for c in comp:
     for sensores in ss:
         nro_drones = [2, 3, 4]
@@ -27,7 +27,7 @@ for c in comp:
                 i += 1
                 np.random.seed(np.round(seed).astype(int))
                 drones = [SimpleAgent(sensores, _id=k) for k in range(cant_drones)]
-                sim = Env(path[-1] + "/data/Map/Ypacarai/map.yaml", agents=drones, id_file=0,
+                sim = Env(path[-1] + "/data/Map/Ypacarai/map.yaml", agents=drones, id_file=i,
                           acq=c, acq_mod="truncated", render2gui=False, saving=True,
                           name_file="{}_{}_{}_{}A{}S".format(c, c, 0.375, cant_drones,
                                                              len(sensores)),

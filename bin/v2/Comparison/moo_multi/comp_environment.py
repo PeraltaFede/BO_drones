@@ -13,7 +13,7 @@ from bin.v2.Comparison.moo_multi.mm_lm_coordinator import Coordinator as LMCoord
 
 class GymEnvironment(object):
     def __init__(self, map_path2yaml, agents: list, acq="GALM", saving=False, acq_fusion="GALM",
-                 acq_mod="truncated", id_file=0, render2gui=True, initial_pos="circle", name_file="", d=1.0):
+                 acq_mod="truncated", id_file=0, render2gui=True, name_file="", d=1.0):
         """
 
         :param map_path2yaml: file path to mapyaml
@@ -34,7 +34,8 @@ class GymEnvironment(object):
             self.coordinator = GACoordinator(self.environment.grid, self.sensors, d=d, no_drones=len(agents))
         elif acq == "lm":
             self.coordinator = LMCoordinator(self.environment.grid, self.sensors, d=d, no_drones=len(agents),
-                                             acq=id_file)
+                                             acq=id_file
+                                             )
         self.timestep = 0
 
         self._load_envs_into_agents()
