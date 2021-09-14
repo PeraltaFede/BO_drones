@@ -130,6 +130,4 @@ class Coordinator(object):
             if self.map_data[iipy, iipx] == 0:
                 px.append(iipx)
                 py.append(iipy)
-        # px = [px[i] for i in range(len(px)) if i % 3 == 0]
-        # py = [py[i] for i in range(len(py)) if i % 3 == 0]
         return px, py

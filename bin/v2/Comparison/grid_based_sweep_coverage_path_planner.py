@@ -5,14 +5,11 @@ author: Atsushi Sakai
 """
 
 import math
-import os
-import sys
 from enum import IntEnum
 
 import numpy as np
 from scipy.spatial.transform import Rotation as Rot
 
-sys.path.append(os.path.relpath("../../Mapping/grid_map_lib/"))
 try:
     from grid_map_lib import GridMap
 except ImportError:

@@ -5,10 +5,10 @@ from time import time
 from numpy import mean
 from numpy.linalg import norm
 
-from bin.v2.Comparison.moo_multi.mm_ga_coordinator import Coordinator
 from bin.Environment.simple_env import Env
-from bin.Utils.utils import get_init_pos4
 from bin.v2.Communications.simple_sender import Sender
+from bin.v2.Comparison.moo_multi.mm_ga_coordinator import Coordinator as GACoordinator
+from bin.v2.Comparison.moo_multi.mm_lm_coordinator import Coordinator as LMCoordinator
 
 
 class GymEnvironment(object):
@@ -31,21 +31,28 @@ class GymEnvironment(object):
         self.sensors = set()
         self._init_maps()
         if acq == "ga":
-            self.coordinator = Coordinator(self.environment.grid, self.sensors, d=d, no_drones=len(agents))
+            self.coordinator = GACoordinator(self.environment.grid, self.sensors, d=d, no_drones=len(agents))
+        elif acq == "lm":
+            self.coordinator = LMCoordinator(self.environment.grid, self.sensors, d=d, no_drones=len(agents),
+                                             acq=id_file)
         self.timestep = 0
 
         self._load_envs_into_agents()
-        initial_positions = get_init_pos4(n=len(agents), map_data=self.environment.grid, expand=True)
-        for agent in self.agents:
-            aux_f = agent.position_flag
-            agent.position_flag = False
-            if initial_pos == "circle":
-                agent.pose, initial_positions = initial_positions[0, :], initial_positions[1:, :]
-            else:
-                agent.randomize_pos()
-            agent.next_pose = deepcopy(agent.pose)
-            agent.position_flag = aux_f
+        for agent in enumerate(self.agents):
+            aux_f = agent[1].position_flag
+            agent[1].position_flag = False
+            agent[1].pose = self.coordinator.current_goals[agent[0]]
+            agent[1].next_pose = deepcopy(agent[1].pose)
+            agent[1].position_flag = aux_f
         # initial readings
+        # import matplotlib.pyplot as plt
+        # for sx, sy, cg in zip(self.coordinator.fpx, self.coordinator.fpy, self.coordinator.current_goals):
+        #     plt.plot(sx, sy, '-x')
+        #     plt.plot([cg[0], sx[0]], [cg[1], sy[0]], '-x')
+        # for a in agents:
+        #     plt.plot(a.pose[0], a.pose[1], '*')
+        # plt.show(block=True)
+
         reads = []
         [reads.append(read.read()) for read in self.agents]
         self.coordinator.initialize_data_gpr(reads)
