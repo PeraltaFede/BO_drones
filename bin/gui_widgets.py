@@ -187,8 +187,8 @@ class GUI(QMainWindow):
             self.data.append(sensors[key])
             self.image[-1].set_clim(vmin=-2.586, vmax=1.7898)
             cb = self.gp_fig.colorbar(self.image[i], ax=ax)
-            cb.ax.tick_params(labelsize=20)
-            cb.ax.set_xlabel(r'$SE(\mu (x))$', fontsize=30)
+            cb.obj_space.tick_params(labelsize=20)
+            cb.obj_space.set_xlabel(r'$SE(\mu (x))$', fontsize=30)
             self.axes.append(ax)
 
             ax = self.std_fig.add_subplot(111)
@@ -209,8 +209,8 @@ class GUI(QMainWindow):
             self.data.append(sensors[key])
             # self.image[-1].set_clim(vmin=0.0, vmax=1.0)
             cb = self.gp_fig.colorbar(self.image[i + 1], ax=ax)
-            cb.ax.tick_params(labelsize=20)
-            cb.ax.set_xlabel(r'$\sigma (x)$', fontsize=30)
+            cb.obj_space.tick_params(labelsize=20)
+            cb.obj_space.set_xlabel(r'$\sigma (x)$', fontsize=30)
             self.axes.append(ax)
 
             ax = self.acq_fig.add_subplot(111)

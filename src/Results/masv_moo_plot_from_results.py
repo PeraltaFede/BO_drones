@@ -7,19 +7,25 @@ import pandas as pd
 plt.style.use("seaborn")
 show = "dist"
 
-for_comparison = [
-    # "1,2,coupled,2,pareto", "1,3,coupled,3,pareto", "1,4,coupled,4,pareto",
-    # "2,2,coupled,2,pareto", "2,3,coupled,3,pareto", "2,4,coupled,4,pareto",
-    # "3,2,coupled,2,pareto", "3,3,coupled,3,pareto", "3,4,coupled,4,pareto",
-    "4,2,coupled,2,pareto", "4,3,coupled,3,pareto", "4,4,coupled,4,pareto",
-    # "2,2,coupled,2,gaussian_ei", "2,3,coupled,3,gaussian_ei", "2,4,coupled,4,gaussian_ei",
-    # "3,2,coupled,2,gaussian_ei", "3,3,coupled,3,gaussian_ei", "3,4,coupled,4,gaussian_ei",
-    "4,2,coupled,2,gaussian_ei", "4,3,coupled,3,gaussian_ei", "4,4,coupled,4,gaussian_ei"
-]
-
 # for_comparison = [
-#     "4,2,coupled,2,gaussian_ei", "4,3,coupled,3,gaussian_ei", "4,4,coupled,4,gaussian_ei",
-#     "4,2,coupled,2,pareto", "4,3,coupled,3,pareto", "4,4,coupled,4,pareto"]
+#     "2,2,coupled,2,pareto", "2,3,coupled,3,pareto", "2,4,coupled,4,pareto",
+#     "3,2,coupled,2,pareto", "3,3,coupled,3,pareto", "3,4,coupled,4,pareto",
+#     "4,2,coupled,2,pareto", "4,3,coupled,3,pareto", "4,4,coupled,4,pareto",
+#     # "2,2,coupled,2,gaussian_ei", "2,3,coupled,3,gaussian_ei", "2,4,coupled,4,gaussian_ei",
+#     # "3,2,coupled,2,gaussian_ei", "3,3,coupled,3,gaussian_ei", "3,4,coupled,4,gaussian_ei",
+#     # "4,2,coupled,2,gaussian_ei", "4,3,coupled,3,gaussian_ei", "4,4,coupled,4,gaussian_ei",
+#     "2,2,lm,2,lm", "2,3,lm,3,lm", "2,4,lm,4,lm",
+#     "3,2,lm,2,lm", "3,3,lm,3,lm", "3,4,lm,4,lm",
+#     "4,2,lm,2,lm", "4,3,lm,3,lm", "4,4,lm,4,lm",
+#     "2,2,lm,2,ga,", "2,3,lm,3,ga,", "2,4,lm,4,ga,",
+#     "3,2,lm,2,ga,", "3,3,lm,3,ga,", "3,4,lm,4,ga,",
+#     "4,2,lm,2,ga,", "4,3,lm,3,ga,", "4,4,lm,4,ga,",
+# ]
+
+for_comparison = [
+    "pareto",
+    ",ga,",
+    ",lm,"]
 
 datas = []
 dataype = []
@@ -33,7 +39,7 @@ for name_file in name_files:
         rest_all_lines = f.readlines()
         flag = False
         for line in rest_all_lines:
-            if "pos:" in line:
+            if "pos:" in line and "lm_lm" not in name_file:
                 flag = True
                 print(name_file)
                 break
@@ -193,12 +199,16 @@ for key in for_comparison:
     qty_clean[key] = np.array(qty_clean[key]).T.reshape(max4key[key], -1)
     time_clean[key] = np.array(time_clean[key]).T.reshape(max4key[key], -1)
     t_dist_clean[key] = np.array(t_dist_clean[key]).T.reshape(max4key[key], -1)
-    # score_clean[key] = np.array(score_clean[key]).T.reshape(min4key[key], -1)
     # variance_clean[key] = np.array(variance_clean[key]).T.reshape(min4key[key], -1)
     # qty_clean[key] = np.array(qty_clean[key]).T.reshape(min4key[key], -1)
     # time_clean[key] = np.array(time_clean[key]).T.reshape(min4key[key], -1)
     # t_dist_clean[key] = np.array(t_dist_clean[key]).T.reshape(min4key[key], -1)
-
+    if "4,4,lm" in key:
+        score_clean[key] = score_clean[key][:-1]
+        variance_clean[key] = variance_clean[key][:-1]
+        qty_clean[key] = qty_clean[key][:-1]
+        time_clean[key] = time_clean[key][:-1]
+        t_dist_clean[key] = t_dist_clean[key][:-1]
 for compare in for_comparison:
     score_mean[compare] = np.nanmean(score_clean[compare], axis=1)
     score_std[compare] = np.nanstd(score_clean[compare], axis=1)
@@ -211,10 +221,10 @@ for compare in for_comparison:
 legends = []
 for key in for_comparison:
     legends.append(key)
-colors = ["#A6CEE3", "#1F78B4", "#B2DF8A", "#33A02C", "#FB9A99", "#E31A1C",
-          "#FDBF6F", "#FF7F00", "#CAB2D6", "#6A3D9A", "#FFFF99", "#B15928",
+colors = ["#C73030", "#E04C4C", "#9E104D", "#0E7BAD", "#0F5194", "#1109AB",
+          "#5FC960", "#97AB50", "#269E62", "#6A3D9A", "#FFFF99", "#B15928",
           "#B6CEE3", "#BF78B4", "#F2DF8A", "#F3A02C", "#AB9A99", "#C31A1C",
-          "#BDBF6F", "#BF7F00", "#FAB2D6", "#FA3D9A", "#AFFF99", "#C15928"]
+          "#BDBF6F", "#BF7F00", "#FAB2D6", "#FA3D9A", "#AFFF99", "#C15928",]
 # colors = ["#A6CEE3", "#1F78B4", "#33A02C",
 #           "#FF7F00", "#6A3D9A", "#B15928"]
 # colors = ["#1F78B4", "#B15928", "#33A02C",
@@ -225,14 +235,18 @@ titles = for_comparison
 # titles = ["Proposed", "PESMOC", "GA"]
 if "dist" in show:
     x = np.linspace(0, max_dist, max_dist + 1)
-    selected = np.arange(250, max_dist, 250).astype(np.int)
+    print(max_dist)
+    selected = np.arange(250, max_dist+1, 250).astype(np.int)
     width = 90 / len(for_comparison)  # the width of the ba
     i = 0
     for key in for_comparison:
         max_r2s = -1
         fmo4mr2s = -1
+
         for tdistrun, mserun, idx in zip(t_dist[key], score[key], enumerate(score[key])):
             fmo = np.where(mserun == -1)[0]
+            # if "ga," in key:
+            #     fmo = fmo[1:]
             if len(fmo) > 0:
                 mse_interp[key].append(np.interp(x, tdistrun[:fmo[0]], mserun[:fmo[0]]))
                 if max_r2s == -1 or mserun[fmo[0] - 1] > score[key][max_r2s][fmo4mr2s - 1]:
@@ -253,15 +267,18 @@ if "dist" in show:
         mse_interp[key] = np.array(mse_interp[key]).T.reshape(len(x), -1)
         mse_interp_mean[key] = np.mean(mse_interp[key], axis=1)
         mse_interp_std[key] = np.std(mse_interp[key], axis=1)
-        plt.plot(x, mse_interp_mean[key], label=key, color=colors[i])
-        plt.fill_between(x, mse_interp_mean[key] - mse_interp_std[key],
-                         mse_interp_mean[key] + mse_interp_std[key], alpha=0.2, color=colors[i])
-        # plt.bar(selected + (i - len(for_comparison) / 2 + 0.5) * width,
-        #         mse_interp_mean[key][selected],
-        #         width,
-        #         yerr=mse_interp_std[key][selected],
-        #         label=key, color=colors[i])
-        print(np.round(mse_interp_mean[key][-1], 6), ' & ')
+        # plt.plot(x, mse_interp_mean[key], label=key, color=colors[i])
+        # plt.fill_between(x, mse_interp_mean[key] - mse_interp_std[key],
+        #                  mse_interp_mean[key] + mse_interp_std[key], alpha=0.2, color=colors[i])
+        plt.bar(selected + (i - len(for_comparison) / 2 + 0.5) * width,
+                mse_interp_mean[key][selected],
+                width,
+                yerr=mse_interp_std[key][selected],
+                label=key, color=colors[i])
+        xd = -1
+        while np.isnan(mse_interp_mean[key][xd]):
+            xd -= 1
+        # print(np.round(mse_interp_mean[key][xd], 6), ' & ')
         i += 1
 
     plt.ylabel('$R^2(x)$', fontsize=30)
@@ -269,8 +286,8 @@ if "dist" in show:
     plt.xlabel("Distance (m)", fontsize=30)
     plt.yticks(fontsize=30)
     plt.title("$R^2(x)$ Score vs Distance", fontsize=30)
-    plt.legend(titles, loc='upper left', prop={'size': 15}, fancybox=True, shadow=True,
-               frameon=True)
+    # plt.legend(titles, prop={'size': 15}, fancybox=True, shadow=True,
+    #            frameon=True)
     # i = 0
     # plt.figure()
     # for key in for_comparison:
@@ -296,8 +313,7 @@ if "score" in show:
     for key in for_comparison:
         labels = np.arange(qty_clean[key][0][0], max4key[key] + qty_clean[key][0][0])
         # labels = np.arange(qty_clean[key][0][0], min4key[key] + qty_clean[key][0][0])
-        # print(key, score_mean[key])
-        # print(key, score_mean[key][-1])
+        print(key, np.shape(labels + (i - len(for_comparison) / 2 + 0.5) * width), np.shape(score_mean[key]))
         plt.bar(labels + (i - len(for_comparison) / 2 + 0.5) * width,
                 score_mean[key],
                 width,
