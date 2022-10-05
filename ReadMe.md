@@ -26,6 +26,8 @@ The code includes an [example folder](bin/v2/Examples) where numerous example of
 
 Please cite the work as [1], [2] or [3].
 
+Any questions fperalta@us.es
+
 ## References
 [1] F. P. Samaniego, D. G. Reina, S. L. T. Marín, M. Arzamendia and D. O. Gregor, "A Bayesian Optimization Approach for Water Resources Monitoring Through an Autonomous Surface Vehicle: The Ypacarai Lake Case Study," in IEEE Access, vol. 9, pp. 9163-9179, 2021, doi: 10.1109/ACCESS.2021.3050934.
 
